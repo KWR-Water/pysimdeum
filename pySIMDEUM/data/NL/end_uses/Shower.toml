@@ -1,0 +1,39 @@
+# statistics for showering
+classname = 'Shower'
+
+penetration = 100
+offset = '2 Hours'
+
+pattern = 'name of pattern generator'
+
+[frequency]  # age dependent
+    distribution = 'Binomial'  # Binomial distribution binomial(N, p)
+    n = 1  # number of showers per day,  either shower or not a shower (could be simplyfied)
+    [frequency.p]
+        child = 0.48
+        teen = 0.67
+        work_ad = 0.79
+        home_ad = 0.79
+        senior = 0.69
+        total = 0.72
+
+[duration]
+    distribution = 'Chisquare'
+    [duration.df]
+        child = '8.6 Minutes'
+        teen = '11.3 Minutes'
+        work_ad = '9.3 Minutes'
+        home_ad = '9.3 Minutes'
+        senior = '6.5 Minutes'
+        total = '8.8 Minutes'
+
+[subtype]
+
+    [subtype.NormalShower]
+        penetration = 50
+        intensity = 0.142  # [L/s]
+
+    [subtype.FancyShower]
+        # combi_heater_with_water_saving_shower_head
+        penetration = 50
+        intensity = 0.123  # [L/s]

@@ -1,0 +1,23 @@
+# Statistics of washing machine end-use
+classname = 'WashingMachine'
+offset = 0
+temperature = 10
+
+[penetration]
+    1 = 92  # [%]
+    2 = 98
+    3 = 98
+    4 = 98
+    5 = 98
+
+# frequency is dependent on number of people living in the household
+[frequency]
+    distribution = 'Poisson'
+    [frequency.average]
+        1 = 0.32  # [1/day]
+        2 = 0.29
+        3 = 0.29
+        4 = 0.27
+        5 = 0.29
+
+# through subtypes different washing machine patterns (washing programs) could be constructed in the future

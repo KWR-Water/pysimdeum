@@ -1,0 +1,21 @@
+# Statistics of dishwasher end-use
+classname = 'Dishwasher'
+offset = 0
+temperature = 10
+
+[penetration]
+    1 = 40   # [%]
+    2 = 63
+    3 = 76
+    4 = 84
+    5 = 78
+
+[frequency]
+    distribution = 'Poisson'
+    [frequency.average]
+        1 = 0.2143  # [1/day]
+        2 = 0.2286
+        3 = 0.1857
+        4 = 0.2000
+        5 = 0.1429
+

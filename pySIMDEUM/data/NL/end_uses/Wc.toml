@@ -1,0 +1,58 @@
+# Statistics of toilet end-use
+classname = 'Wc'  # has to be exactly the same name as class constructor
+penetration = 100  # penetraton rate of houses with wc [%]
+# pattern_generator = ''  # if a pattern exists, otherwise this field is an empty string
+offset = 0  # offset defines the time where a second use of the end-use is blocked
+temperature = 10  # temperature of used-water [%]
+prob_flush_interuption = 70  # probability if a water savings option of a toilett is installed that it will be used [%]
+intensity = 0.042  # fixed intensity for toilet flush corresponds to the pipesize to fill the cistern [L/s]
+
+[frequency]
+    distribution = 'Poisson'  # type of distribution from where the frequency of the  end-use will be drawn
+    # toilet use is age and gender dependent, therefore the input parameter of the Poisson distribution changes with age and gender
+    [frequency.average.child]
+        male = 3.8  # average frequency of use [day^(-1)]
+        female = 5.4
+        total = 4.6
+    [frequency.average.teen]
+        male = 4.1
+        female = 5.1
+        total = 4.7
+    [frequency.average.work_ad]
+        male = 5.3
+        female = 6.8
+        total = 6.0
+    [frequency.average.home_ad]
+        male = 7.0
+        female = 7.0
+        total = 7.0
+    [frequency.average.senior]
+        male = 7.4
+        female = 6.8
+        total = 7.2
+    [frequency.average.total]
+        male = 5.3
+        female = 6.4
+        total = 5.9
+# different subtypes of toilets which are used to populate a household
+[subtype]
+    [subtype.WcNormal]
+        penetration = 33.3  # penetration rate within end-use [%]
+        flush_interuption = false  # presence of water savings option
+        cistern_size = 9  # size of cistern of toilet [L] ,but not important for calculation
+        duration = '3.6 Minutes'  # duration of water use corresponds to the filling time of the cistern and therefore on its size.
+    [subtype.WcNormalSave]
+        penetration = 22.2
+        flush_interuption = true
+        cistern_size = 9
+        duration = '3.6 Minutes'
+    [subtype.WcNew]
+        penetration = 11.1
+        flush_interuption = false
+        cistern_size = 6
+        duration = '2.4 Minutes'
+    [subtype.WcNewSave]
+        penetration = 33.3
+        flush_interuption = true
+        cistern_size = 6
+        duration = '2.4 Minutes'
