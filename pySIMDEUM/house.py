@@ -2,11 +2,10 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from traits.api import Either, Str, Instance, Float, List, Any
-from pyDASH.DemandGenerator.utils import Base
-from pyDASH.DemandGenerator.statistics import Statistics
-from pyDASH.DemandGenerator.user import User
-from pyDASH.DemandGenerator.utils import chooser, normalize
-import pyDASH.DemandGenerator.end_use as EndUses
+from pySIMDEUM.pySIMDEUM.utils import Base, chooser, normalize
+from pySIMDEUM.pySIMDEUM.statistics import Statistics
+from pySIMDEUM.pySIMDEUM.user import User
+import pySIMDEUM.pySIMDEUM.end_use as EndUses
 
 # ToDo: Implement multiple appliances which will be later on divided over the users, so they are not blocked
 # ToDo: Link data to OOPNET
@@ -110,6 +109,11 @@ class House(Property):
         super(House, self).__init__(**kwargs)
         self.users = users
         self.appliances = appliances
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}:\n\tid\t=\t{self._id}\n\ttype\t=' \
+               f'\t{self.house_type}\n\tuser\t=\t{len(self.users)}\n' \
+               f'\tappliances\t=\t{list(map(lambda x: x.__class__.__name__, self.appliances))}'
 
     def populate_house(self):
 
@@ -281,9 +285,13 @@ class House(Property):
                                         dims=['time', 'user', 'enduse'])
         return self.consumption
 
-    def simulate(self):
+    def simulate(self, date=None):
 
-        time = pd.TimedeltaIndex(start='00:00:00', end='24:00:00', freq='1s', closed='left')
+        if date is None:
+            date = pd.datetime.now().date()
+
+        # time = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1s', closed='left')
+        time = pd.date_range(start=date, end=date + pd.to_timedelta('1 day'), freq='1s', closed='left')
         users = [x.id for x in self.users] + ['household']
         enduse = [x.name for x in self.appliances]
 

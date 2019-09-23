@@ -10,7 +10,7 @@ def ktap_daily_pattern(filename=None, resolution='1s'):
         filename = os.path.join(pathname, 'dp_kitchen_tap.txt')
 
     data = pd.read_csv(filename, header=None, squeeze=True).values
-    index = pd.TimedeltaIndex(start='00:00:00', freq='15Min', end='24:00:00')
+    index = pd.timedelta_range(start='00:00:00', freq='15Min', end='24:00:00')
     s = pd.Series(data=data, index=index)
     s = s.resample(resolution).mean().interpolate(method='linear')
     # print(s.shape)

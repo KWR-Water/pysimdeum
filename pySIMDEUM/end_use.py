@@ -1,52 +1,70 @@
 from traits.api import HasStrictTraits, Either, Instance, Str, Any
-from pyDASH.DemandGenerator.data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, dishwasher_enduse_pattern
-from pyDASH.DemandGenerator.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
-from pyDASH.DemandGenerator.data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, washingmachine_enduse_pattern
 import copy
 import pandas as pd
 import numpy as np
-from pyDASH.DemandGenerator.utils import chooser, duration_decorator, normalize, to_timedelta
-import xarray as xr
-from matplotlib import pyplot as plt
+from pySIMDEUM.pySIMDEUM.utils import chooser, duration_decorator, normalize, to_timedelta
+
 
 class EndUse(HasStrictTraits):
+    """Base class for end-uses.
 
-    name = Str
-    statistics = Any
+    """
 
-    def __init__(self, name='EndUse', statistics=None):
+    name = Str  # ... name of the end-use
+    statistics = Any  # ... statistic object associated with end-use
+
+    def __init__(self, name: str = 'EndUse', statistics=None):
+        """Initialisation funciton of end-use class.
+
+        Args:
+            name: name of the specific end-use as string
+            statistics: statistics object associated with end-use
+        """
         super(EndUse, self).__init__()
         self.name = name
         self.statistics = statistics
 
     def init_consumption(self, users=None, time_resolution='1s'):
-        """Initialize dataframe for storing consumptions"""
+        """Initialization of a pandas dataframe to store the  consumptions.
+
+        Args:
+            users:  list with users
+            time_resolution:  string with desired time resolution as python pandas `DateOffset` object
+            (https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects)
+
+        Returns:
+            consumption as pandas `DataFrame` filled with zeros
+        """
 
         if users:
             # produce datetime index
             index = pd.TimedeltaIndex(start='00:00:00', end='24:00:00', freq=time_resolution, closed='left')
 
+            # name columns by users
             columns = ['user_' + str(x+1) for x, user in enumerate(users)]
 
-            consumption = pd.DataFrame(index=index, columns=columns)
+            # initialise consumption dataframe with timedelta index and user columnnames, name it according to end-use
+            # device and fill it with zeros.
+            consumption = pd.DataFrame(data=0, index=index, columns=columns)
             consumption.name = self.name
-            consumption = consumption.fillna(0)
         else:
+            # raise an error if no users are defined.
             raise Exception('No Users are defined!')
 
         return consumption
 
-    def usage_probability(self, time_resolution='1s'):
+    @staticmethod
+    def usage_probability(time_resolution='1s'):
         """Produces uninformed prior.
 
         For more specific usage probabilities (washing machine, kitchen tap, dishwasher) overload this function by
         loading a usage pattern into it.
         """
         # produce datetime index
-        index = pd.TimedeltaIndex(start='00:00:00', end='24:00:00', freq=time_resolution, closed='left')
+        index = pd.timedelta_range(start='00:00:00', end='24:00:00', freq=time_resolution, closed='left')
 
-        prob = pd.Series(1, index=index)
-        prob /= prob.sum()  # normalize
+        prob = pd.Series(data=1, index=index)  # ... uniform probability over time and cast it into pandas series.
+        prob /= prob.sum()  # ... normalization of the probabilities
 
         return prob
 
@@ -75,12 +93,29 @@ class EndUse(HasStrictTraits):
 
 
 class Bathtub(EndUse):
-    
+    """Class for Bathtub end-use."""
+
+
     def __init__(self, name='Bathtub', **kwargs):
+        """Initialisation function of Bathtub end-use class.
+
+        Args:
+            name: End-use name as string.
+            **kwargs: keyword arguments for super classes.
+        """
         super(Bathtub, self).__init__(**kwargs)
         self.name = name
 
     def fct_frequency(self, age=None):
+        """Random function computing the frequency of use for the Bathtub end-use class.
+
+        Args:
+            age: age of the user in years.
+
+        Returns:
+            distribution function from `numpy.random` to compute frequency of use.
+
+        """
         f_stats = self.statistics['frequency']
         distribution = getattr(np.random, f_stats['distribution'].lower())
         average = f_stats['average'][age]
@@ -88,10 +123,24 @@ class Bathtub(EndUse):
         return distribution(average)
 
     def fct_duration(self):
+        """Function to compute the duration of Bathtub end-use.
+
+        Comment: The duration is fixed to 10 minutes in this case.
+
+        Returns:
+            duration (fixed value as integer)
+
+        """
         # fixed duration
         return int(to_timedelta(self.statistics['duration']).total_seconds())
 
     def fct_intensity(self):
+        """Compute the intensity of Bathtub end-use.
+
+        Returns:
+            intensity (fixed value as float)
+
+        """
         # fixed intensity
         return self.statistics['intensity']
 

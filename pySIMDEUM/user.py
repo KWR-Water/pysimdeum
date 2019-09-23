@@ -4,8 +4,7 @@ import numpy as np
 import pymc3 as pm
 import pandas as pd
 import uuid
-from pyDASH.DemandGenerator.utils import Base
-from matplotlib import pyplot as plt
+from pySIMDEUM.pySIMDEUM.utils import Base
 
 
 class Presence(HasStrictTraits):
@@ -89,7 +88,7 @@ class Presence(HasStrictTraits):
         return l
 
     def pdf(self, peak=0.65, normal=0.335, away=0.0, night=0.015):
-        index = pd.TimedeltaIndex(start='00:00:00', end='24:00:00', freq='1Min')
+        index = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1Min')
         pdf = pd.Series(index=index)
 
         up = int((self.up.total_seconds()) / 60) % 1440
