@@ -14,4 +14,9 @@ Used Python packages:
 * toml
 * pymc3 (is at the moment only in the computation of user presence time, planned to be replaced in future)
 
-all packages can be installed either with `conda install <packagename>` or `pip install <packagename>`.
+
+It is recommended to install Python Anaconda distribution from https://www.anaconda.com/distribution/
+
+All packages can be installed either with `conda install <packagename>` or `pip install <packagename>` in a terminal. 
+
+The Python script `sim_water_use.py` shows how the pySIMDEUM can be used.
