@@ -4,8 +4,6 @@ from datetime import datetime
 import pandas as pd
 import xarray as xr
 import matplotlib.pyplot as plt
-import seaborn as sns
-sns.set_style('darkgrid')
 
 # Simulation for single houses:
 
