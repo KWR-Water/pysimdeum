@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+from datetime import datetime
 from traits.api import Either, Str, Instance, Float, List, Any
 from pySIMDEUM.pySIMDEUM.utils import Base, chooser, normalize
 from pySIMDEUM.pySIMDEUM.statistics import Statistics
@@ -288,7 +289,7 @@ class House(Property):
     def simulate(self, date=None):
 
         if date is None:
-            date = pd.datetime.now().date()
+            date = datetime.now().date()
 
         # time = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1s', closed='left')
         time = pd.date_range(start=date, end=date + pd.to_timedelta('1 day'), freq='1s', closed='left')

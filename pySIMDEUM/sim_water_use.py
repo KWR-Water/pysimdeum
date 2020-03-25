@@ -1,5 +1,6 @@
 from pySIMDEUM.pySIMDEUM.statistics import Statistics
 from pySIMDEUM.pySIMDEUM.house import Property
+from datetime import datetime
 import pandas as pd
 import xarray as xr
 import matplotlib.pyplot as plt
@@ -42,7 +43,7 @@ for user in users:  # ... iterate over users
 
 # Simulate same house for 1 week (difference between weekday and weekend is not yet automatically implemented, but can
 # be done quite easily)
-start = pd.datetime.now().date()  # ... set simulation starttime to today
+start = datetime.now().date()  # ... set simulation starttime to today
 end = start + pd.to_timedelta('1 W')  # ... endtime is 1 week in the future
 dates = pd.date_range(start, end, freq='1d', closed='left')  # ... generate dates to simulate
 
