@@ -1,7 +1,6 @@
 from traits.api import HasStrictTraits, Bool, Any, Str, Either, Instance
 import copy
 import numpy as np
-import pymc3 as pm
 import scipy.stats as ss
 import pandas as pd
 import uuid
