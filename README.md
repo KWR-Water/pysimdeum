@@ -8,6 +8,7 @@ Used Python packages:
 * `numpy`
 * `pandas`
 * `matplotlib`
+* `scipy`
 * `xarray`
 * `traits` (for strict type definitions of classes, could be replaced by Python's type annotations)
 * `toml`
