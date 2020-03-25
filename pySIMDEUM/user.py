@@ -2,6 +2,7 @@ from traits.api import HasStrictTraits, Bool, Any, Str, Either, Instance
 import copy
 import numpy as np
 import pymc3 as pm
+import scipy.stats as ss
 import pandas as pd
 import uuid
 from pySIMDEUM.pySIMDEUM.utils import Base
@@ -36,12 +37,17 @@ class Presence(HasStrictTraits):
         for key, val in diurnal.items():
             dist = val['dist']
             del val['dist']
-            dist = getattr(pm, dist)
+            # dist = getattr(pm, dist)
+            dist = getattr(ss, dist)
             newval = dict()
-            for x, y in val.items():
-                newval[x] = round(pd.Timedelta(y).total_seconds() / 60)
+            translate = {'mu': 'loc',
+                         'sd': 'scale'}
 
-            setattr(self, '_prob_' + key, dist.dist(**newval))
+            for x, y in val.items():
+                newval[translate[x]] = round(pd.Timedelta(y).total_seconds() / 60)
+
+            # setattr(self, '_prob_' + key, dist.dist(**newval))
+            setattr(self, '_prob_' + key, dist(**newval))
 
         self.up = self.sample_single_property('_prob_getting_up')
 
@@ -69,7 +75,7 @@ class Presence(HasStrictTraits):
     def sample_single_property(self, prop):
 
         prob_fct = getattr(self, prop)
-        x = prob_fct.random()
+        x = prob_fct.rvs()
         x = int(np.round(x))
         x = pd.Timedelta(minutes=x)
         return x
