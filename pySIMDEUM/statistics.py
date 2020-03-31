@@ -1,10 +1,10 @@
 import os
 import toml
 from traits.api import HasStrictTraits, Either, Dict
-from pySIMDEUM.pySIMDEUM.data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
+from data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
     dishwasher_enduse_pattern
-from pySIMDEUM.pySIMDEUM.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
-from pySIMDEUM.pySIMDEUM.data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
+from data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
+from data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
     washingmachine_enduse_pattern
 
 

@@ -1,5 +1,5 @@
-from pySIMDEUM.pySIMDEUM.statistics import Statistics
-from pySIMDEUM.pySIMDEUM.house import Property
+from statistics import Statistics
+from house import Property
 from datetime import datetime
 import pandas as pd
 import xarray as xr
