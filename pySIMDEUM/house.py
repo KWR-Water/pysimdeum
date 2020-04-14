@@ -3,10 +3,10 @@ import pandas as pd
 import xarray as xr
 from datetime import datetime
 from traits.api import Either, Str, Instance, Float, List, Any
-from pySIMDEUM.pySIMDEUM.utils import Base, chooser, normalize
-from pySIMDEUM.pySIMDEUM.statistics import Statistics
-from pySIMDEUM.pySIMDEUM.user import User
-import pySIMDEUM.pySIMDEUM.end_use as EndUses
+from utils import Base, chooser, normalize
+from statistics import Statistics
+from user import User
+import end_use as EndUses
 
 # ToDo: Implement multiple appliances which will be later on divided over the users, so they are not blocked
 # ToDo: Link data to OOPNET
