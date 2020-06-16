@@ -286,11 +286,15 @@ class House(Property):
                                         dims=['time', 'user', 'enduse'])
         return self.consumption
 
-    def simulate(self, date=None):
+    def simulate(self, date=None, duration='1 day'):
 
         if date is None:
             date = datetime.now().date()
-
+        try:
+            timedelta = pd.to_timedelta(duration)
+        except:
+            print('Warning: duration unrecognized defaulted to 1 day')
+            timedelta = pd.to_timedelta('1 day')
         # time = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1s', closed='left')
         time = pd.date_range(start=date, end=date + pd.to_timedelta('1 day'), freq='1s', closed='left')
         users = [x.id for x in self.users] + ['household']
