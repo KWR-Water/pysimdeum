@@ -296,7 +296,7 @@ class House(Property):
             print('Warning: duration unrecognized defaulted to 1 day')
             timedelta = pd.to_timedelta('1 day')
         # time = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1s', closed='left')
-        time = pd.date_range(start=date, end=date + pd.to_timedelta('1 day'), freq='1s', closed='left')
+        time = pd.date_range(start=date, end=date + timedelta, freq='1s', closed='left')
         users = [x.id for x in self.users] + ['household']
         enduse = [x.name for x in self.appliances]
 
