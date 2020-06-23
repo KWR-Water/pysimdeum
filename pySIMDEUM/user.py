@@ -140,9 +140,7 @@ class Presence(HasStrictTraits):
         except:
             pass
 
-        pdf = pdf.astype('float').resample('1S').mean()[:-1]
-        pdf = pdf.fillna(method='ffill')
-
+        pdf = pdf.astype('float').resample('1S').fillna('ffill')[:-1]
         pdf /= np.sum(pdf)  # normalize
 
         # transform timedeltas to strings for indexing later on
