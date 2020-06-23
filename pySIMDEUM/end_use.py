@@ -551,11 +551,11 @@ class Wc(EndUse):
 
         intensity = self.statistics['intensity']
 
-        average = self.statistics['subtype'][self.name]['duration']
+        average = to_timedelta(self.statistics['subtype'][self.name]['duration'])
 
         # dist = duration_decorator(getattr(np.random, d_stats['distribution'].lower()))
 
-        average = to_timedelta(np.log(to_timedelta(average).total_seconds()) - 0.5)  # Todo: Wrong time for the toilett
+        # average = to_timedelta(np.log(to_timedelta(average).total_seconds()) - 0.5)  # Todo: Wrong time for the toilett
 
 
         # add water savings option
