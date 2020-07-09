@@ -1,5 +1,5 @@
 from traits.api import Either, Str, Instance, Float, List, Any, Int
-from house import Property, House
+from pySIMDEUM.house import Property, House
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -7,30 +7,47 @@ class DemandPatternPostProcessor():
     _property = Instance(Property)
 
     def __init__(self, inputproperty):
+        self._consumption = pd.DataFrame()
+        self._users = []
+        self._enduses = [] 
         if type(inputproperty) == House:
-            self._property = inputproperty
-            self._create_data()
+            #self._property = inputproperty   
+            self._consumption, self._users, self._enduses = self._create_house_data(inputproperty)
+        elif type(inputproperty) == list:
+            for house in inputproperty:
+                consumption, users, enduses = self._create_house_data(house)
+                self._users + users.tolist()
+                self._enduses + enduses.tolist()
+                for column in consumption.columns:
+                    if ('user' not in column) and ('household' not in column):
+                        if (column in self._consumption.columns) and (column != 'time'):
+                            self._consumption[column] += consumption[column]
+                        else:
+                            self._consumption[column] = consumption[column] 
+
         else:
             print("Error: input should either be a House or a list of Houses")
     
-    def _create_data(self):
-        self._consumption = pd.DataFrame()
-        self._consumption['time'] = self._property.consumption['time'].values
-        self._users = self._property.consumption['user'].values
-        self._enduses = self._property.consumption['enduse'].values
-        for user in self._users:
-            for enduse in self._enduses:
-                self._consumption[user + ' ' + enduse] = self._property.consumption.sel(user=user, enduse=enduse).values
-            self._consumption[user + ' total'] = self._property.consumption.sel(user=user).sum('enduse').values
-        for enduse in self._enduses:
-            self._consumption[enduse + ' total'] = self._property.consumption.sel(enduse=enduse).sum('user').values
-        self._consumption['total'] = self._property.consumption.sum('user').sum('enduse').values
+    def _create_house_data(self, house):
+        consumption = pd.DataFrame()
+        consumption['time'] = house.consumption['time'].values
+        users = house.consumption['user'].values
+        enduses = house.consumption['enduse'].values
+        for user in users:
+            for enduse in enduses:
+                consumption[user + ' ' + enduse] = house.consumption.sel(user=user, enduse=enduse).values
+            consumption[user + ' total'] = house.consumption.sel(user=user).sum('enduse').values
+        for enduse in enduses:
+            consumption[enduse + ' total'] = house.consumption.sel(enduse=enduse).sum('user').values
+        consumption['total'] = house.consumption.sum('user').sum('enduse').values
+
+        return consumption, users, enduses
 
     def plot_demand(self):
         fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True)
-        for user in self._users:
-            ax1.plot(self._consumption['time'], self._consumption[user + ' total'], label=user)
-        ax3.plot(self._consumption['time'], self._consumption['total'], label='total')
+        #for user in self._users:
+        #    ax1.plot(self._consumption['time'], self._consumption[user + ' total'], label=user)
+        #ax3.plot(self._consumption['time'], self._consumption['total'], label='total')
         for enduse in self._enduses:
             ax2.plot(self._consumption['time'], self._consumption[enduse + ' total'], label=enduse)
         ax1.legend()
@@ -41,5 +58,14 @@ class DemandPatternPostProcessor():
         ax3.set_xlabel('time')
         ax2.legend()
         plt.show()
+
+    def createQcfdplot(self, timeinterval=1):
+        n_bins = 100
+        fig, ax = plt.subplots()
+        x = self._consumption['total']
+        n, bins, patches = ax.hist(x, n_bins, density=True, histtype='step',
+                           cumulative=True, label='Empirical')
+        plt.show()
+
 
 
