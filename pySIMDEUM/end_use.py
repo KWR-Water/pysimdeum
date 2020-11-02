@@ -638,8 +638,8 @@ class Wc(EndUse):
         average = self.statistics['subtype'][self.name]['duration']
 
         # dist = duration_decorator(getattr(np.random, d_stats['distribution'].lower()))
-
-        average = to_timedelta(np.log(to_timedelta(average).total_seconds()) - 0.5)
+        average = to_timedelta(self.statistics['subtype'][self.name]['duration'])
+        # average = to_timedelta(np.log(to_timedelta(average).total_seconds()) - 0.5)
 
         # add water savings option
         if flush_interuption:
