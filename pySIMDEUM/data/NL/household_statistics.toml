@@ -42,10 +42,10 @@ households = 30 # Number of households (%)
 
     [two_person.job]
     # Subdivision % of adults with job away from home
-    both = 49
-    only_male = 26
-    only_female = 6
-    neither_person = 18
+    both = 49.4
+    only_male = 26.0
+    only_female = 6.3
+    neither_person = 18.3
 
 # Families with children
 ['family']
@@ -66,7 +66,7 @@ households = 36 # Number of households (%)
 
     [family.job]
     # Subdivision % of adults with job away from home
-    both = 39
-    only_male = 52 # only father
-    only_female = 3 # only mother
-    neither_person = 5 # neither parent
+    both = 39.4
+    only_male = 52.3 # only father
+    only_female = 3.1 # only mother
+    neither_person = 5.2 # neither parent
