@@ -2,7 +2,7 @@ from traits.api import HasStrictTraits, Either, Instance, Str, Any
 import copy
 import pandas as pd
 import numpy as np
-from pySIMDEUM.utils import chooser, duration_decorator, normalize, to_timedelta
+from utils import chooser, duration_decorator, normalize, to_timedelta
 
 
 class EndUse(HasStrictTraits):
@@ -163,6 +163,15 @@ class Bathtub(EndUse):
 
                 consumption[start:end, j, ind_enduse] = intensity
 
+                # block uses of current user for other enduses (this is possible because Python takes the object
+                # itself and not a copy of the presence attribute) So no user can use two endtypes at the same time
+                prob_user[start:end] = 0
+                prob_user = normalize(prob_user)
+
+                # block for other users (only possible because of fixed duration time)
+                prob_usage[start-duration:end] = 0
+                prob_usage = normalize(prob_usage)
+
         return consumption
 
 
@@ -207,15 +216,29 @@ class BathroomTap(EndUse):
             prob_user = user.presence.values
 
             for i in range(freq):
+                check = False
 
                 duration, intensity = self.fct_duration_intensity()
 
                 prob_joint = normalize(prob_user * prob_usage)
 
-                u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
-                end = int(start + duration)
-                consumption[start:end, j, ind_enduse] = intensity
+                # get rid of overlaps
+                for tries in range(10):
+                    u = np.random.uniform()
+                    start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
+                    end = int(start + duration)
+                    if np.sum(consumption[start:end, j, ind_enduse]) == 0:
+                        check = True
+                        break
+
+                if check:
+                    prob_user[start:end] = 0
+                    prob_user = normalize(prob_user)
+
+                    prob_usage[start:end] = 0
+                    prob_usage = normalize(prob_usage)
+
+                    consumption[start:end, j, ind_enduse] = intensity
 
         return consumption
 
@@ -237,6 +260,7 @@ class Dishwasher(EndUse):
 
     def fct_duration_pattern(self, start=None):
         pattern = self.statistics['enduse_pattern']
+        # duration = pattern.index[-1] - pattern.index[0]
         return pattern
 
     def simulate(self, consumption, users=None, ind_enduse=None):
@@ -264,10 +288,16 @@ class Dishwasher(EndUse):
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
             end = start + duration
 
-            if end > (24 * 60 * 60):  #ToDo: Find better way to simulate dishwashers that are turned on in the night
+            if end > (24 * 60 * 60):
                 end = 24 * 60 * 60
             difference = end - start
             consumption[start:end, j, ind_enduse] = pattern[:difference]
+
+            prob_user[start:end] = 0
+            prob_user = normalize(prob_user)
+
+            prob_usage[start - duration:end] = 0
+            prob_usage = normalize(prob_usage)
 
         return consumption
 
@@ -326,7 +356,7 @@ class KitchenTap(EndUse):
         prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
 
         for j, user in enumerate(users):
-            if j == 0:  # ToDo: Add function that computes usage probability for all users
+            if j == 0:
                 prob_user = copy.deepcopy(user.presence)
             else:
                 prob_user += user.presence
@@ -340,11 +370,26 @@ class KitchenTap(EndUse):
         for i in range(freq):
 
             duration, intensity = self.fct_duration_intensity()
-            u = np.random.uniform()
-            prob_joint = normalize(prob_user * prob_usage)  # ToDo: Check if joint probability can be computed outside of for loop for all functions
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
-            end = start + duration
-            consumption[start:end, j, ind_enduse] = intensity
+
+            prob_joint = normalize(prob_user * prob_usage)
+
+            for tries in range(10):
+                u = np.random.uniform()
+                start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
+                end = start + duration
+
+                if np.sum(consumption[start:end, j, ind_enduse]) == 0:
+                    check = True
+                    break
+
+            if check:
+                prob_user[start:end] = 0
+                prob_user = normalize(prob_user)
+
+                prob_usage[start:end] = 0
+                prob_usage = normalize(prob_usage)
+
+                consumption[start:end, j, ind_enduse] = intensity
 
         return consumption
 
@@ -403,11 +448,26 @@ class OutsideTap(EndUse):
             duration, intensity = self.fct_duration_intensity()
 
             prob_joint = normalize(prob_user * prob_usage)
-            u = np.random.uniform()
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
-            end = start + duration
 
-            consumption[start:end, j, ind_enduse] = intensity
+            for tries in range(10):
+                u = np.random.uniform()
+                start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
+                end = start + duration
+
+                if np.sum(consumption[start:end, j, ind_enduse]) == 0:
+                    check = True
+                    break
+                else:
+                    print('consumption overlap')
+
+            if check:
+                prob_user[start:end] = 0
+                prob_user = normalize(prob_user)
+
+                prob_usage[start:end] = 0
+                prob_usage = normalize(prob_usage)
+
+                consumption[start:end, j, ind_enduse] = intensity
 
         return consumption
 
@@ -450,13 +510,31 @@ class Shower(EndUse):
             prob_user = user.presence.values
 
             for i in range(freq):
+                check = False
+
                 duration, intensity = self.fct_duration_intensity(age=user.age)
 
                 prob_joint = normalize(prob_user * prob_usage)
-                u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
-                end = start + duration
-                consumption[start:end, j, ind_enduse] = intensity
+
+                # get rid of overlaps
+                for tries in range(10):
+                    u = np.random.uniform()
+                    start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
+                    end = start + duration
+
+                    if np.sum(consumption[start:end, j, ind_enduse]) == 0:
+                        check = True
+                        break
+                    else:
+                        print('consumption overlap')
+                if check:
+                    prob_user[start:end] = 0
+                    prob_user = normalize(prob_user)
+
+                    prob_usage[start:end] = 0
+                    prob_usage = normalize(prob_usage)
+
+                    consumption[start:end, j, ind_enduse] = intensity
 
         return consumption
 
@@ -527,6 +605,12 @@ class WashingMachine(EndUse):
             difference = end - start
             consumption[start:end, j, ind_enduse] = pattern[:difference]
 
+            prob_user[start:end] = 0
+            prob_user = normalize(prob_user)
+
+            prob_usage[start - duration:end] = 0
+            prob_usage = normalize(prob_usage)
+
         return consumption
 
 
@@ -551,9 +635,11 @@ class Wc(EndUse):
 
         intensity = self.statistics['intensity']
 
-        average = to_timedelta(self.statistics['subtype'][self.name]['duration'])
+        average = self.statistics['subtype'][self.name]['duration']
 
         # dist = duration_decorator(getattr(np.random, d_stats['distribution'].lower()))
+
+        average = to_timedelta(np.log(to_timedelta(average).total_seconds()) - 0.5)
 
         # add water savings option
         if flush_interuption:
@@ -575,14 +661,33 @@ class Wc(EndUse):
             prob_user = user.presence.values
 
             for i in range(freq):
+                check = False
 
                 duration, intensity = self.fct_duration_intensity()
 
                 prob_joint = normalize(prob_user * prob_usage)
-                u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
-                end = start + duration
-                consumption[start:end, j, ind_enduse] = intensity
+
+                # get rid of overlaps
+                for tries in range(10):
+                    u = np.random.uniform()
+                    start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
+                    end = start + duration
+
+                    if np.sum(consumption[start:end, j, ind_enduse]) == 0:
+                        check = True
+                        break
+                    else:
+                        print('consumption overlap')
+                # print(start, end)
+                # print(consumption.time)
+                if check:
+                    prob_user[start:end] = 0
+                    prob_user = normalize(prob_user)
+
+                    prob_usage[start:end] = 0
+                    prob_usage = normalize(prob_usage)
+
+                    consumption[start:end, j, ind_enduse] = intensity
 
         return consumption
 
