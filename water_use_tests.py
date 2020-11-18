@@ -45,38 +45,37 @@ def calculate_total(inresults):
 
 
 
-#number_of_houses = 2
+number_of_houses = 100
 stats = Statistics()
-#houses = list(map(simulate_house, range(number_of_houses)))
+houses = list(map(simulate_house, range(number_of_houses)))
 
-prop = Property(statistics=stats)
-house = prop.built_house()
-house.populate_house()
-house.furnish_house()
-for user in house.users:
-    user.compute_presence(statistics=stats)
-house.simulate()
+#prop = Property(statistics=stats)
+#house = prop.built_house()
+#house.populate_house()
+#house.furnish_house()
+#for user in house.users:
+#    user.compute_presence(statistics=stats)
+#house.simulate()
 #enduseresults = list(map(calculate_sum_users, houses, ['enduse']*number_of_houses))
 #total_enduse = calculate_total(enduseresults)
 
-house2 = prop.built_house()
-house2.populate_house()
-house2.furnish_house()
-for user in house2.users:
-    user.compute_presence(statistics=stats)
-house2.simulate()
+#house2 = prop.built_house()
+#house2.populate_house()
+#house2.furnish_house()
+#for user in house2.users:
+#    user.compute_presence(statistics=stats)
+#house2.simulate()
 
 #total_number_of_users = sum([len(x.users) for x in houses])
 #meanflow = total_enduse.mean(axis=0).mean(axis=0)
 #print('average number of users per house is: ', total_number_of_users/number_of_houses)
 #print('average water use per person per day is :', total_enduse/total_number_of_users)
 
-water_use = ApplianceWaterUse(house)
-water_use.plot()
-#water_use.print()
-#water_use.export()
+water_use = ApplianceWaterUse(houses)
+water_use.plot(plotsubject='pppd')
 
-demandpatternpostprocessor = DemandPatternPostProcessor([house, house2])
+
+demandpatternpostprocessor = DemandPatternPostProcessor(houses)
 demandpatternpostprocessor.plot_demand()
 demandpatternpostprocessor.createQcfdplot()
 #print('average flow velocity (in time) is: ', meanflow)

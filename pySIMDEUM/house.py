@@ -298,7 +298,7 @@ class House(Property):
         # time = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1s', closed='left')
         time = pd.date_range(start=date, end=date + timedelta, freq='1s', closed='left')
         users = [x.id for x in self.users] + ['household']
-        enduse = [x.name for x in self.appliances]
+        enduse = [x.statistics['classname'] for x in self.appliances]
 
         consumption = np.zeros((len(time), len(users), len(enduse)))
 
