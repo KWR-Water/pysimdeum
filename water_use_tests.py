@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from pySIMDEUM.utilitites.ApplianceWaterUse import ApplianceWaterUse
 from pySIMDEUM.utilitites.DemandPatternPostProcessor import DemandPatternPostProcessor
 
-
+# test edit to see if test is run
 # Simulations for multiple houses:
 def simulate_house(x):
     prop = Property(statistics=stats)
