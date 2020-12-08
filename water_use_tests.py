@@ -6,6 +6,10 @@ import xarray as xr
 import matplotlib.pyplot as plt
 from pySIMDEUM.utilitites.ApplianceWaterUse import ApplianceWaterUse
 from pySIMDEUM.utilitites.DemandPatternPostProcessor import DemandPatternPostProcessor
+from pySIMDEUM.utilitites.statistics_plot_functions import plot_diurnal_pattern
+import time
+from guppy import hpy
+from pympler import asizeof, classtracker
 
 
 # Simulations for multiple houses:
@@ -17,6 +21,7 @@ def simulate_house(x):
     for user in house.users:
         user.compute_presence(statistics=stats)
     house.simulate()
+
     return house
 
 def calculate_sum_users(house, use):
@@ -43,12 +48,20 @@ def calculate_total(inresults):
 #        usage_dataframe[classname_appliances[]]
 
 
-
-
-number_of_houses = 100
+#h = hpy()
+#print(h.heap())
+number_of_houses = 1000
 stats = Statistics()
-houses = list(map(simulate_house, range(number_of_houses)))
+#plot_diurnal_pattern(statistics=stats)
+st = time.time()
+house = simulate_house(1)
+test = asizeof.asized(house)
 
+#houses = list(map(simulate_house, range(number_of_houses)))
+et = time.time()
+print(et-st)
+#h2 = hpy()
+#print(h2.heap())
 #prop = Property(statistics=stats)
 #house = prop.built_house()
 #house.populate_house()
@@ -71,13 +84,13 @@ houses = list(map(simulate_house, range(number_of_houses)))
 #print('average number of users per house is: ', total_number_of_users/number_of_houses)
 #print('average water use per person per day is :', total_enduse/total_number_of_users)
 
-water_use = ApplianceWaterUse(houses)
-water_use.plot(plotsubject='pppd')
+#water_use = ApplianceWaterUse(houses)
+#water_use.plot(plotsubject='pppd')
 
 
-demandpatternpostprocessor = DemandPatternPostProcessor(houses)
-demandpatternpostprocessor.plot_demand()
-demandpatternpostprocessor.createQcfdplot()
+#demandpatternpostprocessor = DemandPatternPostProcessor(houses)
+#demandpatternpostprocessor.plot_demand()
+#demandpatternpostprocessor.createQcfdplot()
 #print('average flow velocity (in time) is: ', meanflow)
 #total_enduse.plot(alpha=0.3)
 #total1h = total.rolling('1H').mean()
