@@ -6,7 +6,7 @@ import xarray as xr
 import matplotlib.pyplot as plt
 from pySIMDEUM.utilitites.ApplianceWaterUse import ApplianceWaterUse
 from pySIMDEUM.utilitites.DemandPatternPostProcessor import DemandPatternPostProcessor
-from pySIMDEUM.utilitites.statistics_plot_functions import plot_diurnal_pattern
+from pySIMDEUM.utilitites.information_from_statistics_functions import plot_diurnal_pattern, get_max_time_diurnal_pattern
 import time
 from guppy import hpy
 from pympler import asizeof, classtracker
@@ -50,12 +50,13 @@ def calculate_total(inresults):
 
 #h = hpy()
 #print(h.heap())
-number_of_houses = 1000
+number_of_houses = 100
+st = time.time()
 stats = Statistics()
 #plot_diurnal_pattern(statistics=stats)
-st = time.time()
-house = simulate_house(1)
-test = asizeof.asized(house)
+test = get_max_time_diurnal_pattern(statistics=stats)
+#house = simulate_house(1)
+#test = asizeof.asized(house)
 
 #houses = list(map(simulate_house, range(number_of_houses)))
 et = time.time()
