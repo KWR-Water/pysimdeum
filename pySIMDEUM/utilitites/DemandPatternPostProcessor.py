@@ -4,20 +4,20 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 class DemandPatternPostProcessor():
-    _property = Instance(Property)
+    _propertytype = Any
 
     def __init__(self, inputproperty):
         self._consumption = pd.DataFrame()
         self._users = []
-        self._enduses = [] 
-        if type(inputproperty) == House:
-            #self._property = inputproperty   
+        self._enduses = []
+        self._propertytype = type(inputproperty)  
+        if type(inputproperty) == House:   
             self._consumption, self._users, self._enduses = self._create_house_data(inputproperty)
         elif type(inputproperty) == list:
             for house in inputproperty:
                 consumption, users, enduses = self._create_house_data(house)
-                self._users + users.tolist()
-                self._enduses + enduses.tolist()
+                self._users.append(users.tolist())
+                self._enduses.append(enduses.tolist())
                 for column in consumption.columns:
                     if ('user' not in column) and ('household' not in column):
                         if (column in self._consumption.columns) and (column != 'time'):
@@ -44,20 +44,28 @@ class DemandPatternPostProcessor():
         return consumption, users, enduses
 
     def plot_demand(self):
-        fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True)
-        #for user in self._users:
-        #    ax1.plot(self._consumption['time'], self._consumption[user + ' total'], label=user)
-        #ax3.plot(self._consumption['time'], self._consumption['total'], label='total')
-        for enduse in self._enduses:
-            ax2.plot(self._consumption['time'], self._consumption[enduse + ' total'], label=enduse)
-        ax1.legend()
-        ax1.set_xlabel('time')
-        ax1.set_ylabel('demand (l/s)')
-        ax2.set_xlabel('time')
-        ax3.legend()
-        ax3.set_xlabel('time')
-        ax2.legend()
-        plt.show()
+        if self._propertytype == House:
+            fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True)
+            for user in self._users:
+                ax1.plot(self._consumption['time'], self._consumption[user + ' total'], label=user)
+            ax3.plot(self._consumption['time'], self._consumption['total'], label='total')
+            for enduse in self._enduses:
+                ax2.plot(self._consumption['time'], self._consumption[enduse + ' total'], label=enduse)
+            ax1.legend()
+            ax1.set_xlabel('time')
+            ax1.set_ylabel('demand (l/s)')
+            ax2.set_xlabel('time')
+            ax3.legend()
+            ax3.set_xlabel('time')
+            ax2.legend()
+            plt.show()
+        else:
+            fig, ax1 = plt.subplots()
+            ax1.plot(self._consumption['time'], self._consumption['total'], label='total')
+            ax1.legend()
+            ax1.set_xlabel('time')
+            ax1.set_ylabel('demand (l/s)')
+            plt.show() 
 
     def createQcfdplot(self, timeinterval=1):
         n_bins = 100
