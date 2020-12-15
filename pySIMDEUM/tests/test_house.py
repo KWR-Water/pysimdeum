@@ -1,5 +1,5 @@
-from pySIMDEUM.house import Property
-from pySIMDEUM.statistics import Statistics
+from pySIMDEUM.core.house import Property
+from pySIMDEUM.core. statistics import Statistics
 from statistics import mean
 
 def test_usersminimal1():
