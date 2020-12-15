@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt 
 
-from pySIMDEUM.house import House, Property
+from pySIMDEUM.core.house import House, Property
 
 def plot_diurnal_pattern(statistics):
 

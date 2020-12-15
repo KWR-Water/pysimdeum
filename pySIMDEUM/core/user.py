@@ -4,7 +4,7 @@ import numpy as np
 import scipy.stats as ss
 import pandas as pd
 import uuid
-from pySIMDEUM.utils import Base
+from pySIMDEUM.core.utils import Base
 
 
 class Presence(HasStrictTraits):

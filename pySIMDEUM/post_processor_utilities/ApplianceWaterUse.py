@@ -1,5 +1,5 @@
 from traits.api import Either, Str, Instance, Float, List, Any, Int
-from pySIMDEUM.house import Property, House
+from pySIMDEUM.core.house import Property, House
 import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt

@@ -15,20 +15,20 @@ class Statistics(HasStrictTraits):
     diurnal_pattern = Dict
     end_uses = Dict
 
-    def __init__(self, country='NL'):
+    def __init__(self, country='NL', statisticsdir='pySIMDEUM/data/NL/'):
         self.country = country
 
         # Load household statistics
-        household_file = os.path.join(os.path.dirname(__file__), 'data', self.country, 'household_statistics.toml')
+        household_file = os.path.join(statisticsdir, 'household_statistics.toml')
         self.household = toml.load(open(household_file, 'r'))
 
         # Load diurnal pattern statistics
-        diurnal_pattern_file = os.path.join(os.path.dirname(__file__), 'data', self.country, 'diurnal_patterns.toml')
+        diurnal_pattern_file = os.path.join(statisticsdir, 'diurnal_patterns.toml')
         self.diurnal_pattern = toml.load(open(diurnal_pattern_file, 'r'))
 
         # load end-uses:
         self.end_uses = dict()
-        path2end_use = os.path.join(os.path.dirname(__file__), 'data', self.country, 'end_uses')
+        path2end_use = os.path.join(statisticsdir, 'end_uses')
 
         bathtub_file = os.path.join(path2end_use, 'Bathtub.toml')
         brtap_file = os.path.join(path2end_use, 'BathroomTap.toml')
