@@ -5,6 +5,7 @@ matplotlib==3.2.1
 pandas==1.0.3
 xarray==0.15.1
 scipy==1.4.1
+epanettools==1.0.0
 
 
 

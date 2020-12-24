@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 from pySIMDEUM.post_processor_utilities.ApplianceWaterUse import ApplianceWaterUse
 from pySIMDEUM.post_processor_utilities.DemandPatternPostProcessor import DemandPatternPostProcessor
 from pySIMDEUM.pre_processor_utilities.statistics_utilities import plot_diurnal_pattern, get_max_time_diurnal_pattern
+from pySIMDEUM.post_processor_utilities.epanet_integration_functions import write_simdeum_patterns_to_epanet
 import time
-from guppy import hpy
-from pympler import asizeof, classtracker
+#from guppy import hpy
+#from pympler import asizeof, classtracker
 
 # test edit to see if test is run
 # Simulations for multiple houses:
@@ -49,17 +50,18 @@ def calculate_total(inresults):
 
 
 # statistics functions
-number_of_houses = 100
+#number_of_houses = 10
 stats = Statistics()
-plot_diurnal_pattern(statistics=stats)
-test = get_max_time_diurnal_pattern(statistics=stats)
-print(test)
+#plot_diurnal_pattern(statistics=stats)
+#test = get_max_time_diurnal_pattern(statistics=stats)
+#print(test)
 
 # house functions
 number_of_houses = 2
 houses = list(map(simulate_house, range(number_of_houses)))
-water_use = ApplianceWaterUse(houses)
-water_use.plot(plotsubject='pppd')
+write_simdeum_patterns_to_epanet(houses, '../_base.inp', 60, 'testname')
+#water_use = ApplianceWaterUse(houses)
+#water_use.plot(plotsubject='pppd')
 #enduseresults = list(map(calculate_sum_users, houses, ['enduse']*number_of_houses))
 #total_enduse = calculate_total(enduseresults)
 
@@ -68,9 +70,9 @@ water_use.plot(plotsubject='pppd')
 #print('average number of users per house is: ', total_number_of_users/number_of_houses)
 #print('average water use per person per day is :', total_enduse/total_number_of_users)
 
-demandpatternpostprocessor = DemandPatternPostProcessor(houses)
-demandpatternpostprocessor.plot_demand()
-demandpatternpostprocessor.createQcfdplot()
+#demandpatternpostprocessor = DemandPatternPostProcessor(houses)
+#demandpatternpostprocessor.plot_demand()
+#demandpatternpostprocessor.createQcfdplot()
 #print('average flow velocity (in time) is: ', meanflow)
 #total_enduse.plot(alpha=0.3)
 #total1h = total.rolling('1H').mean()
