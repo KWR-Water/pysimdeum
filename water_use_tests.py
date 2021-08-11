@@ -61,7 +61,7 @@ stats = Statistics()
 
 number_of_houses = 16
 houses = list(map(simulate_house, range(number_of_houses)))
-write_simdeum_patterns_to_epanet(houses, '../test.inp', 900, 'testname')
+write_simdeum_patterns_to_epanet(houses, '../Hanoi.inp', 900, {'2':2, '23': 1, '30': 3},'testname')
 #water_use = ApplianceWaterUse(houses)
 #water_use.plot(plotsubject='pppd')
 #enduseresults = list(map(calculate_sum_users, houses, ['enduse']*number_of_houses))
