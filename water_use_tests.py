@@ -8,6 +8,7 @@ from pySIMDEUM.post_processor_utilities.ApplianceWaterUse import ApplianceWaterU
 from pySIMDEUM.post_processor_utilities.DemandPatternPostProcessor import DemandPatternPostProcessor
 from pySIMDEUM.pre_processor_utilities.statistics_utilities import plot_diurnal_pattern, get_max_time_diurnal_pattern
 from pySIMDEUM.post_processor_utilities.epanet_integration_functions import write_simdeum_patterns_to_epanet
+from pySIMDEUM.post_processor_utilities.epanet_classes import Epanet_file_object
 import time
 #from guppy import hpy
 #from pympler import asizeof, classtracker
@@ -57,9 +58,10 @@ stats = Statistics()
 #print(test)
 
 # house functions
-number_of_houses = 2
+
+number_of_houses = 16
 houses = list(map(simulate_house, range(number_of_houses)))
-write_simdeum_patterns_to_epanet(houses, '../_base.inp', 60, 'testname')
+write_simdeum_patterns_to_epanet(houses, '../test.inp', 900, 'testname')
 #water_use = ApplianceWaterUse(houses)
 #water_use.plot(plotsubject='pppd')
 #enduseresults = list(map(calculate_sum_users, houses, ['enduse']*number_of_houses))
