@@ -100,6 +100,21 @@ def write_simdeum_house_to_epanet(house, input_file=None):
     house_wn.write_inpfile('../house_test.inp')
 
 
+def get_demand_nodes_epanet(inpfile):
+    """get_demand_nodes_epanet will get all the nodes which have a demand defined in the epanet file
+    INPUT:
+    inpfile: the epanet input file from which to get the demand nodes
+    OUTPUT:
+    returns a dictionary of {nodename1 : base_demand, nodename2: basedemand ...}
+    because of wntr base_demand will be in m3/s"""
+    wn = wntr.network.WaterNetworkModel(inpfile)
+    returndict = {}
+    for junctionname, junction in wn.junctions():
+        if junction.base_demand > 0:
+            returndict[junctionname] = junction.base_demand
+    
+    return returndict
+
 def create_house_network_file():
 
     wn = wntr.network.WaterNetworkModel()
