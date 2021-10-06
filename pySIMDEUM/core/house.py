@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+import pickle
 from datetime import datetime
 from traits.api import Either, Str, Instance, Float, List, Any
 from pySIMDEUM.core.utils import Base, chooser, normalize
@@ -81,20 +82,25 @@ class Property(Base):
 
         return self.house_type
 
-    def built_house(self, house_type=None):
+    def built_house(self, house_type=None, housefile=None):
 
-        if house_type is not None:
-            self.house_type = house_type
+        if housefile is not None:
+            with open(housefile, 'rb') as f:
+                new_house = pickle.load(f)
+            self.house = new_house
         else:
-            self._choose_type(self.statistics)
-        self.house = House(id=self.id,
-                           house_type=self.house_type,
-                           statistics=self.statistics,
-                           oopnet_id=self.oopnet_id,
-                           lattitude=self.lattitude,
-                           longitude=self.longitude,
-                           x_coordinate=self.x_coordinate,
-                           y_coordinate=self.y_coordinate)
+            if house_type is not None:
+                self.house_type = house_type
+            else:
+                self._choose_type(self.statistics)
+            self.house = House(id=self.id,
+                            house_type=self.house_type,
+                            statistics=self.statistics,
+                            oopnet_id=self.oopnet_id,
+                            lattitude=self.lattitude,
+                            longitude=self.longitude,
+                            x_coordinate=self.x_coordinate,
+                            y_coordinate=self.y_coordinate)
 
         return self.house
 
@@ -310,3 +316,12 @@ class House(Property):
 
         return self.consumption
 
+    def save_house(self, outputname):
+#        if self.consumption == None: #only save simulated houses
+#            self.simulate()
+        with open(outputname + '.house', 'wb') as f:
+            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
+    
+
+
+        
