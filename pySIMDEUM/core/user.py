@@ -1,7 +1,7 @@
 from traits.api import HasStrictTraits, Bool, Any, Str, Either, Instance
 import copy
 import numpy as np
-import scipy.stats as ss
+import scipy.stats as sstats
 import pandas as pd
 import uuid
 from pySIMDEUM.core.utils import Base
@@ -37,7 +37,7 @@ class Presence(HasStrictTraits):
             dist = val['dist']
             del val['dist']
             # dist = getattr(pm, dist)
-            dist = getattr(ss, dist)
+            dist = getattr(sstats, dist)
             newval = dict()
             translate = {'mu': 'loc',
                          'sd': 'scale'}
