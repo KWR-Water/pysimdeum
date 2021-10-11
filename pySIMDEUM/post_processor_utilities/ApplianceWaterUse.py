@@ -41,14 +41,15 @@ class ApplianceWaterUse():
             print("Error: input should either be a House or a list of Houses")
 
     def _create_data(self, inputproperty):
-        total_water_usage = float(inputproperty.consumption.sum('user').sum('time').sum('enduse').values)
+        total_water_usage = float(inputproperty.consumption.sum('user').sum('time').sum('enduse').sum('patterns').values)
+        total_patterns = len(inputproperty.consumption.patterns)
         total_users = len(inputproperty.users)
-        appliance_data = inputproperty.consumption.sum('user').sum('time').to_dataframe('total')
+        appliance_data = inputproperty.consumption.sum('user').sum('time').sum('patterns').to_dataframe('total')
         appliance_data['percentage'] = (appliance_data['total']/total_water_usage)*100
         appliance_data['pp'] = appliance_data['total']/total_users
         number_of_seconds = len(inputproperty.consumption)
         total_number_of_days = number_of_seconds/(60*60*24)
-        appliance_data['pppd'] = appliance_data['pp']/total_number_of_days
+        appliance_data['pppd'] = (appliance_data['pp']/total_patterns)/total_number_of_days
         return appliance_data, total_water_usage, total_users, total_number_of_days
     
     def plot(self, plotsubject='percentage'):

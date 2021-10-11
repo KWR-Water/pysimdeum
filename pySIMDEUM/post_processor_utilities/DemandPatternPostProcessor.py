@@ -35,11 +35,11 @@ class DemandPatternPostProcessor():
         enduses = house.consumption['enduse'].values
         for user in users:
             for enduse in enduses:
-                consumption[user + ' ' + enduse] = house.consumption.sel(user=user, enduse=enduse).values
-            consumption[user + ' total'] = house.consumption.sel(user=user).sum('enduse').values
+                consumption[user + ' ' + enduse] = house.consumption.sel(user=user, enduse=enduse, patterns=0).values
+            consumption[user + ' total'] = house.consumption.sel(user=user, patterns=0).sum('enduse').values
         for enduse in enduses:
-            consumption[enduse + ' total'] = house.consumption.sel(enduse=enduse).sum('user').values
-        consumption['total'] = house.consumption.sum('user').sum('enduse').values
+            consumption[enduse + ' total'] = house.consumption.sel(enduse=enduse, patterns=0).sum('user').values
+        consumption['total'] = house.consumption.sel(patterns=0).sum('user').sum('enduse').values
 
         return consumption, users, enduses
 

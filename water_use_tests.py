@@ -21,7 +21,7 @@ def simulate_house(x):
     house.furnish_house()
     for user in house.users:
         user.compute_presence(statistics=stats)
-    house.simulate()
+    house.simulate(num_patterns=10)
 
     return house
 
@@ -57,19 +57,19 @@ stats = Statistics()
 #print(test)
 
 # house functions
-house = simulate_house(1)
+house = simulate_house(2)
 house.save_house('test')
 
 prop = Property(statistics=stats)
 house2 = prop.built_house(housefile='test.house')
 test2 = 2 
-#number_of_houses = 16
-#houses = list(map(simulate_house, range(number_of_houses)))
-#write_simdeum_patterns_to_epanet(houses, '../Hanoi.inp', 900, {'2':2, '23': 1, '30': 3},'testname')
+number_of_houses = 16
+houses = list(map(simulate_house, range(number_of_houses)))
+write_simdeum_patterns_to_epanet(houses, '../Hanoi.inp', 900, {'2':2, '23': 1, '30': 3},'testname')
 #write_simdeum_house_to_epanet(houses[10])
 #test = get_demand_nodes_epanet('../Hanoi.inp')
 #print(test)
-#water_use = ApplianceWaterUse(houses)
+#water_use = ApplianceWaterUse(house)
 #water_use.plot(plotsubject='pppd')
 #enduseresults = list(map(calculate_sum_users, houses, ['enduse']*number_of_houses))
 #total_enduse = calculate_total(enduseresults)
@@ -79,7 +79,7 @@ test2 = 2
 #print('average number of users per house is: ', total_number_of_users/number_of_houses)
 #print('average water use per person per day is :', total_enduse/total_number_of_users)
 
-#demandpatternpostprocessor = DemandPatternPostProcessor(houses)
+#demandpatternpostprocessor = DemandPatternPostProcessor(house)
 #demandpatternpostprocessor.plot_demand()
 #demandpatternpostprocessor.createQcfdplot()
 #print('average flow velocity (in time) is: ', meanflow)

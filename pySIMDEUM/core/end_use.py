@@ -144,7 +144,7 @@ class Bathtub(EndUse):
         # fixed intensity
         return self.statistics['intensity']
 
-    def simulate(self, consumption, users=None, ind_enduse=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1):
 
         prob_usage = self.usage_probability().values
 
@@ -161,7 +161,7 @@ class Bathtub(EndUse):
                 start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
                 end = start + duration
 
-                consumption[start:end, j, ind_enduse] = intensity
+                consumption[start:end, j, ind_enduse, pattern_num] = intensity
 
         return consumption
 
@@ -198,7 +198,7 @@ class BathroomTap(EndUse):
 
         return duration, intensity
 
-    def simulate(self, consumption, users=None, ind_enduse=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1):
 
         prob_usage = self.usage_probability().values
 
@@ -215,7 +215,7 @@ class BathroomTap(EndUse):
                 u = np.random.uniform()
                 start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
                 end = int(start + duration)
-                consumption[start:end, j, ind_enduse] = intensity
+                consumption[start:end, j, ind_enduse, pattern_num] = intensity
 
         return consumption
 
@@ -239,7 +239,7 @@ class Dishwasher(EndUse):
         pattern = self.statistics['enduse_pattern']
         return pattern
 
-    def simulate(self, consumption, users=None, ind_enduse=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1):
 
         prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
         freq = self.fct_frequency(numusers=len(users))
@@ -267,7 +267,7 @@ class Dishwasher(EndUse):
             if end > (24 * 60 * 60):  #ToDo: Find better way to simulate dishwashers that are turned on in the night
                 end = 24 * 60 * 60
             difference = end - start
-            consumption[start:end, j, ind_enduse] = pattern[:difference]
+            consumption[start:end, j, ind_enduse, pattern_num] = pattern[:difference]
 
         return consumption
 
@@ -321,7 +321,7 @@ class KitchenTap(EndUse):
 
         return duration, intensity
 
-    def simulate(self, consumption, users=None, ind_enduse=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1):
 
         prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
 
@@ -344,7 +344,7 @@ class KitchenTap(EndUse):
             prob_joint = normalize(prob_user * prob_usage)  # ToDo: Check if joint probability can be computed outside of for loop for all functions
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
             end = start + duration
-            consumption[start:end, j, ind_enduse] = intensity
+            consumption[start:end, j, ind_enduse, pattern_num] = intensity
 
         return consumption
 
@@ -382,7 +382,7 @@ class OutsideTap(EndUse):
 
         return duration, intensity
 
-    def simulate(self, consumption, users=None, ind_enduse=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1):
 
         prob_usage = self.usage_probability().values
 
@@ -407,7 +407,7 @@ class OutsideTap(EndUse):
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
             end = start + duration
 
-            consumption[start:end, j, ind_enduse] = intensity
+            consumption[start:end, j, ind_enduse, pattern_num] = intensity
 
         return consumption
 
@@ -441,7 +441,7 @@ class Shower(EndUse):
 
         return duration, intensity
 
-    def simulate(self, consumption, users=None, ind_enduse=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1):
 
         prob_usage = self.usage_probability().values
 
@@ -456,7 +456,7 @@ class Shower(EndUse):
                 u = np.random.uniform()
                 start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
                 end = start + duration
-                consumption[start:end, j, ind_enduse] = intensity
+                consumption[start:end, j, ind_enduse, pattern_num] = intensity
 
         return consumption
 
@@ -495,7 +495,7 @@ class WashingMachine(EndUse):
         # duration = pattern.index[-1] - pattern.index[0]
         return pattern
 
-    def simulate(self, consumption, users=None, ind_enduse=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1):
 
         prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
 
@@ -525,7 +525,7 @@ class WashingMachine(EndUse):
             if end > (24 * 60 * 60):
                 end = 24 * 60 * 60
             difference = end - start
-            consumption[start:end, j, ind_enduse] = pattern[:difference]
+            consumption[start:end, j, ind_enduse, pattern_num] = pattern[:difference]
 
         return consumption
 
@@ -566,7 +566,7 @@ class Wc(EndUse):
         return duration, intensity
 
 
-    def simulate(self, consumption, users=None, ind_enduse=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1):
 
         prob_usage = self.usage_probability().values
 
@@ -582,7 +582,7 @@ class Wc(EndUse):
                 u = np.random.uniform()
                 start = np.argmin(np.abs(np.cumsum(prob_joint) - u))
                 end = start + duration
-                consumption[start:end, j, ind_enduse] = intensity
+                consumption[start:end, j, ind_enduse, pattern_num] = intensity
 
         return consumption
 

@@ -37,14 +37,14 @@ def write_simdeum_patterns_to_epanet(houses, inpfile, timestep, number_of_patter
             num_pats = 0
         if num_pats != 0:
             random_houses = random.choices(houses_to_choose_from, k=num_pats)
-            for house in random_houses:
-                houses_to_choose_from.remove(house)
             #for now we simulate the houses the amoutn of times needed.
-            house.simulate()
-            totpattern = house.consumption.sum('user').sum('enduse').values
+            if random_houses[0].consumption is None:
+                random_houses[0].simulate()
+            totpattern = random_houses[0].consumption.sel(patterns=0).sum('user').sum('enduse').values
             for i in range(1, num_pats): #skip first
-                house.simulate()
-                pattern = house.consumption.sum('user').sum('enduse').values
+                if random_houses[i].consumption is None:
+                    random_houses[i].simulate()
+                pattern = random_houses[i].consumption.sel(patterns=0).sum('user').sum('enduse').values
                 totpattern = totpattern + pattern
             timereducedpattern = np.add.reduceat(totpattern, np.arange(0, len(totpattern), int(86400/timestep)))
             convertedpattern = timereducedpattern*flow_conv
@@ -84,7 +84,7 @@ def write_simdeum_house_to_epanet(house, input_file=None):
     house.simulate()
     appliances = [x.statistics['classname'] for x in house.appliances]
     for name in appliances:
-        pattern = house.consumption.loc[:, :, name].sum('user').values
+        pattern = house.consumption.loc[:, :, name, 0].sum('user').values
         #timereducedpattern = np.add.reduceat(pattern, np.arange(0, len(pattern), int(86400/timestep)))
         convertedpattern = pattern
         house_wn.add_pattern(name + '_simdeum_pattern', convertedpattern)

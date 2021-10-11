@@ -292,7 +292,7 @@ class House(Property):
                                         dims=['time', 'user', 'enduse'])
         return self.consumption
 
-    def simulate(self, date=None, duration='1 day'):
+    def simulate(self, date=None, duration='1 day', num_patterns=1):
 
         if date is None:
             date = datetime.now().date()
@@ -305,14 +305,15 @@ class House(Property):
         time = pd.date_range(start=date, end=date + timedelta, freq='1s', closed='left')
         users = [x.id for x in self.users] + ['household']
         enduse = [x.statistics['classname'] for x in self.appliances]
+        patterns = [x for x in range(0, num_patterns)]
+        consumption = np.zeros((len(time), len(users), len(enduse), num_patterns))
 
-        consumption = np.zeros((len(time), len(users), len(enduse)))
+        for num in patterns:
+            for k, appliance in enumerate(self.appliances):
 
-        for k, appliance in enumerate(self.appliances):
+                consumption = appliance.simulate(consumption, users=self.users, ind_enduse=k, pattern_num=num)
 
-            consumption = appliance.simulate(consumption, users=self.users, ind_enduse=k)
-
-        self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse], dims=['time', 'user', 'enduse'])
+        self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns], dims=['time', 'user', 'enduse', 'patterns'])
 
         return self.consumption
 
