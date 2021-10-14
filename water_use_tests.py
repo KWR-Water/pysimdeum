@@ -5,7 +5,7 @@ import pandas as pd
 import xarray as xr
 import matplotlib.pyplot as plt
 from pySIMDEUM.post_processor_utilities.ApplianceWaterUse import ApplianceWaterUse
-from pySIMDEUM.post_processor_utilities.DemandPatternPostProcessor import DemandPatternPostProcessor
+from pySIMDEUM.post_processor_utilities.demand_pattern_post_processing import write_simdeum_patterns_to_xlsx, plot_demand, createQcfdplot
 from pySIMDEUM.pre_processor_utilities.statistics_utilities import plot_diurnal_pattern, get_max_time_diurnal_pattern
 from pySIMDEUM.post_processor_utilities.epanet_integration import write_simdeum_patterns_to_epanet, write_simdeum_house_to_epanet, get_demand_nodes_epanet
 import time
@@ -15,6 +15,7 @@ import time
 # test edit to see if test is run
 # Simulations for multiple houses:
 def simulate_house(x):
+    stats = Statistics()
     prop = Property(statistics=stats)
     house = prop.built_house()
     house.populate_house()
@@ -51,21 +52,21 @@ def calculate_total(inresults):
 
 # statistics functions
 #number_of_houses = 10
-stats = Statistics()
+
 #plot_diurnal_pattern(statistics=stats)
 #test = get_max_time_diurnal_pattern(statistics=stats)
 #print(test)
 
 # house functions
 house = simulate_house(2)
-house.save_house('test')
+#house.save_house('test')
 
-prop = Property(statistics=stats)
-house2 = prop.built_house(housefile='test.house')
-test2 = 2 
-number_of_houses = 16
-houses = list(map(simulate_house, range(number_of_houses)))
-write_simdeum_patterns_to_epanet(houses, '../Hanoi.inp', 900, {'2':2, '23': 1, '30': 3},'testname')
+#prop = Property(statistics=stats)
+#house2 = prop.built_house(housefile='test.house')
+#test2 = 2 
+#number_of_houses = 16
+#houses = list(map(simulate_house, range(number_of_houses)))
+#write_simdeum_patterns_to_epanet(houses, '../Hanoi.inp', 900, {'2':2, '23': 1, '30': 3},'testname')
 #write_simdeum_house_to_epanet(houses[10])
 #test = get_demand_nodes_epanet('../Hanoi.inp')
 #print(test)
@@ -79,9 +80,9 @@ write_simdeum_patterns_to_epanet(houses, '../Hanoi.inp', 900, {'2':2, '23': 1, '
 #print('average number of users per house is: ', total_number_of_users/number_of_houses)
 #print('average water use per person per day is :', total_enduse/total_number_of_users)
 
-#demandpatternpostprocessor = DemandPatternPostProcessor(house)
-#demandpatternpostprocessor.plot_demand()
-#demandpatternpostprocessor.createQcfdplot()
+#write_simdeum_patterns_to_xlsx(['test.house'], 300, 'm3_h', 1, 'test.xlsx')
+plot_demand(house)
+createQcfdplot(house)
 #print('average flow velocity (in time) is: ', meanflow)
 #total_enduse.plot(alpha=0.3)
 #total1h = total.rolling('1H').mean()
