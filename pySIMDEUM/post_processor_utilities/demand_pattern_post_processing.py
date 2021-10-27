@@ -4,70 +4,32 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 
-
-def get_consumption_data(houses):
-    consumption = pd.DataFrame()
-    users = []
-    enduses = []
-    if type(houses) == House:   
-        consumption, users, enduses = _create_house_data(houses)
-    elif type(houses) == list:
-        for house in houses:
-            consumption, users, enduses = _create_house_data(house)
-            users.append(users.tolist())
-            enduses.append(enduses.tolist())
-            for column in consumption.columns:
-                if ('user' not in column) and ('household' not in column):
-                    if (column in consumption.columns) and (column != 'time'):
-                        consumption[column] += consumption[column]
-                    else:
-                        consumption[column] = consumption[column] 
-
-    else:
-        print("Error: input should either be a House or a list of Houses")
-    
-    return consumption, users, enduses
-    
-def _create_house_data(house):
-    consumption = pd.DataFrame()
-    consumption['time'] = house.consumption['time'].values
-    users = house.consumption['user'].values
-    enduses = house.consumption['enduse'].values
-    for user in users:
-        for enduse in enduses:
-            consumption[user + ' ' + enduse] = house.consumption.sel(user=user, enduse=enduse, patterns=0).values
-        consumption[user + ' total'] = house.consumption.sel(user=user, patterns=0).sum('enduse').values
-    for enduse in enduses:
-        consumption[enduse + ' total'] = house.consumption.sel(enduse=enduse, patterns=0).sum('user').values
-    consumption['total'] = house.consumption.sel(patterns=0).sum('user').sum('enduse').values
-
-    return consumption, users, enduses
-
 def plot_demand(houses):
-    consumption, users, enduses = get_consumption_data(houses)
+    # houses can either be a house or a list of housefiles
+    # if it is a single house it will plot per user, per enduse an a total of pattern 1 and a total of all patterns/num patterns
+    #consumption, users, enduses = get_consumption_data(houses)
     if type(houses) == House:
-        fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True)
-        for user in users:
-            ax1.plot(consumption['time'], consumption[user + ' total'], label=user)
-        ax3.plot(consumption['time'], consumption['total'], label='total')
-        for enduse in enduses:
-            ax2.plot(consumption['time'], consumption[enduse + ' total'], label=enduse)
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2, sharey=True)
+        for user in houses.consumption.user.values:
+            ax1.plot(houses.consumption['time'].values, houses.consumption.sel(user=user, patterns=0).sum('enduse').values, label=user)
+        ax3.plot(houses.consumption['time'].values, houses.consumption.sel(patterns=0).sum('user').sum('enduse').values, label='total')
+        for enduse in houses.consumption.enduse.values:
+            ax2.plot(houses.consumption['time'].values, houses.consumption.sel(enduse=enduse, patterns=0).sum('user').values, label=enduse)
+        ax4.plot(houses.consumption['time'].values, houses.consumption.sum('user').sum('enduse').sum('patterns').values/len(houses.consumption.patterns), label='average')
         ax1.legend()
         ax1.set_xlabel('time')
         ax1.set_ylabel('demand (l/s)')
         ax2.set_xlabel('time')
         ax3.legend()
         ax3.set_xlabel('time')
+        ax3.set_ylabel('demand (l/s)')
+        ax4.set_xlabel('time')
         ax2.legend()
+        ax4.legend()
         plt.show()
     else:
-        # it makes no sense to create user and enduse plots for multiple houses therefore only a total plot
-        fig, ax1 = plt.subplots()
-        ax1.plot(consumption['time'], consumption['total'], label='total')
-        ax1.legend()
-        ax1.set_xlabel('time')
-        ax1.set_ylabel('demand (l/s)')
-        plt.show()
+        #list of housefiles not implemented yet
+        test=2
 
 def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_option, output_file):
     # after writeSimdeumPatternToXls (Matlab)
@@ -102,22 +64,22 @@ def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_optio
                 summedoutput[column] = output[column].groupby(output.index // timestep).sum().values
         summedoutput.to_excel(output_file)
 
-
-        
     else: #.houses
         number_of_houses = len(houses)
-
-
-        
+      
 
 def createQcfdplot(houses, timeinterval=1):
-    consumption, users, enduse = get_consumption_data(houses)
-    n_bins = 100
-    fig, ax = plt.subplots()
-    x = consumption['total']
-    n, bins, patches = ax.hist(x, n_bins, density=True, histtype='step',
-                        cumulative=True, label='Empirical')
-    plt.show()
+    
+    if type(houses) == House:
+        n_bins = 100
+        fig, ax = plt.subplots()
+        x = houses.consumption.sel(patterns=0).sum('user').sum('enduse').values
+        n, bins, patches = ax.hist(x, n_bins, density=True, histtype='step',
+                            cumulative=True, label='Empirical')
+        plt.show()
+    else:
+        # list of housefiles not implemented yet
+        test = 2
 
 
 
