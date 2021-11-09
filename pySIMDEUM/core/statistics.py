@@ -54,3 +54,15 @@ class Statistics(HasStrictTraits):
         self.end_uses['Dishwasher']['daily_pattern'] = dishwasher_daily_pattern()
         self.end_uses['Dishwasher']['enduse_pattern'] = dishwasher_enduse_pattern()
         self.end_uses['KitchenTap']['daily_pattern'] = ktap_daily_pattern()
+
+
+    def __str__(self):
+        returnstring = f'{self.__class__.__name__}\nCountry: {self.country}\n'
+        returnstring = f'diurnal patterns: \n'
+        for key in self.diurnal_pattern.keys():
+            returnstring = returnstring + f'\nusertype: {key} \n\t' 
+            for key2 in self.diurnal_pattern[key].keys():
+                returnstring = returnstring + f'{key2}: \t'
+                for key3 in self.diurnal_pattern[key][key2].keys():
+                    returnstring = returnstring + f'{key3}: {self.diurnal_pattern[key][key2][key3]} \t'
+        return returnstring
