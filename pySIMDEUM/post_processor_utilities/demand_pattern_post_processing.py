@@ -1,5 +1,5 @@
 from traits.api import Either, Str, Instance, Float, List, Any, Int
-from pySIMDEUM.core.house import Property, House
+from pySIMDEUM.core.house import HousePattern, Property, House
 import matplotlib.pyplot as plt
 import pandas as pd
 import glob
@@ -35,28 +35,24 @@ def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_optio
     # after writeSimdeumPatternToXls (Matlab)
     # house can eithwer be a list of filenames or a list of houses
     # timestep the output timestep of the pattern
-    # Q_option for now only 'm3/h'
+    # Q_option for now only 'm3/h' TODO is this true? are the units not L/s?????
     # for now only 1 all patterns in 1 file
     # output_file file to write to
     
     if type(houses[0]) == str:
         count = 0
         output = pd.DataFrame()
-        for house in houses:
-            prop = Property()
-            loadedhouse = prop.built_house(housefile=house)
-            if count == 0:
-                datelist = []
-                valueslist = []
-                for i in range(0, len(loadedhouse.consumption.patterns)):
-                    datelist.extend(loadedhouse.consumption['time'].values)
-                    valueslist.extend(loadedhouse.consumption.sel(patterns=i).sum('user').sum('enduse').values)
-                output['date'] = datelist
-            else:
-                valueslist = []
-                for i in range(0, len(loadedhouse.consumption.patterns)):
-                    valueslist.extend(loadedhouse.consumption.sel(patterns=i).sum('user').sum('enduse').values)
-            output['pysimdeum ' + str(count)] = valueslist
+        if '.housepattern' in houses[0]: #it are housepattern files
+            for housepattern in houses:
+                loadedhousepattern = HousePattern(housepattern)
+                get_housepattern_output(count, output, loadedhousepattern)
+                count +=1
+        else: #assumed to be house files
+            for house in houses:
+                prop = Property()
+                loadedhouse = prop.built_house(housefile=house)
+                get_house_output(count, output, loadedhouse)
+                count +=1
         summedoutput = pd.DataFrame()
         summedoutput['date'] = output['date'].values[0::timestep]
         for column in output.columns:
@@ -65,7 +61,43 @@ def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_optio
         summedoutput.to_excel(output_file)
 
     else: #.houses
-        number_of_houses = len(houses)
+        for house in houses:
+            get_house_output(count, output, loadedhouse)
+        summedoutput = pd.DataFrame()
+        summedoutput['date'] = output['date'].values[0::timestep]
+        for column in output.columns:
+            if column != 'date':
+                summedoutput[column] = output[column].groupby(output.index // timestep).sum().values
+        summedoutput.to_excel(output_file)
+
+
+def get_house_output(count, output, loadedhouse):
+    if count == 0:
+        datelist = []
+        valueslist = []
+        for i in range(0, len(loadedhouse.consumption.patterns)):
+            datelist.extend(loadedhouse.consumption['time'].values)
+            valueslist.extend(loadedhouse.consumption.sel(patterns=i).sum('user').sum('enduse').values)
+        output['date'] = datelist
+    else:
+        valueslist = []
+        for i in range(0, len(loadedhouse.consumption.patterns)):
+            valueslist.extend(loadedhouse.consumption.sel(patterns=i).sum('user').sum('enduse').values)
+    output['pysimdeum ' + str(count)] = valueslist
+
+def get_housepattern_output(count, output, loadedhousepattern):
+    if count == 0:
+        datelist = []
+        valueslist = []
+        for i in range(0, len(loadedhousepattern.consumption.patterns)):
+            datelist.extend(loadedhousepattern.consumption['time'].values)
+            valueslist.extend(loadedhousepattern.consumption.sel(patterns=i).values)
+        output['date'] = datelist
+    else:
+        valueslist = []
+        for i in range(0, len(loadedhousepattern.consumption.patterns)):
+            valueslist.extend(loadedhousepattern.consumption.sel(patterns=i).values)
+    output['pysimdeum ' + str(count)] = valueslist
       
 
 def createQcfdplot(houses, timeinterval=1):

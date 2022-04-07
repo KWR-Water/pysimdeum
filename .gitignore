@@ -107,3 +107,4 @@ pySIMDEUM/ApplianceWaterUse.xlsx
 pySIMDEUM/water_use_tests.py
 test.pkl
 test.house
+workdir/

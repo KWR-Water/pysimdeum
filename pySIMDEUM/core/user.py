@@ -148,22 +148,19 @@ class Presence(HasStrictTraits):
         # transform timedeltas to strings for indexing later on
         return pdf
 
-
+# removed reference to house. house user belongs to house and not also vice versa
 class User(Base):
 
     id = Str
-    house = Any
     gender = Either(None, 'male', 'female')
     age = Either('child', 'teen', 'home_ad', 'work_ad', 'senior')
     presence = Any
-    consumption = Instance(pd.Series)
 
-    def __init__(self, id=None, age=None, gender=None, house=None, job=True):
+    def __init__(self, id=None, age=None, gender=None, job=True):
 
         super(User, self).__init__(id=id)
 
         self.gender = gender
-        self.house = house
 
         if id is None:
             id = str(uuid.uuid4())

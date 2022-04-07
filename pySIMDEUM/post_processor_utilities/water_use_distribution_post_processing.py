@@ -13,21 +13,26 @@ def create_usage_data(houses):
         total_number_of_days = 0
         appliance_data['total'] = 0
         for inputp in houses:
-            appliance_data, total_water_usage, total_users, total_number_of_days = _create_data(inputp)
-            for appliance in appliance_data.index.values:
+            if type(inputp == str): #input file list
+                prop = Property()
+                loadedhouse = prop.built_house(housefile=inputp)
+            else:
+                loadedhouse = inputp
+            one_appliance_data, water_usage, users, number_of_days, patterns = _create_data(loadedhouse)
+            for appliance in one_appliance_data.index.values:
                 if appliance in appliance_data.index.values:
-                    appliance_data.loc[appliance, 'total'] += appliance_data.loc[appliance, 'total']
+                    appliance_data.loc[appliance, 'total'] += one_appliance_data.loc[appliance, 'total']
                 else:
-                    appliance_data.loc[appliance, 'total'] = appliance_data.loc[appliance, 'total']
-            total_water_usage += total_water_usage
-            total_users += total_users
-            total_number_of_days = total_number_of_days
+                    appliance_data.loc[appliance, 'total'] = one_appliance_data.loc[appliance, 'total']
+            total_water_usage += water_usage
+            total_users += users
+            total_number_of_days += number_of_days*patterns
         appliance_data['percentage'] = (appliance_data['total']/total_water_usage)*100
         appliance_data['pp'] = appliance_data['total']/total_users
         appliance_data['pppd'] = appliance_data['pp']/total_number_of_days
 
     elif type(houses) == House:
-        appliance_data, total_water_usage, total_users, total_number_of_days = _create_data(houses)
+        appliance_data, total_water_usage, total_users, total_number_of_days, total_patterns = _create_data(houses)
         
     else:
         print("Error: input should either be a House or a list of Houses")
@@ -44,7 +49,7 @@ def _create_data(inputproperty):
     number_of_seconds = len(inputproperty.consumption)
     total_number_of_days = number_of_seconds/(60*60*24)
     appliance_data['pppd'] = (appliance_data['pp']/total_patterns)/total_number_of_days
-    return appliance_data, total_water_usage, total_users, total_number_of_days
+    return appliance_data, total_water_usage, total_users, total_number_of_days, total_patterns
     
 def plot_water_use_distribution(inputproperty, plotsubject='percentage'):
     appliance_data, total_water_usage, total_users, total_number_of_days = create_usage_data(inputproperty)

@@ -1,3 +1,4 @@
+from hashlib import new
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -104,6 +105,34 @@ class Property(Base):
 
         return self.house
 
+# this class is introduced for storage purposes. 
+# It is meant for those cases where only demand data per house is needed 
+# and not the individual data of the users and or appliances
+# the conumption datarray therefore only contains totals
+# user and appliance data is removed for now
+class HousePattern():
+    users = List
+    appliances = List
+    consumption = Instance(xr.DataArray)
+
+    def __init__(self, house):
+        if type(house) == House: 
+            self.users = house.users
+            self.appliances = house.appliances 
+            self.consumption = house.consumption.sum('user').sum('enduse')
+        elif type(house) == str:
+            with open(house, 'rb') as f:
+                new_house_pattern = pickle.load(f)
+                self.users = new_house_pattern.users
+                self.appliances = new_house_pattern.appliances
+                self.consumption = new_house_pattern.consumption
+   
+    def save_house_pattern(self, outputname):
+        with open(outputname + '.housepattern', 'wb') as f:
+            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
+    
+
+
 
 class House(Property):
 
@@ -147,7 +176,7 @@ class House(Property):
                 if u < job_stats[gender]:
                     job = True
 
-            self.users = [User(id='user_1', age=age, gender=gender, house=self, job=job)]
+            self.users = [User(id='user_1', age=age, gender=gender, job=job)]
 
         elif self.house_type == 'two_person':
             # todo: implement same sex households
@@ -193,8 +222,8 @@ class House(Property):
                 else:
                     raise Exception('Unknown job attribute, not implemented.')
 
-            self.users = [User(id='user_1', age=age1, gender=gender1, house=self, job=job1),
-                          User(id='user_2', age=age2, gender=gender2, house=self, job=job2)]
+            self.users = [User(id='user_1', age=age1, gender=gender1, job=job1),
+                          User(id='user_2', age=age2, gender=gender2, job=job2)]
 
         elif self.house_type == 'family':
 
@@ -213,12 +242,12 @@ class House(Property):
                 if u < job_stats[['both', 'only_female']].sum():  # not correct, this is for two partners (comment
                     # from Mirjam Blokker)
                     job = True
-                mother = User(id='user_1', age='adult', job=job, house=self, gender='female')
+                mother = User(id='user_1', age='adult', job=job, gender='female')
 
                 # child
                 gender = chooser(gender_stats)
                 age = chooser(age_stats[['child', 'teen']])
-                child = User(id='user_2', age=age, job=False, house=self, gender=gender)
+                child = User(id='user_2', age=age, job=False, gender=gender)
 
                 self.users = [mother, child]
 
@@ -239,14 +268,14 @@ class House(Property):
                     f_job = False
                     m_job = False
 
-                family = [User(id='user_1', gender='male', age='adult', house=self, job=f_job),  # father
-                          User(id='user_2', gender='female', age='adult', house=self, job=m_job)]  # mother
+                family = [User(id='user_1', gender='male', age='adult', job=f_job),  # father
+                          User(id='user_2', gender='female', age='adult', job=m_job)]  # mother
 
                 # add child/teen until family size is reached
                 for numchild in range(2, rNum):
                     gender = chooser(gender_stats)
                     age = chooser(age_stats[['child', 'teen']])
-                    family += [User(id='user_' + str(numchild+1), gender=gender, age=age, house=self, job=False)]  #
+                    family += [User(id='user_' + str(numchild+1), gender=gender, age=age, job=False)]  #
                     # additional
                     # child
 
@@ -326,6 +355,4 @@ class House(Property):
         with open(outputname + '.house', 'wb') as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
     
-
-
         

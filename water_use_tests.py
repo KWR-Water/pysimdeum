@@ -1,14 +1,16 @@
 from pySIMDEUM.core.statistics import Statistics
-from pySIMDEUM.core.house import Property
+from pySIMDEUM.core.house import Property, HousePattern
 from datetime import datetime
 import pandas as pd
 import xarray as xr
 import matplotlib.pyplot as plt
-from pySIMDEUM.post_processor_utilities.water_use_distribution_post_processing import plot_water_use_distribution 
+from pySIMDEUM.post_processor_utilities.water_use_distribution_post_processing import plot_water_use_distribution, create_usage_data
 from pySIMDEUM.post_processor_utilities.demand_pattern_post_processing import write_simdeum_patterns_to_xlsx, plot_demand, createQcfdplot
 from pySIMDEUM.pre_processor_utilities.statistics_utilities import plot_diurnal_pattern, get_max_time_diurnal_pattern, view_statistics
 from pySIMDEUM.post_processor_utilities.epanet_integration import write_simdeum_patterns_to_epanet, write_simdeum_house_to_epanet, get_demand_nodes_epanet
 import time
+import os
+from memory_profiler import profile
 #from guppy import hpy
 #from pympler import asizeof, classtracker
 
@@ -22,7 +24,7 @@ def simulate_house(x):
     house.furnish_house()
     for user in house.users:
         user.compute_presence(statistics=stats)
-    house.simulate(num_patterns=10)
+    house.simulate(num_patterns=100)
 
     return house
 
@@ -51,22 +53,21 @@ def calculate_total(inresults):
 
 
 # statistics functions
-#number_of_houses = 10
-house = simulate_house(2)
-plot_diurnal_pattern(statistics=house.statistics)
-view_statistics(house.statistics)
-#test = get_max_time_diurnal_pattern(statistics=stats)
-#print(test)
+number_of_houses = 100
+houselist = []
+outputdir = 'workdir'
+#os.mkdir(outputdir)
+for n in range(0, number_of_houses):
+    house = simulate_house(2)
+    patternname = 'housepattern' + str(n)
+    houselist.append(outputdir + '/' + patternname + '.housepattern')
+    housepattern = HousePattern(house)
+    housepattern.save_house_pattern(outputdir + '/' + patternname)
 
-# house functions
 
-#house.save_house('test')
+#write_simdeum_patterns_to_xlsx(houselist, 1, 'm3_h', 1, 'test400_1second.xlsx')
+write_simdeum_patterns_to_xlsx(houselist, 900, 'm3_h', 1, 'test10pat_15minute.xlsx')
 
-#plot_water_use_distribution(house, plotsubject='pppd')
-
-#write_simdeum_patterns_to_xlsx(['test.house'], 300, 'm3_h', 1, 'test.xlsx')
-#plot_demand(house)
-#createQcfdplot(house)
 
 
 
