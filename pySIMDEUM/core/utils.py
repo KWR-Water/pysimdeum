@@ -88,7 +88,7 @@ def to_timedelta(time: str | float | pd.Timedelta) -> pd.Timedelta:
         value = pd.Timedelta(time)
 
     elif isinstance(time, (int, float)):
-        value = pd.Timedelta(seconds=value)
+        value = pd.Timedelta(seconds=time)
 
     elif isinstance(time, pd.Timedelta):
         value = time
