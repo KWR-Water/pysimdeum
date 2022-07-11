@@ -2,7 +2,7 @@ from pySIMDEUM.core.statistics import Statistics
 from pySIMDEUM.core.house import Property, HousePattern, House
 
 
-def built_house(house_type: str = '') -> House:
+def built_house(house_type: str = "") -> House:
 
     stats = Statistics()
     prop = Property(statistics=stats)
