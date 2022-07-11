@@ -9,17 +9,18 @@ from pySIMDEUM.core.utils import Base, chooser, normalize
 from pySIMDEUM.core.statistics import Statistics
 from pySIMDEUM.core.user import User
 import pySIMDEUM.core.end_use as EndUses
+from dataclasses import dataclass
 
 # ToDo: Implement multiple appliances which will be later on divided over the users, so they are not blocked
 # ToDo: Link data to OOPNET
 # ToDo: Increase speed of program
 # ToDo: Documentation
 
-
+@dataclass
 class Property(Base):
     """Property represents a parcel of land on which a house is/can be build.
 
-    Additionally, it contains
+    Additionally, it contains information on statistics, and the location of the house, plus a connection to the oopnet_id
     """
 
     _house_type = Either(None, Str)
@@ -334,7 +335,8 @@ class House(Property):
             print('Warning: duration unrecognized defaulted to 1 day')
             timedelta = pd.to_timedelta('1 day')
         # time = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1s', closed='left')
-        time = pd.date_range(start=date, end=date + timedelta, freq='1s', closed='left')
+        # time = pd.date_range(start=date, end=date + timedelta, freq='1s', closed='left')
+        time = pd.date_range(start=date, end=date + timedelta, freq='1s')
         users = [x.id for x in self.users] + ['household']
         enduse = [x.statistics['classname'] for x in self.appliances]
         patterns = [x for x in range(0, num_patterns)]
