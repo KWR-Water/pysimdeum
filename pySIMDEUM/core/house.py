@@ -148,7 +148,7 @@ class House(Property):
         self.appliances = appliances
 
     def __repr__(self):
-        return f'{self.__class__.__name__}:\n\tid\t=\t{self._id}\n\ttype\t=' \
+        return f'{self.__class__.__name__}:\n\tid\t=\t{self.id}\n\ttype\t=' \
                f'\t{self.house_type}\n\tuser\t=\t{len(self.users)}\n' \
                f'\tappliances\t=\t{list(map(lambda x: x.__class__.__name__, self.appliances))}'
     
