@@ -1,6 +1,5 @@
 import os
 import toml
-from dataclasses import dataclass, field
 from traits.api import HasStrictTraits, Either, Dict
 from pySIMDEUM.data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
     dishwasher_enduse_pattern
@@ -9,16 +8,14 @@ from pySIMDEUM.data.NL.end_uses.pattern.pat_washing_machine import washingmachin
     washingmachine_enduse_pattern
 
 
-@dataclass
-class Statistics:
+class Statistics(HasStrictTraits):
 
-    country: str = "NL"  # at the moment there are only country statistics for the Netherlands implemented.
-    household: dict = field(default_factory=dict)
-    diurnal_pattern: dict = field(default_factory=dict)
-    end_uses: dict = field(default_factory=dict)
+    country = Either('NL')
+    household = Dict
+    diurnal_pattern = Dict
+    end_uses = Dict
 
-
-    def __post__init__(self, country="NL", statisticsdir='pySIMDEUM/data/NL/'):
+    def __init__(self, country='NL', statisticsdir='pySIMDEUM/data/NL/'):
         self.country = country
 
         # Load household statistics
