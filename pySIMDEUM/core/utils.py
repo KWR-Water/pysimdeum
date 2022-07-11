@@ -1,11 +1,11 @@
-from traits.api import HasStrictTraits, Str
 import pandas as pd
 import uuid
 import numpy as np
+from dataclasses import dataclass
 
 
-def chooser(data, myproperty=None):
-    if myproperty is None:
+def chooser(data: pd.Series | pd.DataFrame, myproperty: str=''):
+    if not myproperty:
         data = pd.Series(data)
     else:
         # if property is nested
@@ -62,22 +62,7 @@ def to_timedelta(value):
         raise Exception('Value is of unknoen type:', type(value))
     return value
 
+@dataclass
+class Base:
 
-class Base(HasStrictTraits):
-
-    _id = Str
-
-    @property
-    def id(self):
-        return self._id
-
-    @id.setter
-    def id(self, value):
-        self._id = value
-
-    def __init__(self, id=None):
-        super(Base, self).__init__()
-        if id is not None:
-            self.id = id
-        else:
-            self.id = str(uuid.uuid4())
+    id: str = str(uuid.uuid4())
