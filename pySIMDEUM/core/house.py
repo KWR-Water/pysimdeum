@@ -1,20 +1,22 @@
-from hashlib import new
 import numpy as np
 import pandas as pd
 import xarray as xr
 import pickle
 from datetime import datetime
-from traits.api import Either, Str, Instance, Float, List, Any
+from typing import Any
+from traits.api import Either, Str, Instance, Float, List
 from pySIMDEUM.core.utils import Base, chooser, normalize
 from pySIMDEUM.core.statistics import Statistics
 from pySIMDEUM.core.user import User
 import pySIMDEUM.core.end_use as EndUses
 from dataclasses import dataclass
 
-# ToDo: Implement multiple appliances which will be later on divided over the users, so they are not blocked
-# ToDo: Link data to OOPNET
-# ToDo: Increase speed of program
-# ToDo: Documentation
+# TODO: Implement multiple appliances which will be later on divided over the users, so they are not blocked
+# TODO: Link data to OOPNET
+# TODO: Increase speed of program
+# TODO: Documentation
+# TODO: Think about if Property class is necessary or if it can be integrated into the House class
+
 
 @dataclass
 class Property(Base):
@@ -23,57 +25,24 @@ class Property(Base):
     Additionally, it contains information on statistics, and the location of the house, plus a connection to the oopnet_id
     """
 
-    _house_type = Either(None, Str)
-    _house = Any
-    _statistics = Instance(Statistics)
-
-    # todo: implement this quantities
-    oopnet_id = Str
-    lattitude = Float
-    longitude = Float
-    x_coordinate = Float
-    y_coordinate = Float
-
-    # getters and setters
-    @property
-    def house_type(self):
-        return self._house_type
-
-    @house_type.setter
-    def house_type(self, value):
-        self._house_type = value
-
-    @property
-    def house(self):
-        return self._house
-
-    @house.setter
-    def house(self, value):
-        if value is not None:
-            if isinstance(value, House):
-                # value.property = self
-                self._house = value
-            else:
-                raise Exception('Property house is not of type House')
-
-    @property
-    def statistics(self):
-        return self._statistics
-
-    @statistics.setter
-    def statistics(self, value):
-        self._statistics = value
+    house_type: str = ""
+    _house: Any = None
+    statistics: Statistics = None
+    country: str = "NL"
 
 
-    def __init__(self, id=None, house_type=None, statistics=None, country='NL', oopnet_id=None,
-                 lattitude=None, longitude=None, x_coordinate=None, y_coordinate=None):
+    # TODO: implement following quantities
+    oopnet_id: str = ""
+    lattitude: float = np.nan
+    longitude: float = np.nan
+    x_coordinate: float = np.nan
+    y_coordinate: float = np.nan
 
-        super(Property, self).__init__(id=id)
-        self.house_type = house_type
-        if statistics is None:
-            self.statistics = Statistics(country=country)
-        else:
-            self.statistics = statistics
+
+    def __post__init__(self):
+        if Statistics is None:
+            self.statistics = Statistics(country=self.country)
+
 
     def _choose_type(self, statistics=None):
 
@@ -84,14 +53,16 @@ class Property(Base):
 
         return self.house_type
 
-    def built_house(self, house_type=None, housefile=None):
+    def built_house(self, house_type: str="", housefile: str=""):
 
-        if housefile is not None:
+        # TODO: House chooser seems not to work if API:built_house does not specify a house_type
+
+        if housefile:
             with open(housefile, 'rb') as f:
                 new_house = pickle.load(f)
             self.house = new_house
         else:
-            if house_type is not None:
+            if house_type:
                 self.house_type = house_type
             else:
                 self._choose_type(self.statistics)
