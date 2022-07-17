@@ -1,37 +1,39 @@
-from traits.api import HasStrictTraits, Bool, Any, Str, Either, Instance
+from traits.api import HasStrictTraits, Bool, Str, Either, Instance
 import copy
 import numpy as np
 import scipy.stats as sstats
 import pandas as pd
 import uuid
 from pySIMDEUM.core.utils import Base
+from dataclasses import dataclass, field
+from typing import Any, Callable
+from pySIMDEUM.core.statistics import Statistics
 
 
-class Presence(HasStrictTraits):
+@dataclass
+class Presence:
+    """Class representing the presence and the water use activity of users in a house."""
 
-    weekday = Bool
-    user = Any
+    weekday: bool
+    user: Any
+    stats: Statistics
 
-    up = Instance(pd.Timedelta)
-    go = Instance(pd.Timedelta)
-    home = Instance(pd.Timedelta)
-    sleep = Instance(pd.Timedelta)
+    up: pd.Timedelta = field(init=False)
+    go: pd.Timedelta = field(init=False)
+    home: pd.Timedelta = field(init=False)
+    sleep: pd.Timedelta = field(init=False)
 
-    _prob_getting_up = Any
-    _prob_leaving_house = Any
-    _prob_being_away = Any
-    _prob_sleep = Any
+    _prob_getting_up: Any = field(init=False)
+    _prob_leaving_house: Any = field(init=False)
+    _prob_being_away: Any = field(init=False)
+    _prob_sleep: Any = field(init=False)
 
-    def __init__(self, user=None, weekday=True, stats=None):
+    def __post_init__(self) -> None:
 
-        super(Presence, self).__init__()
-
-        self.user = user
-
-        if weekday:
-            diurnal = copy.deepcopy(stats.diurnal_pattern[user.age])
+        if self.weekday:
+            diurnal = copy.deepcopy(self.stats.diurnal_pattern[self.user.age])
         else:
-            diurnal = copy.deepcopy(stats.diurnal_pattern['weekend'])
+            diurnal = copy.deepcopy(self.stats.diurnal_pattern['weekend'])
 
         for key, val in diurnal.items():
             dist = val['dist']
@@ -65,13 +67,16 @@ class Presence(HasStrictTraits):
         if self.sleep < self.home:
             self.home = self.sleep - pd.Timedelta(minutes=30)
 
-    def print(self):
+    def print(self) -> None:
+        """Method to print the main properties of the user's presence"""
+
         print('up:', self.up)
         print('go:', self.go)
         print('home:', self.home)
         print('sleep:', self.sleep)
 
-    def sample_single_property(self, prop):
+    def sample_single_property(self, prop: str) -> pd.Timedelta:
+        """Function to draw random time values from the single time properties (e.g., getting up, leave house, ...) of the users"""
 
         prob_fct = getattr(self, prop)
         x = prob_fct.rvs()
@@ -80,11 +85,14 @@ class Presence(HasStrictTraits):
         return x
 
     @staticmethod
-    def timestamp2str(x):
+    def timestamp2str(x: pd.Timedelta) -> str:
+        """Transform a Python Pandas Timedelta object to a string in the format HH:MM"""
+        
         return str(x.components.hours).zfill(2) + ':' + str(x.components.minutes).zfill(2) # + ':' + str(
         # x.components.seconds).zfill(2)
 
     def timeindexer(self, l, value, a, b):
+
         if a < b:
             l[a:b] = value
         else:
