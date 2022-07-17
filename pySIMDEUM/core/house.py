@@ -9,7 +9,7 @@ from pySIMDEUM.core.utils import Base, chooser, normalize
 from pySIMDEUM.core.statistics import Statistics
 from pySIMDEUM.core.user import User
 import pySIMDEUM.core.end_use as EndUses
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # TODO: Implement multiple appliances which will be later on divided over the users, so they are not blocked
 # TODO: Link data to OOPNET
@@ -30,7 +30,6 @@ class Property(Base):
     statistics: Statistics = None
     country: str = "NL"
 
-
     # TODO: implement following quantities
     oopnet_id: str = ""
     lattitude: float = np.nan
@@ -44,7 +43,7 @@ class Property(Base):
             self.statistics = Statistics(country=self.country)
 
 
-    def _choose_type(self, statistics=None):
+    def _choose_type(self, statistics: Statistics=None) -> str:
 
         if not statistics:
             raise Exception('Statistics object has to be defined')
@@ -77,48 +76,20 @@ class Property(Base):
 
         return self.house
 
-# this class is introduced for storage purposes. 
-# It is meant for those cases where only demand data per house is needed 
-# and not the individual data of the users and or appliances
-# the conumption datarray therefore only contains totals
-# user and appliance data is removed for now
-class HousePattern():
-    users = List
-    appliances = List
-    consumption = Instance(xr.DataArray)
 
-    def __init__(self, house):
-        if type(house) == House: 
-            self.users = house.users
-            self.appliances = house.appliances 
-            self.consumption = house.consumption.sum('user').sum('enduse')
-        elif type(house) == str:
-            with open(house, 'rb') as f:
-                new_house_pattern = pickle.load(f)
-                self.users = new_house_pattern.users
-                self.appliances = new_house_pattern.appliances
-                self.consumption = new_house_pattern.consumption
-   
-    def save_house_pattern(self, outputname):
-        with open(outputname + '.housepattern', 'wb') as f:
-            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
-    
-
-
-
+@dataclass
 class House(Property):
+    """pySIMDEUM House containting information on users, appliances and consumption.
 
-    users = List
-    appliances = List
-    consumption = Instance(xr.DataArray)
+    This class is a child of the `Property` class. It containts methods for populating and furnishing a house, and 
+    methods to initialise and run simulations.
+    """
 
-    def __init__(self, users=[], appliances=[], **kwargs):
+    users: list = field(default_factory=list)  # List of users/inhabitants present in the house
+    appliances: list = field(default_factory=list)  # List of appliances/water end-use devices in the house
+    consumption: xr.DataArray = field(default_factory=xr.DataArray)  # property to store the consumption of a house
 
-        super(House, self).__init__(**kwargs)
-        self.users = users
-        self.appliances = appliances
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'{self.__class__.__name__}:\n\tid\t=\t{self.id}\n\ttype\t=' \
                f'\t{self.house_type}\n\tuser\t=\t{len(self.users)}\n' \
                f'\tappliances\t=\t{list(map(lambda x: x.__class__.__name__, self.appliances))}'
@@ -126,7 +97,7 @@ class House(Property):
     def __str__(self):
         return self.__repr__()
 
-    def populate_house(self):
+    def populate_house(self) -> None:
 
         # job statistic
         job_stats = normalize(pd.Series(self.statistics.household[self.house_type]['job']))
@@ -329,3 +300,34 @@ class House(Property):
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
     
         
+# this class is introduced for storage purposes. 
+# It is meant for those cases where only demand data per house is needed 
+# and not the individual data of the users and or appliances
+# the conumption datarray therefore only contains totals
+# user and appliance data is removed for now
+@dataclass
+class HousePattern:
+
+    house: House | str
+    users: list = field(default_factory=list, init=False)
+    appliances: list = field(default_factory=list, init=False)
+    consumption: list = field(default_factory=list, init=False)
+
+    def __post__init__(self, house):
+
+        if type(self.house) == House:
+            self.users = self.house.users
+            self.appliances = self.house.appliances 
+            self.consumption = self.house.consumption.sum('user').sum('enduse')
+        
+        elif type(self.house) == str:
+            with open(house, 'rb') as f:
+                new_house_pattern = pickle.load(f)
+                self.users = new_house_pattern.users
+                self.appliances = new_house_pattern.appliances
+                self.consumption = new_house_pattern.consumption
+   
+    def save_house_pattern(self, outputname):
+        with open(outputname + '.housepattern', 'wb') as f:
+            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
+    
