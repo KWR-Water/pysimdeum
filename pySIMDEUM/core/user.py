@@ -1,3 +1,4 @@
+from enum import Enum
 from traits.api import HasStrictTraits, Bool, Str, Either, Instance
 import copy
 import numpy as np
@@ -6,8 +7,9 @@ import pandas as pd
 import uuid
 from pySIMDEUM.core.utils import Base
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 from pySIMDEUM.core.statistics import Statistics
+from enum import Enum, auto
 
 
 @dataclass
@@ -23,10 +25,10 @@ class Presence:
     home: pd.Timedelta = field(init=False)
     sleep: pd.Timedelta = field(init=False)
 
-    _prob_getting_up: Any = field(init=False)
-    _prob_leaving_house: Any = field(init=False)
-    _prob_being_away: Any = field(init=False)
-    _prob_sleep: Any = field(init=False)
+    _prob_getting_up: Any = field(init=False, repr=False)
+    _prob_leaving_house: Any = field(init=False, repr=False)
+    _prob_being_away: Any = field(init=False, repr=False)
+    _prob_sleep: Any = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
 
@@ -157,30 +159,25 @@ class Presence:
         return pdf
 
 # removed reference to house. house user belongs to house and not also vice versa
+
+
+@dataclass
 class User(Base):
 
-    id = Str
-    gender = Either(None, 'male', 'female')
-    age = Either('child', 'teen', 'home_ad', 'work_ad', 'senior')
-    presence = Any
+    gender: Literal['male', 'female'] = None
+    age: Literal['child', 'teen', 'adult', 'home_ad', 'work_ad', 'senior'] = None  #TODO: Detangle home and work adult from adult
+    job: bool = True
 
-    def __init__(self, id=None, age=None, gender=None, job=True):
+    presence: Presence = field(init=False, repr=False)
 
-        super(User, self).__init__(id=id)
+    def __post_init__(self):
 
-        self.gender = gender
-
-        if id is None:
-            id = str(uuid.uuid4())
-        self.id = id
-
-        if age == 'adult':
-            if job:
+        if self.age == 'adult':
+            if self.job:
                 self.age = 'work_ad'
             else:
                 self.age = 'home_ad'
-        else:
-            self.age = age
+
 
     def compute_presence(self, weekday=True, statistics=None, peak=0.65, normal=0.335, away=0.0, night=0.15):
 
