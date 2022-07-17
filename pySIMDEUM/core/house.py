@@ -4,7 +4,6 @@ import xarray as xr
 import pickle
 from datetime import datetime
 from typing import Any
-from traits.api import Either, Str, Instance, Float, List
 from pySIMDEUM.core.utils import Base, chooser, normalize
 from pySIMDEUM.core.statistics import Statistics
 from pySIMDEUM.core.user import User
