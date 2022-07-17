@@ -1,15 +1,11 @@
-from enum import Enum
-from traits.api import HasStrictTraits, Bool, Str, Either, Instance
 import copy
 import numpy as np
 import scipy.stats as sstats
 import pandas as pd
-import uuid
 from pySIMDEUM.core.utils import Base
 from dataclasses import dataclass, field
 from typing import Any, Callable, Literal
 from pySIMDEUM.core.statistics import Statistics
-from enum import Enum, auto
 
 
 @dataclass
