@@ -1,35 +1,20 @@
-from traits.api import Either, Str, Instance, Float, List, Any, Int
-from pySIMDEUM.core.house import HousePattern, Property, House
-import matplotlib.pyplot as plt
 import pandas as pd
-import glob
+from datetime import datetime
 
-def plot_demand(houses):
-    # houses can either be a house or a list of housefiles
-    # if it is a single house it will plot per user, per enduse an a total of pattern 1 and a total of all patterns/num patterns
-    #consumption, users, enduses = get_consumption_data(houses)
-    if type(houses) == House:
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2, sharey=True)
-        for user in houses.consumption.user.values:
-            ax1.plot(houses.consumption['time'].values, houses.consumption.sel(user=user, patterns=0).sum('enduse').values, label=user)
-        ax3.plot(houses.consumption['time'].values, houses.consumption.sel(patterns=0).sum('user').sum('enduse').values, label='total')
-        for enduse in houses.consumption.enduse.values:
-            ax2.plot(houses.consumption['time'].values, houses.consumption.sel(enduse=enduse, patterns=0).sum('user').values, label=enduse)
-        ax4.plot(houses.consumption['time'].values, houses.consumption.sum('user').sum('enduse').sum('patterns').values/len(houses.consumption.patterns), label='average')
-        ax1.legend()
-        ax1.set_xlabel('time')
-        ax1.set_ylabel('demand (l/s)')
-        ax2.set_xlabel('time')
-        ax3.legend()
-        ax3.set_xlabel('time')
-        ax3.set_ylabel('demand (l/s)')
-        ax4.set_xlabel('time')
-        ax2.legend()
-        ax4.legend()
-        plt.show()
-    else:
-        #list of housefiles not implemented yet
-        test=2
+from pySIMDEUM.core.helper import create_usage_data
+from pySIMDEUM.core.house import HousePattern, Property, House
+
+def export_water_use_distribution(inputproperty, name='ApplianceWaterUse.xlsx'):
+    appliance_data, total_water_usage, total_users, total_number_of_days = create_usage_data(inputproperty)
+    writer = pd.ExcelWriter(name, engine = 'xlsxwriter')
+    metadata = pd.DataFrame(index=['info'])
+    metadata['Total number of Users'] = total_users
+    metadata['Total water consumption'] = total_water_usage
+    metadata['Total number of days'] = total_number_of_days
+    metadata['Calculation date'] = datetime.now().date()
+    appliance_data.to_excel(writer, sheet_name = 'data')
+    metadata.to_excel(writer, sheet_name = 'metadata')
+    writer.close()
 
 def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_option, output_file):
     # after writeSimdeumPatternToXls (Matlab)
@@ -45,13 +30,13 @@ def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_optio
         if '.housepattern' in houses[0]: #it are housepattern files
             for housepattern in houses:
                 loadedhousepattern = HousePattern(housepattern)
-                get_housepattern_output(count, output, loadedhousepattern)
+                __get_housepattern_output(count, output, loadedhousepattern)
                 count +=1
         else: #assumed to be house files
             for house in houses:
                 prop = Property()
                 loadedhouse = prop.built_house(housefile=house)
-                get_house_output(count, output, loadedhouse)
+                __get_house_output(count, output, loadedhouse)
                 count +=1
         summedoutput = pd.DataFrame()
         summedoutput['date'] = output['date'].values[0::timestep]
@@ -62,7 +47,7 @@ def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_optio
 
     else: #.houses
         for house in houses:
-            get_house_output(count, output, loadedhouse)
+            __get_house_output(count, output, loadedhouse)
         summedoutput = pd.DataFrame()
         summedoutput['date'] = output['date'].values[0::timestep]
         for column in output.columns:
@@ -70,8 +55,7 @@ def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_optio
                 summedoutput[column] = output[column].groupby(output.index // timestep).sum().values
         summedoutput.to_excel(output_file)
 
-
-def get_house_output(count, output, loadedhouse):
+def __get_house_output(count, output, loadedhouse):
     if count == 0:
         datelist = []
         valueslist = []
@@ -85,7 +69,7 @@ def get_house_output(count, output, loadedhouse):
             valueslist.extend(loadedhouse.consumption.sel(patterns=i).sum('user').sum('enduse').values)
     output['pysimdeum ' + str(count)] = valueslist
 
-def get_housepattern_output(count, output, loadedhousepattern):
+def __get_housepattern_output(count, output, loadedhousepattern):
     if count == 0:
         datelist = []
         valueslist = []
@@ -98,20 +82,3 @@ def get_housepattern_output(count, output, loadedhousepattern):
         for i in range(0, len(loadedhousepattern.consumption.patterns)):
             valueslist.extend(loadedhousepattern.consumption.sel(patterns=i).values)
     output['pysimdeum ' + str(count)] = valueslist
-      
-
-def createQcfdplot(houses, timeinterval=1):
-    
-    if type(houses) == House:
-        n_bins = 100
-        fig, ax = plt.subplots()
-        x = houses.consumption.sel(patterns=0).sum('user').sum('enduse').values
-        n, bins, patches = ax.hist(x, n_bins, density=True, histtype='step',
-                            cumulative=True, label='Empirical')
-        plt.show()
-    else:
-        # list of housefiles not implemented yet
-        test = 2
-
-
-
