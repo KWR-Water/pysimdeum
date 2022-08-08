@@ -20,9 +20,10 @@ print(house)
 # Simulate one day of water use in the house, the result is an xarray dataarray with dimensions time, user and end-user
 # resample it to 15 minutes and plot it for each user and end-use device:
 cons = house.simulate()
-
+house.save_house('house')
+house2 = prop.built_house(housefile='house.house')
 data = cons.resample(time='1Min').mean(dim='time')  # ... resample time from 1 second to 1 minute
-used_devices = data.enduse[data.sum(dim='user').sum('time') != 0]  # ... find only used end-use devices
+used_devices = data.enduse[data.sum(dim='user').sum(dim='patterns').sum('time') != 0]  # ... find only used end-use devices
 data = data.sel(enduse=used_devices)
 users = list(data.user.values)  # ... extract list with all users
 for user in users:  # ... iterate over users
@@ -46,8 +47,9 @@ end = start + pd.to_timedelta('1 W')  # ... endtime is 1 week in the future
 dates = pd.date_range(start, end, freq='1d', closed='left')  # ... generate dates to simulate
 
 result = xr.concat(list(map(house.simulate, dates)), 'time')  # ... simulate with map function (point for parallel computing with m,ultiprocessing!)
-cons = result.sum('user').sum('enduse').to_dataframe('total consumption')  # ... sum over users and enduses and cast to pandas DataFrame
+cons = result.sel(patterns=result.patterns[0]).sum('user').sum('enduse').to_dataframe('total consumption')  # ... select first pattern and sum over users and enduses and cast to pandas DataFrame
 cons = cons.resample('15 Min').mean()  # ... resample from 1 second to 15 minutes
+cons.drop(['patterns'], axis=1, inplace=True)
 cons.plot()  # ... plot the data
 plt.ylim((0, None))  # ... y axis should start at 0
 plt.ylabel(r'$Q \quad (\frac{L}{s})$', fontsize=14)  # ... y-axis label with latex code
