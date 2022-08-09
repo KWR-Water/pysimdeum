@@ -2,9 +2,10 @@ import pandas as pd
 import uuid
 import numpy as np
 from dataclasses import dataclass
+from typing import Union
 
 
-def chooser(data: pd.Series | pd.DataFrame, myproperty: str=''):
+def chooser(data: Union[pd.Series, pd.DataFrame], myproperty: str=''):
     """Function to choose elements from a pd.Series randomly, which consists of keys representing the elements and probabilities as values [-> Statistics object].
 
     Args:
@@ -56,7 +57,7 @@ def duration_decorator(func):
     return wrapper
 
 
-def normalize(pdf: np.ndarray | pd.Series) -> np.ndarray | pd.Series:
+def normalize(pdf: Union[np.ndarray, pd.Series]) -> Union[np.ndarray, pd.Series]:
     """Normalize probability density function (pdf).
 
     Args:
@@ -69,7 +70,7 @@ def normalize(pdf: np.ndarray | pd.Series) -> np.ndarray | pd.Series:
     return pdf
 
 
-def to_timedelta(time: str | float | pd.Timedelta) -> pd.Timedelta:
+def to_timedelta(time: Union[str, float, pd.Timedelta]) -> pd.Timedelta:
     """Transform a time in format string or float to a pandas.Timedelta object. 
 
     The function raises an exception if the format is not a string, float or pandas.Timedelta object
