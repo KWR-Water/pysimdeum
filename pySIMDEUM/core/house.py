@@ -3,7 +3,7 @@ import pandas as pd
 import xarray as xr
 import pickle
 from datetime import datetime
-from typing import Any
+from typing import Any, Union
 from pySIMDEUM.core.utils import Base, chooser, normalize
 from pySIMDEUM.core.statistics import Statistics
 from pySIMDEUM.core.user import User
@@ -307,7 +307,7 @@ class House(Property):
 @dataclass
 class HousePattern:
 
-    house: House | str
+    house: Union[House, str]
     users: list = field(default_factory=list, init=False)
     appliances: list = field(default_factory=list, init=False)
     consumption: list = field(default_factory=list, init=False)
