@@ -2,10 +2,10 @@ import os
 import toml
 from dataclasses import dataclass, field
 # from ..data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, dishwasher_enduse_pattern
-from pysimdeum.data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
+from data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
     dishwasher_enduse_pattern
-from pysimdeum.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
-from pysimdeum.data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
+from data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
+from data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
     washingmachine_enduse_pattern
 
 @dataclass
@@ -16,9 +16,9 @@ class Statistics:
     household: dict = field(default_factory=dict)
     diurnal_pattern: dict = field(default_factory=dict)
     end_uses: dict = field(default_factory=dict)
-    statisticsdir: str = 'pysimdeum/data/NL/'
+    statisticsdir: str = 'data/NL/'
 
-    def __post_init__(self, country='NL', statisticsdir='pysimdeum/data/NL/'):
+    def __post_init__(self, country='NL', statisticsdir='data/NL/'):
         self.country = country
 
         # Load household statistics
