@@ -1,30 +1,21 @@
-from traits.api import HasStrictTraits, Either, Instance, Str, Any
 import copy
 import pandas as pd
 import numpy as np
+from dataclasses import dataclass, field
 from pySIMDEUM.core.utils import chooser, duration_decorator, normalize, to_timedelta
+from pySIMDEUM.core.statistics import Statistics	
 
 
-class EndUse(HasStrictTraits):
-    """Base class for end-uses.
+#TODO: Specific EndUse __post_init__ calls can be replaced by directly using the class name instead of setting the name attributes
 
-    """
+@dataclass
+class EndUse:
+    """Base class for end-uses."""
+    
+    statistics: Statistics = field(repr=False)  # ... statistic object associated with end-use
+    name: str = "EndUse"  # ... name of the end-use
 
-    name = Str  # ... name of the end-use
-    statistics = Any  # ... statistic object associated with end-use
-
-    def __init__(self, name: str = 'EndUse', statistics=None):
-        """Initialisation funciton of end-use class.
-
-        Args:
-            name: name of the specific end-use as string
-            statistics: statistics object associated with end-use
-        """
-        super(EndUse, self).__init__()
-        self.name = name
-        self.statistics = statistics
-
-    def init_consumption(self, users=None, time_resolution='1s'):
+    def init_consumption(self, users: list=None, time_resolution: str='1s') -> pd.DataFrame:
         """Initialization of a pandas dataframe to store the  consumptions.
 
         Args:
@@ -54,7 +45,7 @@ class EndUse(HasStrictTraits):
         return consumption
 
     @staticmethod
-    def usage_probability(time_resolution='1s'):
+    def usage_probability(time_resolution: str='1s') -> pd.Series:
         """Produces uninformed prior.
 
         For more specific usage probabilities (washing machine, kitchen tap, dishwasher) overload this function by
@@ -91,20 +82,19 @@ class EndUse(HasStrictTraits):
 
         return duration, intensity
 
-
+@dataclass
 class Bathtub(EndUse):
     """Class for Bathtub end-use."""
 
 
-    def __init__(self, name='Bathtub', **kwargs):
+    def __post_init__(self):
         """Initialisation function of Bathtub end-use class.
 
         Args:
             name: End-use name as string.
             **kwargs: keyword arguments for super classes.
         """
-        super(Bathtub, self).__init__(**kwargs)
-        self.name = name
+        self.name = "Bathtub"
 
     def fct_frequency(self, age=None):
         """Random function computing the frequency of use for the Bathtub end-use class.
@@ -166,11 +156,11 @@ class Bathtub(EndUse):
         return consumption
 
 
+@dataclass
 class BathroomTap(EndUse):
     
-    def __init__(self, name='BathroomTap', **kwargs):
-        super(BathroomTap, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "BathroomTap"
 
     def fct_frequency(self):
 
@@ -219,12 +209,11 @@ class BathroomTap(EndUse):
 
         return consumption
 
-
+@dataclass
 class Dishwasher(EndUse):
 
-    def __init__(self, name='Dishwasher', **kwargs):
-        super(Dishwasher, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "Dishwasher"
 
     def fct_frequency(self, numusers=None):
 
@@ -271,12 +260,11 @@ class Dishwasher(EndUse):
 
         return consumption
 
-
+@dataclass
 class KitchenTap(EndUse):
 
-    def __init__(self, name='KitchenTap', **kwargs):
-        super(KitchenTap, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "KitchenTap"
 
     def fct_frequency(self, numusers=None):
 
@@ -348,12 +336,11 @@ class KitchenTap(EndUse):
 
         return consumption
 
-
+@dataclass
 class OutsideTap(EndUse):
 
-    def __init__(self, name='OutsideTap', **kwargs):
-        super(OutsideTap, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "OutsideTap"
 
     def fct_frequency(self):
 
@@ -411,12 +398,11 @@ class OutsideTap(EndUse):
 
         return consumption
 
-
+@dataclass
 class Shower(EndUse):
 
-    def __init__(self, name='Shower',**kwargs):
-        super(Shower, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "Shower"
 
     def fct_frequency(self, age=None):
 
@@ -463,23 +449,19 @@ class Shower(EndUse):
 
 class NormalShower(Shower):
 
-    def __init__(self, name='NormalShower', **kwargs):
-        super(NormalShower, self).__init__(**kwargs)
-        self.name = name
-
+    def __post_init__(self):
+        self.name = "NormalShower"
 
 class FancyShower(Shower):
 
-    def __init__(self, name='FancyShower', **kwargs):
-        super(FancyShower, self).__init__(**kwargs)
-        self.name = name
-
+    def __post_init__(self):
+        self.name = "FancyShower"
+    
 
 class WashingMachine(EndUse):
 
-    def __init__(self, name='WashingMachine', **kwargs):
-        super(WashingMachine, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "WashingMachine"
 
     def fct_frequency(self, numusers=None):
 
@@ -529,12 +511,12 @@ class WashingMachine(EndUse):
 
         return consumption
 
-
+@dataclass
 class Wc(EndUse):
 
-    def __init__(self, name='Wc', **kwargs):
-        super(Wc, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "Wc"
+    
 
     def fct_frequency(self, age=None, gender=None):
         f_stats = self.statistics['frequency']
@@ -586,29 +568,26 @@ class Wc(EndUse):
 
         return consumption
 
+@dataclass
 class WcNormal(Wc):
 
-    def __init__(self, name='WcNormal', **kwargs):
-        super(WcNormal, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = 'WcNormal'
 
-
+@dataclass
 class WcNormalSave(Wc):
 
-    def __init__(self, name='WcNormalSave', **kwargs):
-        super(WcNormalSave, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "WcNormalSave"
 
-
+@dataclass
 class WcNew(Wc):
 
-    def __init__(self, name='WcNew', **kwargs):
-        super(WcNew, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "WcNew"
 
-
+@dataclass
 class WcNewSave(Wc):
 
-    def __init__(self, name='WcNewSave', **kwargs):
-        super(WcNewSave, self).__init__(**kwargs)
-        self.name = name
+    def __post_init__(self):
+        self.name = "WcNewSave"

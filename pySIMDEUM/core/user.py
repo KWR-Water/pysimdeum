@@ -1,37 +1,37 @@
-from traits.api import HasStrictTraits, Bool, Any, Str, Either, Instance
 import copy
 import numpy as np
 import scipy.stats as sstats
 import pandas as pd
-import uuid
 from pySIMDEUM.core.utils import Base
+from dataclasses import dataclass, field
+from typing import Any, Callable, Literal
+from pySIMDEUM.core.statistics import Statistics
 
 
-class Presence(HasStrictTraits):
+@dataclass
+class Presence:
+    """Class representing the presence and the water use activity of users in a house."""
 
-    weekday = Bool
-    user = Any
+    weekday: bool
+    user: Any
+    stats: Statistics
 
-    up = Instance(pd.Timedelta)
-    go = Instance(pd.Timedelta)
-    home = Instance(pd.Timedelta)
-    sleep = Instance(pd.Timedelta)
+    up: pd.Timedelta = field(init=False)
+    go: pd.Timedelta = field(init=False)
+    home: pd.Timedelta = field(init=False)
+    sleep: pd.Timedelta = field(init=False)
 
-    _prob_getting_up = Any
-    _prob_leaving_house = Any
-    _prob_being_away = Any
-    _prob_sleep = Any
+    _prob_getting_up: Any = field(init=False, repr=False)
+    _prob_leaving_house: Any = field(init=False, repr=False)
+    _prob_being_away: Any = field(init=False, repr=False)
+    _prob_sleep: Any = field(init=False, repr=False)
 
-    def __init__(self, user=None, weekday=True, stats=None):
+    def __post_init__(self) -> None:
 
-        super(Presence, self).__init__()
-
-        self.user = user
-
-        if weekday:
-            diurnal = copy.deepcopy(stats.diurnal_pattern[user.age])
+        if self.weekday:
+            diurnal = copy.deepcopy(self.stats.diurnal_pattern[self.user.age])
         else:
-            diurnal = copy.deepcopy(stats.diurnal_pattern['weekend'])
+            diurnal = copy.deepcopy(self.stats.diurnal_pattern['weekend'])
 
         for key, val in diurnal.items():
             dist = val['dist']
@@ -65,13 +65,16 @@ class Presence(HasStrictTraits):
         if self.sleep < self.home:
             self.home = self.sleep - pd.Timedelta(minutes=30)
 
-    def print(self):
+    def print(self) -> None:
+        """Method to print the main properties of the user's presence"""
+
         print('up:', self.up)
         print('go:', self.go)
         print('home:', self.home)
         print('sleep:', self.sleep)
 
-    def sample_single_property(self, prop):
+    def sample_single_property(self, prop: str) -> pd.Timedelta:
+        """Function to draw random time values from the single time properties (e.g., getting up, leave house, ...) of the users"""
 
         prob_fct = getattr(self, prop)
         x = prob_fct.rvs()
@@ -80,11 +83,14 @@ class Presence(HasStrictTraits):
         return x
 
     @staticmethod
-    def timestamp2str(x):
+    def timestamp2str(x: pd.Timedelta) -> str:
+        """Transform a Python Pandas Timedelta object to a string in the format HH:MM"""
+        
         return str(x.components.hours).zfill(2) + ':' + str(x.components.minutes).zfill(2) # + ':' + str(
         # x.components.seconds).zfill(2)
 
     def timeindexer(self, l, value, a, b):
+
         if a < b:
             l[a:b] = value
         else:
@@ -94,7 +100,7 @@ class Presence(HasStrictTraits):
 
     def pdf(self, peak=0.65, normal=0.335, away=0.0, night=0.015):
         index = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1Min')
-        pdf = pd.Series(index=index)
+        pdf = pd.Series(index=index, dtype='float64')
 
         up = int((self.up.total_seconds()) / 60) % 1440
         up_p30 = int((up + 30)) % 1440
@@ -149,30 +155,25 @@ class Presence(HasStrictTraits):
         return pdf
 
 # removed reference to house. house user belongs to house and not also vice versa
+
+
+@dataclass
 class User(Base):
 
-    id = Str
-    gender = Either(None, 'male', 'female')
-    age = Either('child', 'teen', 'home_ad', 'work_ad', 'senior')
-    presence = Any
+    gender: Literal['male', 'female'] = None
+    age: Literal['child', 'teen', 'adult', 'home_ad', 'work_ad', 'senior'] = None  #TODO: Detangle home and work adult from adult
+    job: bool = True
 
-    def __init__(self, id=None, age=None, gender=None, job=True):
+    presence: Presence = field(init=False, repr=False)
 
-        super(User, self).__init__(id=id)
+    def __post_init__(self):
 
-        self.gender = gender
-
-        if id is None:
-            id = str(uuid.uuid4())
-        self.id = id
-
-        if age == 'adult':
-            if job:
+        if self.age == 'adult':
+            if self.job:
                 self.age = 'work_ad'
             else:
                 self.age = 'home_ad'
-        else:
-            self.age = age
+
 
     def compute_presence(self, weekday=True, statistics=None, peak=0.65, normal=0.335, away=0.0, night=0.15):
 

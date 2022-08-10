@@ -1,21 +1,24 @@
 import os
 import toml
-from traits.api import HasStrictTraits, Either, Dict
+from dataclasses import dataclass, field
+# from ..data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, dishwasher_enduse_pattern
 from pySIMDEUM.data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
     dishwasher_enduse_pattern
 from pySIMDEUM.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
 from pySIMDEUM.data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
     washingmachine_enduse_pattern
 
+@dataclass
+class Statistics:
+    """Statistics dataclass that contains all the relevant statistical information for pySIMDEUM."""
 
-class Statistics(HasStrictTraits):
+    country: str = 'NL'   
+    household: dict = field(default_factory=dict)
+    diurnal_pattern: dict = field(default_factory=dict)
+    end_uses: dict = field(default_factory=dict)
+    statisticsdir: str = 'pySIMDEUM/data/NL/'
 
-    country = Either('NL')
-    household = Dict
-    diurnal_pattern = Dict
-    end_uses = Dict
-
-    def __init__(self, country='NL', statisticsdir='pySIMDEUM/data/NL/'):
+    def __post_init__(self, country='NL', statisticsdir='pySIMDEUM/data/NL/'):
         self.country = country
 
         # Load household statistics
@@ -56,13 +59,11 @@ class Statistics(HasStrictTraits):
         self.end_uses['KitchenTap']['daily_pattern'] = ktap_daily_pattern()
 
 
-    def __str__(self):
-        returnstring = f'{self.__class__.__name__}\nCountry: {self.country}\n'
-        returnstring = f'diurnal patterns: \n'
-        for key in self.diurnal_pattern.keys():
-            returnstring = returnstring + f'\nusertype: {key} \n\t' 
-            for key2 in self.diurnal_pattern[key].keys():
-                returnstring = returnstring + f'{key2}: \t'
-                for key3 in self.diurnal_pattern[key][key2].keys():
-                    returnstring = returnstring + f'{key3}: {self.diurnal_pattern[key][key2][key3]} \t'
-        return returnstring
+def main():
+
+    stats = Statistics()
+
+
+if __name__ == '__main__':
+
+    main()

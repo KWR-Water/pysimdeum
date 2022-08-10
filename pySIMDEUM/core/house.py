@@ -1,80 +1,48 @@
-from hashlib import new
 import numpy as np
 import pandas as pd
 import xarray as xr
 import pickle
 from datetime import datetime
-from traits.api import Either, Str, Instance, Float, List, Any
+from typing import Any, Union
 from pySIMDEUM.core.utils import Base, chooser, normalize
 from pySIMDEUM.core.statistics import Statistics
 from pySIMDEUM.core.user import User
 import pySIMDEUM.core.end_use as EndUses
+from dataclasses import dataclass, field
 
-# ToDo: Implement multiple appliances which will be later on divided over the users, so they are not blocked
-# ToDo: Link data to OOPNET
-# ToDo: Increase speed of program
-# ToDo: Documentation
+# TODO: Implement multiple appliances which will be later on divided over the users, so they are not blocked
+# TODO: Link data to OOPNET
+# TODO: Increase speed of program
+# TODO: Documentation
+# TODO: Think about if Property class is necessary or if it can be integrated into the House class
 
 
+@dataclass
 class Property(Base):
     """Property represents a parcel of land on which a house is/can be build.
 
-    Additionally, it contains
+    Additionally, it contains information on statistics, and the location of the house, plus a connection to the oopnet_id
     """
 
-    _house_type = Either(None, Str)
-    _house = Any
-    _statistics = Instance(Statistics)
+    house_type: str = ""
+    _house: Any = None
+    statistics: Statistics = None
+    country: str = "NL"
 
-    # todo: implement this quantities
-    oopnet_id = Str
-    lattitude = Float
-    longitude = Float
-    x_coordinate = Float
-    y_coordinate = Float
-
-    # getters and setters
-    @property
-    def house_type(self):
-        return self._house_type
-
-    @house_type.setter
-    def house_type(self, value):
-        self._house_type = value
-
-    @property
-    def house(self):
-        return self._house
-
-    @house.setter
-    def house(self, value):
-        if value is not None:
-            if isinstance(value, House):
-                # value.property = self
-                self._house = value
-            else:
-                raise Exception('Property house is not of type House')
-
-    @property
-    def statistics(self):
-        return self._statistics
-
-    @statistics.setter
-    def statistics(self, value):
-        self._statistics = value
+    # TODO: implement following quantities
+    oopnet_id: str = ""
+    lattitude: float = np.nan
+    longitude: float = np.nan
+    x_coordinate: float = np.nan
+    y_coordinate: float = np.nan
 
 
-    def __init__(self, id=None, house_type=None, statistics=None, country='NL', oopnet_id=None,
-                 lattitude=None, longitude=None, x_coordinate=None, y_coordinate=None):
+    def __post__init__(self):
+        if Statistics is None:
+            self.statistics = Statistics(country=self.country)
 
-        super(Property, self).__init__(id=id)
-        self.house_type = house_type
-        if statistics is None:
-            self.statistics = Statistics(country=country)
-        else:
-            self.statistics = statistics
 
-    def _choose_type(self, statistics=None):
+    def _choose_type(self, statistics: Statistics=None) -> str:
 
         if not statistics:
             raise Exception('Statistics object has to be defined')
@@ -83,14 +51,16 @@ class Property(Base):
 
         return self.house_type
 
-    def built_house(self, house_type=None, housefile=None):
+    def built_house(self, house_type: str="", housefile: str=""):
 
-        if housefile is not None:
+        # TODO: House chooser seems not to work if API:built_house does not specify a house_type
+
+        if housefile:
             with open(housefile, 'rb') as f:
                 new_house = pickle.load(f)
             self.house = new_house
         else:
-            if house_type is not None:
+            if house_type:
                 self.house_type = house_type
             else:
                 self._choose_type(self.statistics)
@@ -105,56 +75,28 @@ class Property(Base):
 
         return self.house
 
-# this class is introduced for storage purposes. 
-# It is meant for those cases where only demand data per house is needed 
-# and not the individual data of the users and or appliances
-# the conumption datarray therefore only contains totals
-# user and appliance data is removed for now
-class HousePattern():
-    users = List
-    appliances = List
-    consumption = Instance(xr.DataArray)
 
-    def __init__(self, house):
-        if type(house) == House: 
-            self.users = house.users
-            self.appliances = house.appliances 
-            self.consumption = house.consumption.sum('user').sum('enduse')
-        elif type(house) == str:
-            with open(house, 'rb') as f:
-                new_house_pattern = pickle.load(f)
-                self.users = new_house_pattern.users
-                self.appliances = new_house_pattern.appliances
-                self.consumption = new_house_pattern.consumption
-   
-    def save_house_pattern(self, outputname):
-        with open(outputname + '.housepattern', 'wb') as f:
-            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
-    
-
-
-
+@dataclass
 class House(Property):
+    """pySIMDEUM House containting information on users, appliances and consumption.
 
-    users = List
-    appliances = List
-    consumption = Instance(xr.DataArray)
+    This class is a child of the `Property` class. It containts methods for populating and furnishing a house, and 
+    methods to initialise and run simulations.
+    """
 
-    def __init__(self, users=[], appliances=[], **kwargs):
+    users: list = field(default_factory=list)  # List of users/inhabitants present in the house
+    appliances: list = field(default_factory=list)  # List of appliances/water end-use devices in the house
+    consumption: xr.DataArray = field(default_factory=xr.DataArray)  # property to store the consumption of a house
 
-        super(House, self).__init__(**kwargs)
-        self.users = users
-        self.appliances = appliances
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}:\n\tid\t=\t{self._id}\n\ttype\t=' \
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}:\n\tid\t=\t{self.id}\n\ttype\t=' \
                f'\t{self.house_type}\n\tuser\t=\t{len(self.users)}\n' \
                f'\tappliances\t=\t{list(map(lambda x: x.__class__.__name__, self.appliances))}'
     
     def __str__(self):
         return self.__repr__()
 
-    def populate_house(self):
+    def populate_house(self) -> None:
 
         # job statistic
         job_stats = normalize(pd.Series(self.statistics.household[self.house_type]['job']))
@@ -334,7 +276,8 @@ class House(Property):
             print('Warning: duration unrecognized defaulted to 1 day')
             timedelta = pd.to_timedelta('1 day')
         # time = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1s', closed='left')
-        time = pd.date_range(start=date, end=date + timedelta, freq='1s', closed='left')
+        # time = pd.date_range(start=date, end=date + timedelta, freq='1s', closed='left')
+        time = pd.date_range(start=date, end=date + timedelta, freq='1s')
         users = [x.id for x in self.users] + ['household']
         enduse = [x.statistics['classname'] for x in self.appliances]
         patterns = [x for x in range(0, num_patterns)]
@@ -356,3 +299,34 @@ class House(Property):
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
     
         
+# this class is introduced for storage purposes. 
+# It is meant for those cases where only demand data per house is needed 
+# and not the individual data of the users and or appliances
+# the conumption datarray therefore only contains totals
+# user and appliance data is removed for now
+@dataclass
+class HousePattern:
+
+    house: Union[House, str]
+    users: list = field(default_factory=list, init=False)
+    appliances: list = field(default_factory=list, init=False)
+    consumption: list = field(default_factory=list, init=False)
+
+    def __post__init__(self, house):
+
+        if type(self.house) == House:
+            self.users = self.house.users
+            self.appliances = self.house.appliances 
+            self.consumption = self.house.consumption.sum('user').sum('enduse')
+        
+        elif type(self.house) == str:
+            with open(house, 'rb') as f:
+                new_house_pattern = pickle.load(f)
+                self.users = new_house_pattern.users
+                self.appliances = new_house_pattern.appliances
+                self.consumption = new_house_pattern.consumption
+   
+    def save_house_pattern(self, outputname):
+        with open(outputname + '.housepattern', 'wb') as f:
+            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
+    
