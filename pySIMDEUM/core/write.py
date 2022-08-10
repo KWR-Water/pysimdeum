@@ -1,8 +1,8 @@
 import pandas as pd
 from datetime import datetime
 
-from pySIMDEUM.core.helper import create_usage_data
-from pySIMDEUM.core.house import HousePattern, Property, House
+from pysimdeum.core.helper import create_usage_data
+from pysimdeum.core.house import HousePattern, Property, House
 
 def export_water_use_distribution(inputproperty, name='ApplianceWaterUse.xlsx'):
     appliance_data, total_water_usage, total_users, total_number_of_days = create_usage_data(inputproperty)
@@ -16,6 +16,17 @@ def export_water_use_distribution(inputproperty, name='ApplianceWaterUse.xlsx'):
     metadata.to_excel(writer, sheet_name = 'metadata')
     writer.close()
 
+def write_simdeum_patterns_to_ddg(houses, timestep, Q_option, patternfile_option, output_file):
+    # house can be either be a list of filenames or a list of houses
+    # timestep the output timestep of the pattern. minimum is 1 minute
+    # Q_option for now only 'm3/h' TODO is this true? are the units not L/s?????
+    # for now only 1 all patterns in 1 file
+    # output_file file to write to
+
+    output = get_output_dataframe(houses, timestep) 
+    test = 2
+    
+
 def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_option, output_file):
     # after writeSimdeumPatternToXls (Matlab)
     # house can eithwer be a list of filenames or a list of houses
@@ -24,6 +35,10 @@ def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_optio
     # for now only 1 all patterns in 1 file
     # output_file file to write to
     
+    output = get_output_dataframe(houses, timestep)
+    output.to_excel(output_file)
+
+def get_output_dataframe(houses, timestep):
     if type(houses[0]) == str:
         count = 0
         output = pd.DataFrame()
@@ -43,17 +58,20 @@ def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_optio
         for column in output.columns:
             if column != 'date':
                 summedoutput[column] = output[column].groupby(output.index // timestep).sum().values
-        summedoutput.to_excel(output_file)
+        return summedoutput
 
     else: #.houses
+        count = 0
+        output = pd.DataFrame()
         for house in houses:
-            __get_house_output(count, output, loadedhouse)
+            __get_house_output(count, output, house)
+            count += 1
         summedoutput = pd.DataFrame()
         summedoutput['date'] = output['date'].values[0::timestep]
         for column in output.columns:
             if column != 'date':
                 summedoutput[column] = output[column].groupby(output.index // timestep).sum().values
-        summedoutput.to_excel(output_file)
+        return summedoutput
 
 def __get_house_output(count, output, loadedhouse):
     if count == 0:

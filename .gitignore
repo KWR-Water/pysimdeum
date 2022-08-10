@@ -103,8 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 .vscode/settings.json
-pySIMDEUM/ApplianceWaterUse.xlsx
-pySIMDEUM/water_use_tests.py
+pysimdeum/ApplianceWaterUse.xlsx
+pysimdeum/water_use_tests.py
 test.pkl
 test.house
 workdir/

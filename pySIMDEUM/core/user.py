@@ -2,10 +2,10 @@ import copy
 import numpy as np
 import scipy.stats as sstats
 import pandas as pd
-from pySIMDEUM.core.utils import Base
+from pysimdeum.core.utils import Base
 from dataclasses import dataclass, field
 from typing import Any, Callable, Literal
-from pySIMDEUM.core.statistics import Statistics
+from pysimdeum.core.statistics import Statistics
 
 
 @dataclass

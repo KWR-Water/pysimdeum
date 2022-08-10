@@ -2,8 +2,8 @@ import copy
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass, field
-from pySIMDEUM.core.utils import chooser, duration_decorator, normalize, to_timedelta
-from pySIMDEUM.core.statistics import Statistics	
+from pysimdeum.core.utils import chooser, duration_decorator, normalize, to_timedelta
+from pysimdeum.core.statistics import Statistics	
 
 
 #TODO: Specific EndUse __post_init__ calls can be replaced by directly using the class name instead of setting the name attributes

@@ -1,5 +1,5 @@
-from pySIMDEUM.core.statistics import Statistics
-from pySIMDEUM.core.house import Property, HousePattern, House
+from pysimdeum.core.statistics import Statistics
+from pysimdeum.core.house import Property, HousePattern, House
 
 
 def built_house(house_type: str = "") -> House:

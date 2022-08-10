@@ -1,6 +1,6 @@
 import pandas as pd
 
-from pySIMDEUM.core.house import House, Property
+from pysimdeum.core.house import House, Property
 
 def create_diurnal_pattern(statistics):
     

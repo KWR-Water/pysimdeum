@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pySIMDEUM.core.helper import create_diurnal_pattern, create_usage_data
-from pySIMDEUM.core.house import House
+from pysimdeum.core.helper import create_diurnal_pattern, create_usage_data
+from pysimdeum.core.house import House
 
 def plot_water_use_distribution(inputproperty, plotsubject='percentage'):
     appliance_data, total_water_usage, total_users, total_number_of_days = create_usage_data(inputproperty)

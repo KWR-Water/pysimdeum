@@ -102,7 +102,7 @@ def to_timedelta(time: Union[str, float, pd.Timedelta]) -> pd.Timedelta:
 
 @dataclass
 class Base:
-    """Base class of pySIMDEUM for generating objects. 
+    """Base class of pysimdeum for generating objects. 
     
     The only argument of this parent class is an id which can either be set or will be set to a unique identifier
     """

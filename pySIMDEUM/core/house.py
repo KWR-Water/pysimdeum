@@ -4,10 +4,10 @@ import xarray as xr
 import pickle
 from datetime import datetime
 from typing import Any, Union
-from pySIMDEUM.core.utils import Base, chooser, normalize
-from pySIMDEUM.core.statistics import Statistics
-from pySIMDEUM.core.user import User
-import pySIMDEUM.core.end_use as EndUses
+from pysimdeum.core.utils import Base, chooser, normalize
+from pysimdeum.core.statistics import Statistics
+from pysimdeum.core.user import User
+import pysimdeum.core.end_use as EndUses
 from dataclasses import dataclass, field
 
 # TODO: Implement multiple appliances which will be later on divided over the users, so they are not blocked
@@ -78,7 +78,7 @@ class Property(Base):
 
 @dataclass
 class House(Property):
-    """pySIMDEUM House containting information on users, appliances and consumption.
+    """pysimdeum House containting information on users, appliances and consumption.
 
     This class is a child of the `Property` class. It containts methods for populating and furnishing a house, and 
     methods to initialise and run simulations.
