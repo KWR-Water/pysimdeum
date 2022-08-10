@@ -1,1 +1,1 @@
-from .core.api import built_house
+from .api import built_house
