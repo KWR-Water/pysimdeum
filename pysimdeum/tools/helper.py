@@ -1,8 +1,10 @@
 import pandas as pd
+from typing import Union
 
 from pysimdeum.core.house import House, Property
+from pysimdeum.core.statistics import Statistics
 
-def create_diurnal_pattern(statistics):
+def create_diurnal_pattern(statistics: Statistics) -> pd.Series:
     
     num_sim = 500
     time = pd.timedelta_range(start='00:00:00', end='23:59:59', freq='1S')
@@ -19,7 +21,7 @@ def create_diurnal_pattern(statistics):
             diurnal_pattern = diurnal_pattern + presence
     return diurnal_pattern
 
-def create_usage_data(houses):
+def create_usage_data(houses: Union[list, House]): #TODO I am not able to tell that it should be a list[str], list[House] or House
     if type(houses) == list:
         appliance_data = pd.DataFrame()
         total_water_usage = 0
@@ -27,7 +29,7 @@ def create_usage_data(houses):
         total_number_of_days = 0
         appliance_data['total'] = 0
         for inputp in houses:
-            if type(inputp == str): #input file list
+            if type(inputp) == str: #input file list
                 prop = Property()
                 loadedhouse = prop.built_house(housefile=inputp)
             else:

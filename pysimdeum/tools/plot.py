@@ -1,11 +1,21 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+from typing import Union
+from pysimdeum.core.statistics import Statistics
 
-from pysimdeum.core.helper import create_diurnal_pattern, create_usage_data
+from pysimdeum.tools.helper import create_diurnal_pattern, create_usage_data
 from pysimdeum.core.house import House
 
-def plot_water_use_distribution(inputproperty, plotsubject='percentage'):
+def plot_water_use_distribution(inputproperty: Union[list, House], plotsubject: str='percentage'):
+    """Function to plot water use distribution betwee the different appliances as a pie graph [-> Axessubplot object]
+    
+    Args:
+        inputproperty (list[House] | list[str] | House): the house or houses (either as a list of objects or paths to files) to be plotted
+        plotsubject (str, optional): unit of plot, percentage, per person per day or per person default is percentage
+    Returns:
+        ax1 (matplotlib axessubplot): an matplotlib axes containing the plot (use plt.show() to render)
+    """
     appliance_data, total_water_usage, total_users, total_number_of_days = create_usage_data(inputproperty)
     def func(pct, allvals):
         absolute = pct/100.*np.sum(allvals)
@@ -24,7 +34,14 @@ def plot_water_use_distribution(inputproperty, plotsubject='percentage'):
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
         return ax1
 
-def createQcfdplot(houses, timeinterval=1):
+def createQcfdplot(houses: House):
+    """Function to plot a cumulative flow plot [-> Axessubplot object]
+    
+    Args:
+        houses (House): the house object to be plotted (other options not implemented yet)
+    Returns:
+        ax (matplotlib axessubplot): an matplotlib axes containing the plot (use plt.show() to render)
+    """
     
     if type(houses) == House:
         n_bins = 100
@@ -38,10 +55,15 @@ def createQcfdplot(houses, timeinterval=1):
         # list of housefiles not implemented yet
         return None
 
-def plot_demand(houses):
-    # houses can either be a house or a list of housefiles
-    # if it is a single house it will plot per user, per enduse an a total of pattern 1 and a total of all patterns/num patterns
-    #consumption, users, enduses = get_consumption_data(houses)
+def plot_demand(houses: House):
+    """Function to plot demand. It will give four plots containing demand per user, per enduse, total of pattern 1 and all patterns/num patterns [-> figure object]
+    
+    Args:
+        houses (House): the house object to be plotted (other options not implemented yet)
+    Returns:
+        fig (matplotlib figure): an matplotlib figure containing the plot (use plt.show() to render)
+    """
+
     if type(houses) == House:
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2, sharey=True)
         for user in houses.consumption.user.values:
@@ -66,11 +88,15 @@ def plot_demand(houses):
         test=2
         return None
 
-def view_statistics(statistics):
-    # make several plots to quickly get an overview of the statistics
-    #
-    # Input: statistics object
-    # household stats pie graph
+def view_statistics(statistics: Statistics):
+    """Function to plot an overview of the household statistics percentage one, two and family households for instance [-> Axessubplot object]
+    
+    Args:
+        statistics (Statistics): the statistics object to be plotted
+    Returns:
+        ax (matplotlib axessubplot): an matplotlib axes containing the plot (use plt.show() to render)
+    """
+    
     data = []
     text = []
     for key in statistics.household.keys():
@@ -88,7 +114,7 @@ def view_statistics(statistics):
         temptext.append('\n')
         text.append(''.join(temptext))
 
-    ax = create_pie_fig(data, text, 'household statistics and home presence settings')
+    ax = __create_pie_fig(data, text, 'household statistics and home presence settings')
 
     # home presence table
     rows = []
@@ -111,14 +137,15 @@ def view_statistics(statistics):
     
     return ax
 
-def plot_diurnal_pattern(statistics):
-
-
-    # plot a diurnal pattern based on statistics object
-    # after plot_diurnal_pattern.m
-    # 
-    # Input: statistics object
-
+def plot_diurnal_pattern(statistics: Statistics):
+    """Function to plot a diurnal pattern (household presence) based on statistics [-> Axessubplot object]
+    
+    Args:
+        statistics (Statistics): the Statistics object to be plotted
+    Returns:
+        ax (matplotlib axessubplot): an matplotlib axes containing the plot (use plt.show() to render)
+    """
+    
     diurnal_pattern = create_diurnal_pattern(statistics)
     fig, ax1 = plt.subplots()
 
@@ -126,7 +153,7 @@ def plot_diurnal_pattern(statistics):
     
     return ax1
 
-def create_pie_fig(data, text, title):
+def __create_pie_fig(data, text, title):
     fig, ax = plt.subplots(figsize=(6, 3), subplot_kw=dict(aspect="equal"))
 
 

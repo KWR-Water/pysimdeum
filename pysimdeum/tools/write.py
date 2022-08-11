@@ -1,10 +1,11 @@
 import pandas as pd
 from datetime import datetime
+from typing import Union
 
-from pysimdeum.core.helper import create_usage_data
+from pysimdeum.tools.helper import create_usage_data
 from pysimdeum.core.house import HousePattern, Property, House
 
-def export_water_use_distribution(inputproperty, name='ApplianceWaterUse.xlsx'):
+def export_water_use_distribution(inputproperty: Union[list, House], name: str='ApplianceWaterUse.xlsx'):
     appliance_data, total_water_usage, total_users, total_number_of_days = create_usage_data(inputproperty)
     writer = pd.ExcelWriter(name, engine = 'xlsxwriter')
     metadata = pd.DataFrame(index=['info'])
@@ -16,18 +17,18 @@ def export_water_use_distribution(inputproperty, name='ApplianceWaterUse.xlsx'):
     metadata.to_excel(writer, sheet_name = 'metadata')
     writer.close()
 
-def write_simdeum_patterns_to_ddg(houses, timestep, Q_option, patternfile_option, output_file):
+def write_simdeum_patterns_to_ddg(houses: list, timestep: int, Q_option: str, patternfile_option: int, output_file: str):
     # house can be either be a list of filenames or a list of houses
     # timestep the output timestep of the pattern. minimum is 1 minute
     # Q_option for now only 'm3/h' TODO is this true? are the units not L/s?????
     # for now only 1 all patterns in 1 file
     # output_file file to write to
 
-    output = get_output_dataframe(houses, timestep) 
+    output = __get_output_dataframe(houses, timestep) 
     test = 2
     
 
-def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_option, output_file):
+def write_simdeum_patterns_to_xlsx(houses: list, timestep: int, Q_option: str, patternfile_option: int, output_file: str):
     # after writeSimdeumPatternToXls (Matlab)
     # house can eithwer be a list of filenames or a list of houses
     # timestep the output timestep of the pattern
@@ -35,10 +36,10 @@ def write_simdeum_patterns_to_xlsx(houses, timestep, Q_option, patternfile_optio
     # for now only 1 all patterns in 1 file
     # output_file file to write to
     
-    output = get_output_dataframe(houses, timestep)
+    output = __get_output_dataframe(houses, timestep)
     output.to_excel(output_file)
 
-def get_output_dataframe(houses, timestep):
+def __get_output_dataframe(houses, timestep):
     if type(houses[0]) == str:
         count = 0
         output = pd.DataFrame()
