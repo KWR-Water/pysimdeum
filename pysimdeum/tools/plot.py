@@ -42,7 +42,7 @@ def createQcfdplot(houses: House):
     Returns:
         ax (matplotlib axessubplot): an matplotlib axes containing the plot (use plt.show() to render)
     """
-    
+    codechangepushtest = 2
     if type(houses) == House:
         n_bins = 100
         fig, ax = plt.subplots()
