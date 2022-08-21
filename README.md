@@ -47,8 +47,7 @@ Be warned, that pysimdeum is still changing a lot. Until it's marked as 1.0.0, y
 
 ## Installation
 
-pysimdeum uses features only available in a newer Python version, which is why Python >= 3.8 is needed along with
-several Python package dependencies.
+pysimdeum uses features only available in a newer Python version, which is why Python >= 3.8 is needed along with several Python package dependencies.
 
 pysimdeum is available on PyPI and can be easily installed together with its dependencies using `pip`:
 
@@ -104,7 +103,6 @@ To simulate the water consumption of a house, you can use the House\`s `simulate
 ```python
 consumption = house.simulate(num_patterns=100)
 ```
-
 
 
 If you want to create a basic Network plot, you can use its `plot` method:
