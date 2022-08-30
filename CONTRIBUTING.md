@@ -67,7 +67,7 @@ Versions look like this: MAJOR.MINOR.PATCH
 For now, MAJOR is set to 0 until `pysimdeum` is deemed stable.
 
 ## Code of Conduct
-Please read our [Code of Conduct](https://github.com/KWR-Water/pysimdeum/blob/main/CODE_OF_CONDUCT.md) before interacting with
+Please read our [Code of Conduct](https://github.com/KWR-Water/pysimdeum/blob/master/CODE_OF_CONDUCT.md) before interacting with
 the `pysimdeum` team or the community. Violations will be met with clear consequences.
 
 ## License
@@ -77,4 +77,4 @@ In short, when you submit code changes, your submissions are understood to be un
 ## References
 This document was adapted from the open-source contribution guidelines by 
 [Brian Danielak](https://gist.github.com/briandk/3d2e8b3ec8daf5a27a62) which is based on the guidelines for 
-[Meta's Draft-JS](https://github.com/facebook/draft-js/blob/main/CONTRIBUTING.md)
+[Meta's Draft-JS](https://github.com/facebook/draft-js/blob/master/CONTRIBUTING.md)
