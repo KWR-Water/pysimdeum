@@ -2,11 +2,13 @@ import os
 import toml
 from dataclasses import dataclass, field
 # from ..data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, dishwasher_enduse_pattern
-from data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
+from pysimdeum.data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
     dishwasher_enduse_pattern
-from data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
-from data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
+from pysimdeum.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
+from pysimdeum.data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
     washingmachine_enduse_pattern
+dirname = os.path.dirname(__file__)
+
 
 @dataclass
 class Statistics:
@@ -16,22 +18,22 @@ class Statistics:
     household: dict = field(default_factory=dict)
     diurnal_pattern: dict = field(default_factory=dict)
     end_uses: dict = field(default_factory=dict)
-    statisticsdir: str = 'data/NL/'
+    statisticsdir: str = os.path.join(dirname, '../data/NL/')  # TODO: Find good solution for this dirty statistics file workaround
 
-    def __post_init__(self, country='NL', statisticsdir='data/NL/'):
+    def __post_init__(self, country='NL'):
         self.country = country
 
         # Load household statistics
-        household_file = os.path.join(statisticsdir, 'household_statistics.toml')
+        household_file = os.path.join(self.statisticsdir, 'household_statistics.toml')
         self.household = toml.load(open(household_file, 'r'))
 
         # Load diurnal pattern statistics
-        diurnal_pattern_file = os.path.join(statisticsdir, 'diurnal_patterns.toml')
+        diurnal_pattern_file = os.path.join(self.statisticsdir, 'diurnal_patterns.toml')
         self.diurnal_pattern = toml.load(open(diurnal_pattern_file, 'r'))
 
         # load end-uses:
         self.end_uses = dict()
-        path2end_use = os.path.join(statisticsdir, 'end_uses')
+        path2end_use = os.path.join(self.statisticsdir, 'end_uses')
 
         bathtub_file = os.path.join(path2end_use, 'Bathtub.toml')
         brtap_file = os.path.join(path2end_use, 'BathroomTap.toml')
