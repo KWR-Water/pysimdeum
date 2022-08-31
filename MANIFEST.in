@@ -1,0 +1,3 @@
+include pysimdeum/core/*
+include pysimdeum/tools/*
+recursive-include pysimdeum/data *

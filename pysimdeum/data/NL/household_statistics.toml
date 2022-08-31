@@ -1,0 +1,72 @@
+# household statistics as found in Blokker (2006). "Modeling water demand patterns; ..."
+
+# One person households
+['one_person']
+people = 1 # Number of people per household
+households = 34 # Number of households (%)
+# division_gender = [46, 54] # Gender division: male, female (%)
+
+    [one_person.division_gender]
+    male = 46
+    female = 54
+
+    [one_person.division_age]
+    # Age division (%)
+    child = 0 # Children (0-12 years old)
+    teen = 0 # Teens (13-18 years old)
+    adult = 70 # Adults (19-64 years old)
+    senior = 30 # Seniors (> 65 years old)
+
+    [one_person.job]
+    # Subdivision % of adults with job away from home
+    male = 67.5
+    female = 52.4
+
+# Two person households
+['two_person']
+people = 2 # Number of people per household
+households = 30 # Number of households (%)
+#division_gender = [50, 50] # Gender division: male, female (%)
+
+    [two_person.division_gender]
+    male_female = 95
+    male_male = 2.5
+    female_female = 2.5
+
+    [two_person.division_age]
+    # Age division (%)
+    child = 0 # Children (0-12 years old)
+    teen = 0 # Teens (13-18 years old)
+    adult = 70 # Adults (19-64 years old)
+    senior = 30 # Seniors (> 65 years old)
+
+    [two_person.job]
+    # Subdivision % of adults with job away from home
+    both = 49.4
+    only_male = 26.0
+    only_female = 6.3
+    neither_person = 18.3
+
+# Families with children
+['family']
+people = 3.75 # Number of people per household
+households = 36 # Number of households (%)
+# division_gender = [50, 50] # Gender division: male, female (%)
+
+    [family.division_gender]
+    male = 50
+    female = 50
+
+    [family.division_age]
+    # Age division (%)
+    child = 25 # Children (0-12 years old)
+    teen = 16.5 # Teens (13-18 years old)
+    adult = 58.5 # Adults (19-64 years old)
+    senior = 0 # Seniors (> 65 years old)
+
+    [family.job]
+    # Subdivision % of adults with job away from home
+    both = 39.4
+    only_male = 52.3 # only father
+    only_female = 3.1 # only mother
+    neither_person = 5.2 # neither parent

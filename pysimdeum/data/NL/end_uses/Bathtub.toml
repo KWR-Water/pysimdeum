@@ -1,0 +1,29 @@
+# Statistics of bathtub end-use
+classname = 'Bathtub'  # has to be exactly the same name as class constructor
+# pattern_generator = '' # if a pattern exists, otherwise this field is an empty string
+temperature = 40 # temperature of used-water [%]
+offset = 0  # offset defines the time where a second use of the end-use is blocked
+size = 120  # size of bathtub filling [L], but this parameter is not used
+duration = '10 Minutes'  # duration of filling a bathtub depends on the size and the intensity of the filling
+intensity = 0.2  # fixed intensity for bathtub filling corresponds to the maximum water flow at full tap opening [L/s]
+
+[penetration]  # penetraton rate of houses with bathtubes [%] depennds on the number of people living in a house
+    1 = 28
+    2 = 45
+    3 = 53
+    4 = 54
+    5 = 63
+
+[frequency]
+    distribution = 'Poisson'   # type of distribution from where the frequency of the  end-use will be drawn
+    # bathtub use is age dependent, therefore the input parameter of the Poisson distribution changes with age
+    [frequency.average]
+        child = 0.085714
+        teen = 0.014286
+#        teen = 5.0
+        work_ad = 0.028571
+        home_ad = 0.028571
+#        home_ad = 2.0
+        senior = 0.028571
+        total = 0.042857
+
