@@ -1,4 +1,5 @@
 # PYSIMDEUM
+
 `pysimdeum` is a Python package for modelling and simulating residential stochastic water demand at the end-use level.
 
 Main functionalities:
@@ -36,6 +37,7 @@ pip install git+https://github.com/KWR-Water/pysimdeum.git
 ```
 
 ### Dependencies
+
 `pysimdeum`  requires the following Python packages:
 
 - matplotlib
@@ -98,15 +100,16 @@ tot_cons.rolling(time=3600, center=True).mean().plot()
 plt.show()
 ```
 
-
 ## License
 
-`pysimdeum` is available under a [EUPL-1.2 license](https://github.com/KWR-Water/pysimdeum/blob/main/LICENSE).
+`pysimdeum` is available under a [EUPL-1.2 license](https://github.com/KWR-Water/pysimdeum/blob/master/LICENSE).
 
 ## Contributing
-If you want to contribute, please check out our [Code of Conduct](https://github.com/KWR-Water/pysimdeum/blob/main/CODE_OF_CONDUCT.md) and our [Contribution Guide](https://github.com/KWR-Water/pysimdeum/blob/main/CONTRIBUTING.md). Looking forward to your pull request or issue!
+
+If you want to contribute, please check out our [Code of Conduct](https://github.com/KWR-Water/pysimdeum/blob/master/CODE_OF_CONDUCT.md) and our [Contribution Guide](https://github.com/KWR-Water/pysimdeum/blob/master/CONTRIBUTING.md). Looking forward to your pull request or issue!
 
 ## Citing
+
 If you publish work based on `pysimdeum` , we appreciate a citation of the following reference:
  
  - Steffelbauer, D.B., Hillebrand B., Blokker, E.J.M., 2022. pySIMDEUM: An open-source stochastic water demand end-use model in Python. Proceedings of the 2nd joint Water Distribution System Analysis and Computing and Control in the Water Industry (WDSA/CCWI2022) conference, Valencia (Spain), 18-22 July 2022.

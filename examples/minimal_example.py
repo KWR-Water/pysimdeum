@@ -1,8 +1,8 @@
-import pySIMDEUM
+import pysimdeum
 import matplotlib.pyplot as plt
 
 # Built a house (one-person household)
-house = pySIMDEUM.built_house(house_type='one_person')
+house = pysimdeum.built_house(house_type='one_person')
 print(house)
 
 # Show the inhabitants of a house
