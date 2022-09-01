@@ -1,5 +1,4 @@
-include pysimdeum/__init__.py
-include pysimdeum/api.py
+include pysimdeum/*.py
 include pysimdeum/core/*
 include pysimdeum/tools/*
 recursive-include pysimdeum/data *
