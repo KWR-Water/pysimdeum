@@ -9,6 +9,7 @@ from pysimdeum.core.statistics import Statistics
 from pysimdeum.core.user import User
 import pysimdeum.core.end_use as EndUses
 from dataclasses import dataclass, field
+import copy
 
 # TODO: Implement multiple appliances which will be later on divided over the users, so they are not blocked
 # TODO: Link data to OOPNET
@@ -268,16 +269,16 @@ class House(Property):
 
     def simulate(self, date=None, duration='1 day', num_patterns=1):
 
-        if date is None:
-            date = datetime.now().date()
-        try:
-            timedelta = pd.to_timedelta(duration)
-        except:
-            print('Warning: duration unrecognized defaulted to 1 day')
-            timedelta = pd.to_timedelta('1 day')
+        # if date is None:
+        #     date = datetime.now().date()
+        # try:
+        #     timedelta = pd.to_timedelta(duration)
+        # except:
+        #     print('Warning: duration unrecognized defaulted to 1 day')
+        #     timedelta = pd.to_timedelta('1 day')
         # time = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1s', closed='left')
         # time = pd.date_range(start=date, end=date + timedelta, freq='1s', closed='left')
-        time = pd.date_range(start=date, end=date + timedelta, freq='1s')
+        time = pd.date_range(start=self.date, end=self.date + self.timedelta, freq='1s')
         users = [x.id for x in self.users] + ['household']
         enduse = [x.statistics['classname'] for x in self.appliances]
         patterns = [x for x in range(0, num_patterns)]
@@ -285,8 +286,9 @@ class House(Property):
 
         for num in patterns:
             for k, appliance in enumerate(self.appliances):
-
-                consumption = appliance.simulate(consumption, users=self.users, ind_enduse=k, pattern_num=num)
+                for day in range(0, self.timedelta.days):
+                    consumption = appliance.simulate(consumption, users=self.users, ind_enduse=k, pattern_num=num, day=day)
+                    a = 5
 
         self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns], dims=['time', 'user', 'enduse', 'patterns'])
 

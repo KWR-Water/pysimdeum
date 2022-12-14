@@ -175,10 +175,16 @@ class User(Base):
                 self.age = 'home_ad'
 
 
-    def compute_presence(self, weekday=True, statistics=None, peak=0.65, normal=0.335, away=0.0, night=0.15):
+    def compute_presence(self, weekday=True, day=None, statistics=None, peak=0.65, normal=0.335, away=0.0, night=0.15):
 
         presence = Presence(user=self, weekday=weekday, stats=statistics)
         pdf = presence.pdf(peak=peak, normal=normal, away=away, night=night)
-        self.presence = pdf
+
+        if hasattr(self, 'presence'):
+            pdf.index += pd.Timedelta(days=day)
+            self.presence = pd.concat([self.presence,pdf])
+        else:
+            self.presence = pdf
+
 
         return self.presence
