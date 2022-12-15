@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
 
 
-def built_house(house_type: str = "", date=None, duration='1 day') -> House:
+def built_house(house_type: str = "", date=None, duration='1 day', frequency='1s') -> House:
 
     stats = Statistics()
     prop = Property(statistics=stats)
@@ -21,7 +21,9 @@ def built_house(house_type: str = "", date=None, duration='1 day') -> House:
         timedelta = pd.to_timedelta('1 day')
 
     house.date = date
-    house.timedelta = timedelta    
+    house.timedelta = timedelta
+    house.frequency = frequency
+
     for user in house.users:
         for day in range(0, timedelta.days):
             if date.weekday() < 5:
@@ -29,7 +31,8 @@ def built_house(house_type: str = "", date=None, duration='1 day') -> House:
             else:
                 weekday = False
 
-            user.compute_presence(statistics=stats, weekday=weekday, day=day)
+            user.compute_presence(statistics=stats, weekday=weekday, day=day, frequency = frequency)
+        user.presence = user.presence[~user.presence.index.duplicated(keep='first')]
     #house.simulate(num_patterns=100)
 
     return house

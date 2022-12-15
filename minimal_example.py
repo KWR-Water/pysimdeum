@@ -2,7 +2,7 @@ import pysimdeum
 import matplotlib.pyplot as plt
 
 # Built a house (one-person household)
-house = pysimdeum.built_house(house_type='one_person', date=None, duration='100 day')
+house = pysimdeum.built_house(house_type='family', date=None, duration='100 day', frequency='60s')
 print(house)
 
 # Show the inhabitants of a house
@@ -18,7 +18,7 @@ consumption = house.simulate(num_patterns=1)
 
 # Build statistics from consumption
 tot_cons = consumption.sum(['enduse', 'user']).mean([ 'patterns'])
-print(tot_cons)
+print(tot_cons.sum())
 
 # Plot total consumption
 tot_cons.plot()

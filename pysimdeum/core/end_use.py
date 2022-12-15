@@ -1,5 +1,6 @@
 import copy
 import pandas as pd
+import re
 import numpy as np
 from dataclasses import dataclass, field
 from pysimdeum.core.utils import chooser, duration_decorator, normalize, to_timedelta
@@ -15,7 +16,7 @@ class EndUse:
     statistics: Statistics = field(repr=False)  # ... statistic object associated with end-use
     name: str = "EndUse"  # ... name of the end-use
 
-    def init_consumption(self, users: list=None, time_resolution: str='1s') -> pd.DataFrame:
+    def init_consumption(self, users: list=None, time_resolution: str='60s') -> pd.DataFrame:
         """Initialization of a pandas dataframe to store the  consumptions.
 
         Args:
@@ -45,7 +46,7 @@ class EndUse:
         return consumption
 
     @staticmethod
-    def usage_probability(time_resolution: str='1s') -> pd.Series:
+    def usage_probability(time_resolution: str='60s') -> pd.Series:
         """Produces uninformed prior.
 
         For more specific usage probabilities (washing machine, kitchen tap, dishwasher) overload this function by
@@ -134,9 +135,11 @@ class Bathtub(EndUse):
         # fixed intensity
         return self.statistics['intensity']
 
-    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None, frequency=None):
 
-        prob_usage = self.usage_probability().values
+        prob_usage = self.usage_probability(time_resolution=frequency).values
+
+        freq_number = int(re.findall(r'\d+', frequency)[0])
 
         for j, user in enumerate(users):
             freq = self.fct_frequency(age=user.age)
@@ -145,13 +148,17 @@ class Bathtub(EndUse):
             for i in range(freq):
 
                 duration, intensity = self.fct_duration_intensity()
+
+                duration_freq = max(int(round(duration/freq_number,0)),1)
+                intensity_freq = intensity*duration/duration_freq
+
                 prob_joint = normalize(prob_user * prob_usage)
 
                 u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + 86400*day
-                end = start + duration
+                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(86400/freq_number*day)
+                end = start + duration_freq
 
-                consumption[start:end, j, ind_enduse, pattern_num] = intensity
+                consumption[start:end, j, ind_enduse, pattern_num] = intensity_freq
 
         return consumption
 
@@ -178,7 +185,7 @@ class BathroomTap(EndUse):
 
         dist = duration_decorator(getattr(np.random, d_stats['distribution'].lower()))
         mean = to_timedelta(np.log(to_timedelta(d_stats['average']).total_seconds()) - 0.5)
-        duration = dist(mean=mean).total_seconds()
+        duration = max(dist(mean=mean).total_seconds(),1)
 
         dist = getattr(np.random, i_stats['distribution'].lower())
         low = i_stats['low']
@@ -188,9 +195,11 @@ class BathroomTap(EndUse):
 
         return duration, intensity
 
-    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None, frequency=None):
 
-        prob_usage = self.usage_probability().values
+        prob_usage = self.usage_probability(time_resolution=frequency).values
+
+        freq_number = int(re.findall(r'\d+', frequency)[0])
 
         for j, user in enumerate(users):
             freq = self.fct_frequency()
@@ -200,12 +209,15 @@ class BathroomTap(EndUse):
 
                 duration, intensity = self.fct_duration_intensity()
 
+                duration_freq = max(int(round(duration/freq_number,0)),1)
+                intensity_freq = intensity*duration/duration_freq
+
                 prob_joint = normalize(prob_user * prob_usage)
 
                 u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + 86400*day
-                end = int(start + duration)
-                consumption[start:end, j, ind_enduse, pattern_num] = intensity
+                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) +  int(86400/freq_number*day)
+                end = int(start + duration_freq)
+                consumption[start:end, j, ind_enduse, pattern_num] = intensity_freq
 
         return consumption
 
@@ -228,9 +240,11 @@ class Dishwasher(EndUse):
         pattern = self.statistics['enduse_pattern']
         return pattern
 
-    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None, frequency=None):
 
-        prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
+        prob_usage = copy.deepcopy(self.statistics['daily_pattern']).resample(frequency).mean().values
+
+        freq_number = int(re.findall(r'\d+', frequency)[0])
         freq = self.fct_frequency(numusers=len(users))
 
         for j, user in enumerate(users):
@@ -244,17 +258,17 @@ class Dishwasher(EndUse):
 
         prob_joint = normalize(prob_user * prob_usage)
 
-        pattern = self.fct_duration_pattern().values
+        pattern = self.fct_duration_pattern().resample(frequency).sum().values
         duration = len(pattern)
 
         for i in range(freq):
 
             u = np.random.random()
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + 86400*day
+            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(86400/freq_number*day)
             end = start + duration
 
-            if end > (24 * 60 * 60):  #ToDo: Find better way to simulate dishwashers that are turned on in the night
-                end = 24 * 60 * 60
+            if end > consumption.shape[0]:#(24 * 60 * 60):  #ToDo: Find better way to simulate dishwashers that are turned on in the night
+                end = consumption.shape[0]
             difference = end - start
             consumption[start:end, j, ind_enduse, pattern_num] = pattern[:difference]
 
@@ -299,7 +313,7 @@ class KitchenTap(EndUse):
         dist = getattr(np.random, d_stats['distribution'].lower())
         mean = np.log(pd.Timedelta(d_stats['average']).total_seconds()) - 0.5
 
-        duration = int(pd.Timedelta(seconds=dist(mean=mean)).total_seconds())
+        duration = max(int(pd.Timedelta(seconds=dist(mean=mean)).total_seconds()), 1)
 
         dist = getattr(np.random, i_stats['distribution'].lower())
         low = i_stats['low']
@@ -309,9 +323,11 @@ class KitchenTap(EndUse):
 
         return duration, intensity
 
-    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None, frequency=None):
 
-        prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
+        prob_usage = copy.deepcopy(self.statistics['daily_pattern']).resample(frequency).mean().values
+
+        freq_number = int(re.findall(r'\d+', frequency)[0])
 
         for j, user in enumerate(users):
             if j == 0:  # ToDo: Add function that computes usage probability for all users
@@ -328,11 +344,15 @@ class KitchenTap(EndUse):
         for i in range(freq):
 
             duration, intensity = self.fct_duration_intensity()
+            
+            duration_freq = max(int(round(duration/freq_number,0)),1)
+            intensity_freq = intensity*duration/duration_freq
+
             u = np.random.uniform()
             prob_joint = normalize(prob_user * prob_usage)  # ToDo: Check if joint probability can be computed outside of for loop for all functions
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + 86400*day
-            end = start + duration
-            consumption[start:end, j, ind_enduse, pattern_num] = intensity
+            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(86400/freq_number*day)
+            end = start + duration_freq
+            consumption[start:end, j, ind_enduse, pattern_num] = intensity_freq
 
         return consumption
 
@@ -359,7 +379,7 @@ class OutsideTap(EndUse):
         dist = getattr(np.random, d_stats['distribution'].lower())
         mean = np.log(pd.Timedelta(d_stats['average']).total_seconds()) - 0.5
 
-        duration = int(pd.Timedelta(seconds=dist(mean=mean)).total_seconds())
+        duration = max(int(pd.Timedelta(seconds=dist(mean=mean)).total_seconds()), 1)
 
         dist = getattr(np.random, i_stats['distribution'].lower())
         low = i_stats['low']
@@ -369,9 +389,11 @@ class OutsideTap(EndUse):
 
         return duration, intensity
 
-    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None, frequency=None):
 
-        prob_usage = self.usage_probability().values
+        prob_usage = self.usage_probability(time_resolution=frequency).values
+
+        freq_number = int(re.findall(r'\d+', frequency)[0])
 
         freq = 0
         for j, user in enumerate(users):
@@ -389,12 +411,15 @@ class OutsideTap(EndUse):
 
             duration, intensity = self.fct_duration_intensity()
 
+            duration_freq = max(int(round(duration/freq_number,0)),1)
+            intensity_freq = intensity*duration/duration_freq
+
             prob_joint = normalize(prob_user * prob_usage)
             u = np.random.uniform()
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + 86400*day
-            end = start + duration
+            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(86400/freq_number*day)
+            end = start + duration_freq
 
-            consumption[start:end, j, ind_enduse, pattern_num] = intensity
+            consumption[start:end, j, ind_enduse, pattern_num] = intensity_freq
 
         return consumption
 
@@ -427,9 +452,11 @@ class Shower(EndUse):
 
         return duration, intensity
 
-    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None, frequency=None):
 
-        prob_usage = self.usage_probability().values
+        prob_usage = self.usage_probability(time_resolution=frequency).values
+
+        freq_number = int(re.findall(r'\d+', frequency)[0])
 
         for j, user in enumerate(users):
             freq = self.fct_frequency(age=user.age)
@@ -438,11 +465,14 @@ class Shower(EndUse):
             for i in range(freq):
                 duration, intensity = self.fct_duration_intensity(age=user.age)
 
+                duration_freq = max(int(round(duration/freq_number,0)),1)
+                intensity_freq = intensity*duration/duration_freq
+
                 prob_joint = normalize(prob_user * prob_usage)
                 u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + 86400*day
-                end = start + duration
-                consumption[start:end, j, ind_enduse, pattern_num] = intensity
+                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(86400/freq_number*day)
+                end = start + duration_freq
+                consumption[start:end, j, ind_enduse, pattern_num] = intensity_freq
 
         return consumption
 
@@ -477,9 +507,11 @@ class WashingMachine(EndUse):
         # duration = pattern.index[-1] - pattern.index[0]
         return pattern
 
-    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None, frequency=None):
 
-        prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
+        prob_usage = copy.deepcopy(self.statistics['daily_pattern']).resample(frequency).mean().values
+
+        freq_number = int(re.findall(r'\d+', frequency)[0])
 
         # for j, user in enumerate(users):
         freq = self.fct_frequency(numusers=len(users))
@@ -495,17 +527,17 @@ class WashingMachine(EndUse):
 
         prob_joint = normalize(prob_user * prob_usage)
 
-        pattern = self.fct_duration_pattern()
+        pattern = self.fct_duration_pattern().resample(frequency).sum().values
         duration = len(pattern)
 
         for i in range(freq):
 
             u = np.random.random()
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + 86400*day
+            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(86400/freq_number*day)
             end = start + duration
 
-            if end > (24 * 60 * 60):
-                end = 24 * 60 * 60
+            if end > consumption.shape[0]:
+                end = consumption.shape[0]
             difference = end - start
             consumption[start:end, j, ind_enduse, pattern_num] = pattern[:difference]
 
@@ -548,9 +580,11 @@ class Wc(EndUse):
         return duration, intensity
 
 
-    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None):
+    def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day=None, frequency=None):
 
-        prob_usage = self.usage_probability().values
+        prob_usage = self.usage_probability(time_resolution=frequency).values
+
+        freq_number = int(re.findall(r'\d+', frequency)[0])
 
         for j, user in enumerate(users):
             freq = self.fct_frequency(age=user.age, gender=user.gender)
@@ -560,11 +594,14 @@ class Wc(EndUse):
 
                 duration, intensity = self.fct_duration_intensity()
 
+                duration_freq = max(int(round(duration/freq_number,0)),1)
+                intensity_freq = intensity*duration/duration_freq
+
                 prob_joint = normalize(prob_user * prob_usage)
                 u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + 86400*day
-                end = start + duration
-                consumption[start:end, j, ind_enduse, pattern_num] = intensity
+                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(86400/freq_number*day)
+                end = start + duration_freq
+                consumption[start:end, j, ind_enduse, pattern_num] = intensity_freq
 
         return consumption
 

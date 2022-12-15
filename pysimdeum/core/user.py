@@ -98,7 +98,7 @@ class Presence:
             l[0:b] = value
         return l
 
-    def pdf(self, peak=0.65, normal=0.335, away=0.0, night=0.015):
+    def pdf(self, peak=0.65, normal=0.335, away=0.0, night=0.015, frequency=None):
         index = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1Min')
         pdf = pd.Series(index=index, dtype='float64')
 
@@ -147,7 +147,7 @@ class Presence:
             pass
 
 
-        pdf = pdf.astype('float').resample('1S').fillna('ffill')[:-1]
+        pdf = pdf.astype('float').resample(frequency).fillna('ffill')[:-1]
 
         pdf /= np.sum(pdf)  # normalize
 
@@ -175,10 +175,10 @@ class User(Base):
                 self.age = 'home_ad'
 
 
-    def compute_presence(self, weekday=True, day=None, statistics=None, peak=0.65, normal=0.335, away=0.0, night=0.15):
+    def compute_presence(self, weekday=True, day=None, frequency=None, statistics=None, peak=0.65, normal=0.335, away=0.0, night=0.15):
 
         presence = Presence(user=self, weekday=weekday, stats=statistics)
-        pdf = presence.pdf(peak=peak, normal=normal, away=away, night=night)
+        pdf = presence.pdf(peak=peak, normal=normal, away=away, night=night, frequency=frequency)
 
         if hasattr(self, 'presence'):
             pdf.index += pd.Timedelta(days=day)

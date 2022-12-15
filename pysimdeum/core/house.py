@@ -278,7 +278,7 @@ class House(Property):
         #     timedelta = pd.to_timedelta('1 day')
         # time = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1s', closed='left')
         # time = pd.date_range(start=date, end=date + timedelta, freq='1s', closed='left')
-        time = pd.date_range(start=self.date, end=self.date + self.timedelta, freq='1s')
+        time = pd.date_range(start=self.date, end=self.date + self.timedelta, freq=self.frequency)
         users = [x.id for x in self.users] + ['household']
         enduse = [x.statistics['classname'] for x in self.appliances]
         patterns = [x for x in range(0, num_patterns)]
@@ -286,9 +286,9 @@ class House(Property):
 
         for num in patterns:
             for k, appliance in enumerate(self.appliances):
+                print(appliance)
                 for day in range(0, self.timedelta.days):
-                    consumption = appliance.simulate(consumption, users=self.users, ind_enduse=k, pattern_num=num, day=day)
-                    a = 5
+                    consumption = appliance.simulate(consumption, users=self.users, ind_enduse=k, pattern_num=num, day=day, frequency=self.frequency)
 
         self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns], dims=['time', 'user', 'enduse', 'patterns'])
 
