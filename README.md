@@ -12,6 +12,10 @@ Main functionalities:
 
 A detailed documentation will be soon available under https://pysimdeum.readthedocs.io.
 
+Output is based on statistics about household sizes and water use of the Netherlands. These can be changed either within the code or by creating the correct toml files. An overview of worldwide differences is available in:
+
+Mazzoni, F., Alvisi, S., Blokker, E. J. M., Buchberger, S. G., Castelletti, A., Cominola, A., Gross, M. P., Jacobs, H. E., Mayer, P., Steffelbauer, D. B., Stewart, R. A., Stillwell, A. S., Tzatchkov, V., Yamanaka, V. H. A. and Franchini, M. (2022). "Investigating the characteristics of residential end uses of water: a worldwide review." Water Research, art. no. 119500, doi:https://doi.org/10.1016/j.watres.2022.119500.https://www.sciencedirect.com/science/article/pii/S0043135422014452 https://livelink.kwrwater.nl/livelink/livelink.exe/Open/69638292
+
 ---
 **Warning!**
 
