@@ -2,13 +2,8 @@ import pandas as pd
 from datetime import datetime
 from typing import Union
 
-try:
-    from pysimdeum.tools.helper import create_usage_data
-    from pysimdeum.core.house import HousePattern, Property, House
-except:
-    from .helper import create_usage_data
-    from ..core.house import HousePattern, Property, House
-
+from pysimdeum.tools.helper import create_usage_data
+from pysimdeum.core.house import HousePattern, Property, House
 
 def export_water_use_distribution(inputproperty: Union[list, House], name: str='ApplianceWaterUse.xlsx'):
     appliance_data, total_water_usage, total_users, total_number_of_days = create_usage_data(inputproperty)

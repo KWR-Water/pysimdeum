@@ -2,14 +2,10 @@ import copy
 import numpy as np
 import scipy.stats as sstats
 import pandas as pd
+from pysimdeum.core.utils import Base
 from dataclasses import dataclass, field
 from typing import Any, Callable, Literal
-try:
-    from pysimdeum.core.utils import Base
-    from pysimdeum.core.statistics import Statistics
-except:
-    from .utils import Base
-    from .statistics import Statistics
+from pysimdeum.core.statistics import Statistics
 
 
 @dataclass

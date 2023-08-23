@@ -2,24 +2,15 @@ import copy
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass, field
-try:
-    from pysimdeum.core.utils import chooser, duration_decorator, normalize, to_timedelta
-    from pysimdeum.core.statistics import Statistics
-except:
-    from .utils import chooser, duration_decorator, normalize, to_timedelta
-    from .statistics import Statistics
+from pysimdeum.core.utils import chooser, duration_decorator, normalize, to_timedelta
+from pysimdeum.core.statistics import Statistics	
 
 
 #TODO: Specific EndUse __post_init__ calls can be replaced by directly using the class name instead of setting the name attributes
 
 @dataclass
 class EndUse:
-    """
-    Base class for end-uses.
-
-    [Binomial](# https://numpy.org/doc/stable/reference/random/generated/numpy.random.binomial.html)
-    [Chisquare](https://numpy.org/doc/stable/reference/random/generated/numpy.random.chisquare.html)
-    """
+    """Base class for end-uses."""
     
     statistics: Statistics = field(repr=False)  # ... statistic object associated with end-use
     name: str = "EndUse"  # ... name of the end-use
@@ -38,18 +29,13 @@ class EndUse:
 
         if users:
             # produce datetime index
-            index = pd.TimedeltaIndex(
-                start='00:00:00',
-                end='24:00:00',
-                freq=time_resolution,
-                closed='left'
-            )
+            index = pd.TimedeltaIndex(start='00:00:00', end='24:00:00', freq=time_resolution, closed='left')
 
             # name columns by users
             columns = ['user_' + str(x+1) for x, user in enumerate(users)]
 
-            # initialise consumption dataframe with timedelta index and user columnnames,
-            # name it according to end-use device and fill it with zeros.
+            # initialise consumption dataframe with timedelta index and user columnnames, name it according to end-use
+            # device and fill it with zeros.
             consumption = pd.DataFrame(data=0, index=index, columns=columns)
             consumption.name = self.name
         else:
@@ -66,15 +52,10 @@ class EndUse:
         loading a usage pattern into it.
         """
         # produce datetime index
-        index = pd.timedelta_range(
-            start='00:00:00',
-            end='24:00:00',
-            freq=time_resolution,
-            closed='left'
-        )
+        index = pd.timedelta_range(start='00:00:00', end='24:00:00', freq=time_resolution, closed='left')
 
         prob = pd.Series(data=1, index=index)  # ... uniform probability over time and cast it into pandas series.
-        prob /= prob.sum()                     # ... normalization of the probabilities
+        prob /= prob.sum()  # ... normalization of the probabilities
 
         return prob
 
@@ -96,7 +77,7 @@ class EndUse:
     def fct_duration_intensity(self):
         """Computing duration and intensity for enduse"""
 
-        duration  = self.fct_duration()
+        duration = self.fct_duration()
         intensity = self.fct_intensity()
 
         return duration, intensity
@@ -104,6 +85,7 @@ class EndUse:
 @dataclass
 class Bathtub(EndUse):
     """Class for Bathtub end-use."""
+
 
     def __post_init__(self):
         """Initialisation function of Bathtub end-use class.
@@ -470,18 +452,11 @@ class NormalShower(Shower):
     def __post_init__(self):
         self.name = "NormalShower"
 
-
 class FancyShower(Shower):
 
     def __post_init__(self):
         self.name = "FancyShower"
-
-
-class RainShower(Shower):
-
-    def __post_init__(self):
-        self.name = "RainShower"
-
+    
 
 class WashingMachine(EndUse):
 
@@ -541,6 +516,7 @@ class Wc(EndUse):
 
     def __post_init__(self):
         self.name = "Wc"
+    
 
     def fct_frequency(self, age=None, gender=None):
         f_stats = self.statistics['frequency']
@@ -570,6 +546,7 @@ class Wc(EndUse):
         duration = int(average.total_seconds())
 
         return duration, intensity
+
 
     def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1):
 

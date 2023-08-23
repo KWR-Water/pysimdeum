@@ -2,16 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import Union
+from pysimdeum.core.statistics import Statistics
 
-try:
-    from pysimdeum.core.statistics import Statistics
-    from pysimdeum.tools.helper import create_diurnal_pattern, create_usage_data
-    from pysimdeum.core.house import House
-except:
-    from ..core.house import House
-    from ..core.statistics import Statistics
-    from .helper import create_diurnal_pattern, create_usage_data
-
+from pysimdeum.tools.helper import create_diurnal_pattern, create_usage_data
+from pysimdeum.core.house import House
 
 def plot_water_use_distribution(inputproperty: Union[list, House], plotsubject: str='percentage'):
     """Function to plot water use distribution betwee the different appliances as a pie graph [-> Axessubplot object]
@@ -31,15 +25,12 @@ def plot_water_use_distribution(inputproperty: Union[list, House], plotsubject: 
     else:
         labels = appliance_data.index.values
         sizes = appliance_data[plotsubject].values
-        total = appliance_data[plotsubject].sum()
         fig1, ax1 = plt.subplots()
         if plotsubject == 'percentage':
-            ax1.pie(sizes, labels=labels, startangle=90, autopct='%1.1f%%',
-                    textprops={'fontsize': 6})
+            ax1.pie(sizes, labels=labels, startangle=90, autopct='%1.1f%%')
         else:
-            ax1.pie(sizes, labels=labels, startangle=90, autopct=lambda pct: func(pct, sizes),
-                    textprops={'fontsize': 6})
-        fig1.suptitle(f'{plotsubject}, {int(total)}L')
+            ax1.pie(sizes, labels=labels, startangle=90, autopct=lambda pct: func(pct, sizes))
+        fig1.suptitle(plotsubject)
         ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
         return ax1
 

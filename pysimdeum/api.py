@@ -1,16 +1,10 @@
-try:
-    from pysimdeum.core.statistics import Statistics
-    from pysimdeum.core.house import Property, HousePattern, House
-except:
-    from .core.statistics import Statistics
-    from .core.house import Property, HousePattern, House
+from pysimdeum.core.statistics import Statistics
+from pysimdeum.core.house import Property, HousePattern, House
 
 
-def built_house(country:    str = "",
-                city:       str = "",
-                house_type: str = "") -> House:
+def built_house(house_type: str = "") -> House:
 
-    stats = Statistics(country=country, city=city)
+    stats = Statistics()
     prop = Property(statistics=stats)
     house = prop.built_house(house_type=house_type)
     house.populate_house()
