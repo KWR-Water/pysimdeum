@@ -4,10 +4,16 @@ import xarray as xr
 import pickle
 from datetime import datetime
 from typing import Any, Union
-from pysimdeum.core.utils import Base, chooser, normalize
-from pysimdeum.core.statistics import Statistics
-from pysimdeum.core.user import User
-import pysimdeum.core.end_use as EndUses
+try:
+    from pysimdeum.core.utils import Base, chooser, normalize
+    from pysimdeum.core.statistics import Statistics
+    from pysimdeum.core.user import User
+    import pysimdeum.core.end_use as EndUses
+except:
+    from .utils import Base, chooser, normalize
+    from .statistics import Statistics
+    from .user import User
+    from . import end_use as EndUses
 from dataclasses import dataclass, field
 
 # TODO: Implement multiple appliances which will be later on divided over the users, so they are not blocked
@@ -28,6 +34,7 @@ class Property(Base):
     _house: Any = None
     statistics: Statistics = None
     country: str = "NL"
+    city:    str = "All"
 
     # TODO: implement following quantities
     oopnet_id: str = ""
@@ -39,7 +46,7 @@ class Property(Base):
 
     def __post__init__(self):
         if Statistics is None:
-            self.statistics = Statistics(country=self.country)
+            self.statistics = Statistics(country=self.country, city=self.city)
 
 
     def _choose_type(self, statistics: Statistics=None) -> str:
@@ -84,7 +91,7 @@ class House(Property):
     methods to initialise and run simulations.
     """
 
-    users: list = field(default_factory=list)  # List of users/inhabitants present in the house
+    users:      list = field(default_factory=list)  # List of users/inhabitants present in the house
     appliances: list = field(default_factory=list)  # List of appliances/water end-use devices in the house
     consumption: xr.DataArray = field(default_factory=xr.DataArray)  # property to store the consumption of a house
 
@@ -109,8 +116,13 @@ class House(Property):
 
         if self.house_type == 'one_person':
 
+            # choose age
             age = chooser(data=age_stats)
+
+            # choose gender
             gender = chooser(data=gender_stats)
+
+            # choose job
             job = False
 
             if age == 'adult':
