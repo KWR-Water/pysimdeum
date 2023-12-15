@@ -83,7 +83,7 @@ class EndUse(HasStrictTraits):
 
         raise NotImplementedError('Intensity function is not implemented yet!')
 
-    def fct_duration_intensity(self):
+    def fct_duration_intensity_temperature(self):
         """Computing duration and intensity for enduse"""
 
         duration = self.fct_duration()
@@ -154,7 +154,7 @@ class Bathtub(EndUse):
 
             for i in range(freq):
 
-                duration, intensity = self.fct_duration_intensity()
+                duration, intensity = self.fct_duration_intensity_temperature()
                 prob_joint = normalize(prob_user * prob_usage)
 
                 u = np.random.uniform()
@@ -188,7 +188,7 @@ class BathroomTap(EndUse):
         average = f_stats['average']
         return distribution(average)
 
-    def fct_duration_intensity(self):
+    def fct_duration_intensity_temperature(self):
 
         subtype = chooser(self.statistics['subtype'], 'penetration')
 
@@ -218,7 +218,7 @@ class BathroomTap(EndUse):
             for i in range(freq):
                 check = False
 
-                duration, intensity = self.fct_duration_intensity()
+                duration, intensity = self.fct_duration_intensity_temperature()
 
                 prob_joint = normalize(prob_user * prob_usage)
 
@@ -331,7 +331,7 @@ class KitchenTap(EndUse):
 
         return distribution(r, p)
 
-    def fct_duration_intensity(self):
+    def fct_duration_intensity_temperature(self):
 
         subtype = chooser(self.statistics['subtype'], 'penetration')
 
@@ -369,7 +369,7 @@ class KitchenTap(EndUse):
 
         for i in range(freq):
 
-            duration, intensity = self.fct_duration_intensity()
+            duration, intensity = self.fct_duration_intensity_temperature()
 
             prob_joint = normalize(prob_user * prob_usage)
 
@@ -407,7 +407,7 @@ class OutsideTap(EndUse):
         average = f_stats['average']
         return distribution(average)
 
-    def fct_duration_intensity(self):
+    def fct_duration_intensity_temperature(self):
 
         subtype = chooser(self.statistics['subtype'], 'penetration')
 
@@ -445,7 +445,7 @@ class OutsideTap(EndUse):
 
         for i in range(freq):
 
-            duration, intensity = self.fct_duration_intensity()
+            duration, intensity = self.fct_duration_intensity_temperature()
 
             prob_joint = normalize(prob_user * prob_usage)
 
@@ -487,7 +487,7 @@ class Shower(EndUse):
 
         return distribution(n, p)
 
-    def fct_duration_intensity(self, age=None):
+    def fct_duration_intensity_temperature(self, age=None):
 
         d_stats = self.statistics['duration']
         distribution = getattr(np.random, d_stats['distribution'].lower())
@@ -512,7 +512,7 @@ class Shower(EndUse):
             for i in range(freq):
                 check = False
 
-                duration, intensity = self.fct_duration_intensity(age=user.age)
+                duration, intensity = self.fct_duration_intensity_temperature(age=user.age)
 
                 prob_joint = normalize(prob_user * prob_usage)
 
@@ -628,7 +628,7 @@ class Wc(EndUse):
 
         return distribution(average)
 
-    def fct_duration_intensity(self):
+    def fct_duration_intensity_temperature(self):
 
         flush_interuption = self.statistics['subtype'][self.name]['flush_interuption']
         prob_flush_interuption = self.statistics['prob_flush_interuption']
@@ -663,7 +663,7 @@ class Wc(EndUse):
             for i in range(freq):
                 check = False
 
-                duration, intensity = self.fct_duration_intensity()
+                duration, intensity = self.fct_duration_intensity_temperature()
 
                 prob_joint = normalize(prob_user * prob_usage)
 

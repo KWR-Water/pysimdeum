@@ -39,7 +39,7 @@ distribution = 'Negative_binomial'
 
     [subtype.dishes]
         penetration = 25
-        tenperature = 55
+        temperature = 55
 
         [subtype.dishes.duration]
             average = '45 Seconds'

@@ -36,23 +36,34 @@ def write_simdeum_patterns_to_xlsx(houses: list, timestep: int, Q_option: str, p
     # for now only 1 all patterns in 1 file
     # output_file file to write to
     
-    output = __get_output_dataframe(houses, timestep)
+    output = __get_output_dataframe(houses, timestep, flowtype='totalflow')
     output.to_excel(output_file)
 
-def __get_output_dataframe(houses, timestep):
+def write_simdeum_hot_patterns_to_xlsx(houses: list, timestep: int, Q_option: str, patternfile_option: int, output_file: str):
+    # after writeSimdeumPatternToXls (Matlab)
+    # house can eithwer be a list of filenames or a list of houses
+    # timestep the output timestep of the pattern
+    # Q_option for now only 'm3/h' TODO is this true? are the units not L/s?????
+    # for now only 1 all patterns in 1 file
+    # output_file file to write to
+    
+    output = __get_output_dataframe(houses, timestep, flowtype='hotflow')
+    output.to_excel(output_file)
+
+def __get_output_dataframe(houses, timestep, flowtype):
     if type(houses[0]) == str:
         count = 0
         output = pd.DataFrame()
         if '.housepattern' in houses[0]: #it are housepattern files
             for housepattern in houses:
                 loadedhousepattern = HousePattern(housepattern)
-                __get_housepattern_output(count, output, loadedhousepattern)
+                __get_housepattern_output(count, output, loadedhousepattern, flowtype)
                 count +=1
         else: #assumed to be house files
             for house in houses:
                 prop = Property()
                 loadedhouse = prop.built_house(housefile=house)
-                __get_house_output(count, output, loadedhouse)
+                __get_house_output(count, output, loadedhouse, flowtype)
                 count +=1
         summedoutput = pd.DataFrame()
         summedoutput['date'] = output['date'].values[0::timestep]
@@ -65,7 +76,7 @@ def __get_output_dataframe(houses, timestep):
         count = 0
         output = pd.DataFrame()
         for house in houses:
-            __get_house_output(count, output, house)
+            __get_house_output(count, output, house, flowtype)
             count += 1
         summedoutput = pd.DataFrame()
         summedoutput['date'] = output['date'].values[0::timestep]
@@ -74,30 +85,30 @@ def __get_output_dataframe(houses, timestep):
                 summedoutput[column] = output[column].groupby(output.index // timestep).sum().values
         return summedoutput
 
-def __get_house_output(count, output, loadedhouse):
+def __get_house_output(count, output, loadedhouse, flowtype):
     if count == 0:
         datelist = []
         valueslist = []
         for i in range(0, len(loadedhouse.consumption.patterns)):
             datelist.extend(loadedhouse.consumption['time'].values)
-            valueslist.extend(loadedhouse.consumption.sel(patterns=i).sum('user').sum('enduse').values)
+            valueslist.extend(loadedhouse.consumption.sel(patterns=i).sel(flowtypes=flowtype).sum('user').sum('enduse').values)
         output['date'] = datelist
     else:
         valueslist = []
         for i in range(0, len(loadedhouse.consumption.patterns)):
-            valueslist.extend(loadedhouse.consumption.sel(patterns=i).sum('user').sum('enduse').values)
+            valueslist.extend(loadedhouse.consumption.sel(patterns=i).sel(flowtypes=flowtype).sum('user').sum('enduse').values)
     output['pysimdeum ' + str(count)] = valueslist
 
-def __get_housepattern_output(count, output, loadedhousepattern):
+def __get_housepattern_output(count, output, loadedhousepattern, flowtype):
     if count == 0:
         datelist = []
         valueslist = []
         for i in range(0, len(loadedhousepattern.consumption.patterns)):
             datelist.extend(loadedhousepattern.consumption['time'].values)
-            valueslist.extend(loadedhousepattern.consumption.sel(patterns=i).values)
+            valueslist.extend(loadedhousepattern.consumption.sel(patterns=i).sel(flowtypes=flowtype).values)
         output['date'] = datelist
     else:
         valueslist = []
         for i in range(0, len(loadedhousepattern.consumption.patterns)):
-            valueslist.extend(loadedhousepattern.consumption.sel(patterns=i).values)
+            valueslist.extend(loadedhousepattern.consumption.sel(patterns=i).sel(flowtypes=flowtype).values)
     output['pysimdeum ' + str(count)] = valueslist
