@@ -46,7 +46,7 @@ def createQcfdplot(houses: House):
     if type(houses) == House:
         n_bins = 100
         fig, ax = plt.subplots()
-        x = houses.consumption.sel(patterns=0).sum('user').sum('enduse').values
+        x = houses.consumption.sel(flowtypes='totalflow').sel(patterns=0).sum('user').sum('enduse').values
         n, bins, patches = ax.hist(x, n_bins, density=True, histtype='step',
                             cumulative=True, label='Empirical')
 
@@ -67,11 +67,13 @@ def plot_demand(houses: House):
     if type(houses) == House:
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2, sharey=True)
         for user in houses.consumption.user.values:
-            ax1.plot(houses.consumption['time'].values, houses.consumption.sel(user=user, patterns=0).sum('enduse').values, label=user)
-        ax3.plot(houses.consumption['time'].values, houses.consumption.sel(patterns=0).sum('user').sum('enduse').values, label='total')
+            ax1.plot(houses.consumption['time'].values, houses.consumption.sel(flowtypes='totalflow').sel(user=user, patterns=0).sum('enduse').values, label=user)
+        ax3.plot(houses.consumption['time'].values, houses.consumption.sel(flowtypes='totalflow').sel(patterns=0).sum('user').sum('enduse').values, label='total flow pattern 0')
+        ax3.plot(houses.consumption['time'].values, houses.consumption.sel(flowtypes='hotflow').sel(patterns=0).sum('user').sum('enduse').values, label='hot flow pattern 0')
         for enduse in houses.consumption.enduse.values:
-            ax2.plot(houses.consumption['time'].values, houses.consumption.sel(enduse=enduse, patterns=0).sum('user').values, label=enduse)
-        ax4.plot(houses.consumption['time'].values, houses.consumption.sum('user').sum('enduse').sum('patterns').values/len(houses.consumption.patterns), label='average')
+            ax2.plot(houses.consumption['time'].values, houses.consumption.sel(flowtypes='totalflow').sel(enduse=enduse, patterns=0).sum('user').values, label=enduse)
+        ax4.plot(houses.consumption['time'].values, houses.consumption.sel(flowtypes='totalflow').sum('user').sum('enduse').sum('patterns').values/len(houses.consumption.patterns), label='average all patterns total flow')
+        ax4.plot(houses.consumption['time'].values, houses.consumption.sel(flowtypes='hotflow').sum('user').sum('enduse').sum('patterns').values/len(houses.consumption.patterns), label='average all patterns hot flow')
         ax1.legend()
         ax1.set_xlabel('time')
         ax1.set_ylabel('demand (l/s)')
