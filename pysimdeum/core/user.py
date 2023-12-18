@@ -175,7 +175,7 @@ class User(Base):
                 self.age = 'home_ad'
 
 
-    def compute_presence(self, weekday=True, statistics=None, peak=0.65, normal=0.335, away=0.0, night=0.15):
+    def compute_presence(self, weekday=True, statistics=None, peak=0.65, normal=0.335, away=0.0, night=0.015):
 
         presence = Presence(user=self, weekday=weekday, stats=statistics)
         pdf = presence.pdf(peak=peak, normal=normal, away=away, night=night)

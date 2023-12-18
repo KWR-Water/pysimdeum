@@ -108,3 +108,6 @@ pysimdeum/water_use_tests.py
 test.pkl
 test.house
 workdir/
+test_pysimdeum.py
+unittest.house
+test.xlsx
