@@ -1,3 +1,3 @@
-__version__ = "0.0.11"
+__version__ = "0.1.2"
 
 from .api import built_house
