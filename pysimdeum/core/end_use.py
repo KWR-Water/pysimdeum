@@ -253,8 +253,8 @@ class Dishwasher(EndUse):
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
             end = start + duration
 
-            if end > (24 * 60 * 60):  #ToDo: Find better way to simulate dishwashers that are turned on in the night
-                end = 24 * 60 * 60
+            if end > (24 * 60 * 60)*(day_num+1):  #ToDo: Find better way to simulate dishwashers that are turned on in the night
+                end = 24 * 60 * 60*(day_num+1)
             difference = end - start
             consumption[start:end, j, ind_enduse, pattern_num] = pattern[:difference]
 
@@ -504,8 +504,8 @@ class WashingMachine(EndUse):
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
             end = start + duration
 
-            if end > (24 * 60 * 60):
-                end = 24 * 60 * 60
+            if end > (24 * 60 * 60)*(day_num+1):
+                end = 24 * 60 * 60*(day_num+1)
             difference = end - start
             consumption[start:end, j, ind_enduse, pattern_num] = pattern[:difference]
 
