@@ -254,17 +254,6 @@ class House(Property):
                     eu_instance = getattr(EndUses, classname)(statistics=appliances)
                 self.appliances.append(eu_instance)
 
-    def init_consumption(self):
-        # todo: can get rid off, functionality shifted to simulate
-
-        time = pd.TimedeltaIndex(start='00:00:00', end='24:00:00', freq='1s', closed='left')
-        users = [x.id for x in self.users] + ['household']
-        enduse = [x.name for x in self.appliances]
-
-        self.consumption = xr.DataArray(data=np.zeros((len(time), len(users), len(enduse))),
-                                        coords=[time, users, enduse],
-                                        dims=['time', 'user', 'enduse'])
-        return self.consumption
 
     def simulate(self, date=None, duration='1 day', num_patterns=1):
 
@@ -287,15 +276,41 @@ class House(Property):
             for k, appliance in enumerate(self.appliances):
                 for day in range(0, number_of_days, 1):
                     consumption = appliance.simulate(consumption, users=self.users, ind_enduse=k, pattern_num=num, day_num=day)
-
-        self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns], dims=['time', 'user', 'enduse', 'patterns'])
-
+                    # maybe here remove all zeros from specific day? to obtain sort of sparse matrix?
+                    # test for new setup TODO this setup takes 10000 times longer than the old implementation. That is unworkable.
+                    #maybe we can use a test and only use this (every so many days/patterns) if we cnnot allocate the memory?
+                    if False:
+                        data_consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns], dims=['time', 'user', 'enduse', 'patterns'])
+                        times_to_drop = [timestamp for timestamp in data_consumption.time.values[2:(len(data_consumption.time.values)-1)] if not np.any(data_consumption.sel(time=timestamp).values)]
+                        data_consumption = data_consumption.drop_sel(time=times_to_drop) 
+                        if day == 0:
+                            self.consumption = data_consumption.copy(deep=True)
+                        else:
+                            self.consumption = xr.concat([self.consumption, data_consumption], dim='time')   
+        
+        #test for old setup
+        # TODO for now keep this, the alternate memory saving option is way toooo slooooow.
+        if True:
+            self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns], dims=['time', 'user', 'enduse', 'patterns'])
+        
         return self.consumption
 
     def save_house(self, outputname):
-#        if self.consumption == None: #only save simulated houses
-#            self.simulate()
+        # routine meant to save A house with all data
         with open(outputname + '.house', 'wb') as f:
+            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
+    
+    def save_sparse_house(self, outputname):
+        # routine meant to save a sparse version of the house, which means all timesteps where no water is being used are removed
+        # initial tests show the resulting file is ~10 times smaller however the routine is ~500 times slower
+        # TODO no way of opening these files yet. 
+        #times_to_drop = [timestamp for timestamp in self.consumption.time.values[2:(len(self.consumption.time.values)-1)] if not np.any(self.consumption.sel(time=timestamp).values)]
+        time_values = self.consumption.time.values
+        all_values = self.consumption.values
+
+        times_to_drop = [timestamp for timestamp in time_values[2:-2] if not np.any(all_values[time_values == timestamp])]
+        self.consumption = self.consumption.drop_sel(time=times_to_drop)
+        with open(outputname + '.sparsehouse', 'wb') as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
     
         
@@ -304,6 +319,7 @@ class House(Property):
 # and not the individual data of the users and or appliances
 # the conumption datarray therefore only contains totals
 # user and appliance data is removed for now
+# TODO class does not work because full consumption is still stored on house itself.
 @dataclass
 class HousePattern:
 

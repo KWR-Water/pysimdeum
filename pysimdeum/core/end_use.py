@@ -15,34 +15,6 @@ class EndUse:
     statistics: Statistics = field(repr=False)  # ... statistic object associated with end-use
     name: str = "EndUse"  # ... name of the end-use
 
-    def init_consumption(self, users: list=None, time_resolution: str='1s') -> pd.DataFrame:
-        """Initialization of a pandas dataframe to store the  consumptions.
-
-        Args:
-            users:  list with users
-            time_resolution:  string with desired time resolution as python pandas `DateOffset` object
-            (https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects)
-
-        Returns:
-            consumption as pandas `DataFrame` filled with zeros
-        """
-
-        if users:
-            # produce datetime index
-            index = pd.TimedeltaIndex(start='00:00:00', end='24:00:00', freq=time_resolution, closed='left')
-
-            # name columns by users
-            columns = ['user_' + str(x+1) for x, user in enumerate(users)]
-
-            # initialise consumption dataframe with timedelta index and user columnnames, name it according to end-use
-            # device and fill it with zeros.
-            consumption = pd.DataFrame(data=0, index=index, columns=columns)
-            consumption.name = self.name
-        else:
-            # raise an error if no users are defined.
-            raise Exception('No Users are defined!')
-
-        return consumption
 
     @staticmethod
     def usage_probability(time_resolution: str='1s') -> pd.Series:
