@@ -304,7 +304,7 @@ class House(Property):
         # routine meant to save a sparse version of the house, which means all timesteps where no water is being used are removed
         # initial tests show the resulting file is ~10 times smaller however the routine is ~500 times slower
         # TODO no way of opening these files yet. 
-        times_to_drop = [timestamp for timestamp in self.consumption.time.values[2:(len(self.consumption.time.values)-1)] if not np.any(self.consumption.sel(time=timestamp).values)]
+        times_to_drop = [timestamp for timestamp in self.consumption.time.values[2:-1] if not np.any(self.consumption.sel(time=timestamp).values)]
         self.consumption = self.consumption.drop_sel(time=times_to_drop)
         with open(outputname + '.sparsehouse', 'wb') as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
