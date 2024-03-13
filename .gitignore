@@ -111,3 +111,7 @@ workdir/
 test_pysimdeum.py
 unittest.house
 test.xlsx
+compare.xlsx
+test2.sparsehouse
+test3.housepattern
+testhot.xlsx
