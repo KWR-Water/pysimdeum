@@ -11,6 +11,6 @@ def built_house(house_type: str = "") -> House:
     house.furnish_house()
     for user in house.users:
         user.compute_presence(statistics=stats)
-    house.simulate(num_patterns=100)
+    house.simulate(num_patterns=100) # why is house.simulate here? It seems as if you already simulate the house before giving that command. 
 
     return house

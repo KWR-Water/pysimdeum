@@ -471,9 +471,22 @@ class WashingMachine(EndUse):
         df = pd.Series(f_stats['average'])
         average = df[str(numusers)] * numusers
         return distribution(average)
-
+    
     def fct_duration_pattern(self, start=None):
-        pattern = self.statistics['enduse_pattern']
+        
+        normal_probability = self.statistics['normal_program']['penetration']
+        eco_probability = self.statistics['eco_program']['penetration']
+        long_probability = self.statistics['long_program']['penetration']
+        
+        u = np.random.random()*100 # here we add a chooser to pick a program from the different patterns.
+        
+        if u < normal_probability:
+            pattern = self.statistics['enduse_pattern_normal']
+        elif normal_probability <= u < (eco_probability + normal_probability):
+            pattern = self.statistics['enduse_pattern_eco']
+        elif (100 - long_probability) <= u:
+            pattern = self.statistics['enduse_pattern_long']
+        
         # duration = pattern.index[-1] - pattern.index[0]
         return pattern
 
@@ -494,11 +507,14 @@ class WashingMachine(EndUse):
         j = len(users)
 
         prob_joint = normalize(prob_user * prob_usage)
-
-        pattern = self.fct_duration_pattern()
-        duration = len(pattern)
+        
+        #pattern = self.fct_duration_pattern() 
+        #duration = len(pattern)
 
         for i in range(freq):
+            
+            pattern = self.fct_duration_pattern() #moved this into the for loop so that each time the waching machine is used a specific pattern is picked
+            duration = len(pattern)
 
             u = np.random.random()
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num

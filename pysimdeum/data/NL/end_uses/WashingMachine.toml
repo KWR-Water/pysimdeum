@@ -19,5 +19,23 @@ temperature = 10
         3 = 0.29
         4 = 0.27
         5 = 0.29
+        
+[mean_consumption]
+    mean = 50
+    
+[stdev]
+    stdev = 1
+    
+# here we would want the probability of use for each of the washing programs, the total penetration of these programs must be 100   
+[normal_program]
 
-# through subtypes different washing machine patterns (washing programs) could be constructed in the future
+    penetration = 40
+
+[eco_program]
+
+    penetration = 30
+    
+[long_program]
+    
+    penetration = 30
+    

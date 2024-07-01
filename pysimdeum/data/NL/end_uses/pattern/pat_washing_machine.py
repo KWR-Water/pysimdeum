@@ -1,6 +1,6 @@
 import pandas as pd
+import numpy as np
 from matplotlib import pyplot as plt
-
 
 def washingmachine_daily_pattern(x=None, resolution='1s'):
 
@@ -13,11 +13,16 @@ def washingmachine_daily_pattern(x=None, resolution='1s'):
     s = s[s.index.days == s.index[0].days]
     return s
 
+mean = 50 # To-do link this to the data in the toml files
+dev = 1
+average_water_use = np.random.normal(mean, dev)/300 #here we convert the average water use of the washing machine to a water use intensity during the intake moments
 
-def washingmachine_enduse_pattern(resolution='1s', periods=7200):
+def washingmachine_enduse_pattern_normal(resolution='1s', periods=7200, avg = average_water_use):
 
-    value = 1/6
-
+    value = avg
+    
+    #value = 1/6 #original value 
+    
     index = pd.timedelta_range(start='00:00:00', freq=resolution, periods=periods)
     s = pd.Series(0, index=index)
 
@@ -25,6 +30,41 @@ def washingmachine_enduse_pattern(resolution='1s', periods=7200):
     s.iloc[3600:3660] = value
     s.iloc[4920:4980] = value
     s.iloc[6120:6180] = value
+
+    # s.index = s.index - s.index[0]
+
+    return s
+
+def washingmachine_enduse_pattern_eco(resolution='1s', periods=7200, avg = average_water_use):
+
+    value = avg
+    
+    #value = 1/6 #original value  
+    
+    index = pd.timedelta_range(start='00:00:00', freq=resolution, periods=periods)
+    s = pd.Series(0, index=index)
+
+    s.iloc[0:121] = value
+    s.iloc[4920:4980] = value
+    s.iloc[6120:6180] = value
+
+    # s.index = s.index - s.index[0]
+
+    return s
+
+def washingmachine_enduse_pattern_long(resolution='1s', periods=7200, avg = average_water_use):
+
+    value = avg
+    
+    #value = 1/6 #original value 
+    
+    index = pd.timedelta_range(start='00:00:00', freq=resolution, periods=periods)
+    s = pd.Series(0, index=index)
+
+    s.iloc[0:121] = value
+    s.iloc[3600:3660] = value
+    s.iloc[4920:4980] = value
+    s.iloc[6120:6240] = value
 
     # s.index = s.index - s.index[0]
 

@@ -5,7 +5,7 @@ from pysimdeum.data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_p
     dishwasher_enduse_pattern
 from pysimdeum.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
 from pysimdeum.data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
-    washingmachine_enduse_pattern
+    washingmachine_enduse_pattern_normal, washingmachine_enduse_pattern_eco, washingmachine_enduse_pattern_long
 from pysimdeum.data import DATA_DIR
 
 @dataclass
@@ -53,7 +53,9 @@ class Statistics:
 
         # Pattern
         self.end_uses['WashingMachine']['daily_pattern'] = washingmachine_daily_pattern()
-        self.end_uses['WashingMachine']['enduse_pattern'] = washingmachine_enduse_pattern()
+        self.end_uses['WashingMachine']['enduse_pattern_normal'] = washingmachine_enduse_pattern_normal()
+        self.end_uses['WashingMachine']['enduse_pattern_eco'] = washingmachine_enduse_pattern_eco()
+        self.end_uses['WashingMachine']['enduse_pattern_long'] = washingmachine_enduse_pattern_long()
         self.end_uses['Dishwasher']['daily_pattern'] = dishwasher_daily_pattern()
         self.end_uses['Dishwasher']['enduse_pattern'] = dishwasher_enduse_pattern()
         self.end_uses['KitchenTap']['daily_pattern'] = ktap_daily_pattern()
