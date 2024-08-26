@@ -88,11 +88,11 @@ consumption = house.simulate(num_patterns=100)
 
 The simulation result is an `xarray.DataArray` --- basically a labelled `numpy.ndarray` with four dimensions / axes (i.e., time, user, enduse, patterns).
 
-You can easily create statistics over the consumption object, for example, to compute the  average total consumption (sum of consumption of all users and enduses as an average over the patterns), you can build the sum over the `user` and `enduse` axes (the total consumption), and then build the mean over the `patterns` axes 
+You can easily create statistics over the consumption object, for example, to compute the  average total consumption (sum of consumption of all users and enduses as an average over the patterns), you can build the sum over the `user` and `enduse` axes (the total consumption), and then build the mean over the `patterns` axes. There are two `flowtypes` defined. `totalflow` and `hotflow`. `totalflow` reflects the total water use while `hotflow` reflects the water that has been heated up. 
 
 ```python
 # Build statistics from consumption
-tot_cons = consumption.sum(['enduse', 'user']).mean([ 'patterns'])
+tot_cons = consumption.sum(['enduse', 'user']).sel(flowtypes='totalflow').mean([ 'patterns'])
 ```
 
 If you want to plot the results pand additionally depict some rolling averages (e.g., hourly means = 3600 seconds), you can this in the following way

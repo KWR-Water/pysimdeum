@@ -14,6 +14,8 @@ class EndUse:
     
     statistics: Statistics = field(repr=False)  # ... statistic object associated with end-use
     name: str = "EndUse"  # ... name of the end-use
+    cold_water_temp = 10
+    hot_water_temp = 60
 
     def init_consumption(self, users: list=None, time_resolution: str='1s') -> pd.DataFrame:
         """Initialization of a pandas dataframe to store the  consumptions.
@@ -73,14 +75,20 @@ class EndUse:
         """Placeholder for specific intensity probability function defined in specific EndUse"""
 
         raise NotImplementedError('Intensity function is not implemented yet!')
+    
+    def temperature(self):
+        """Placeholder for specific temperature function defined in specific EndUse"""
 
-    def fct_duration_intensity(self):
-        """Computing duration and intensity for enduse"""
+        raise NotImplementedError('temperature function is not implemented yet!')
+
+    def fct_duration_intensity_temperature(self):
+        """Computing duration and intensity for enduse and retrieve temperature for enduse"""
 
         duration = self.fct_duration()
         intensity = self.fct_intensity()
+        temperature = self.temperature()
 
-        return duration, intensity
+        return duration, intensity, temperature
 
 @dataclass
 class Bathtub(EndUse):
@@ -133,6 +141,16 @@ class Bathtub(EndUse):
         """
         # fixed intensity
         return self.statistics['intensity']
+    
+    def temperature(self):
+        """Obtain the temperature of a bath
+
+        Returns:
+            temperature of bath water
+        
+        """
+        # independent of subtype
+        return self.statistics['temperature']
 
     def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day_num=0):
 
@@ -144,14 +162,16 @@ class Bathtub(EndUse):
 
             for i in range(freq):
 
-                duration, intensity = self.fct_duration_intensity()
+                duration, intensity, temperature = self.fct_duration_intensity_temperature()
+                temperature = self.statistics['temperature']
                 prob_joint = normalize(prob_user * prob_usage)
 
                 u = np.random.uniform()
                 start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
                 end = start + duration
-
-                consumption[start:end, j, ind_enduse, pattern_num] = intensity
+                consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
+                temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
+                consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
 
         return consumption
 
@@ -169,7 +189,7 @@ class BathroomTap(EndUse):
         average = f_stats['average']
         return distribution(average)
 
-    def fct_duration_intensity(self):
+    def fct_duration_intensity_temperature(self):
 
         subtype = chooser(self.statistics['subtype'], 'penetration')
 
@@ -185,8 +205,8 @@ class BathroomTap(EndUse):
         high = i_stats['high']
 
         intensity = dist(low=low, high=high)
-
-        return duration, intensity
+        temperature = self.statistics['subtype'][subtype]['temperature']
+        return duration, intensity, temperature
 
     def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day_num=0):
 
@@ -198,14 +218,16 @@ class BathroomTap(EndUse):
 
             for i in range(freq):
 
-                duration, intensity = self.fct_duration_intensity()
+                duration, intensity, temperature = self.fct_duration_intensity_temperature()
 
                 prob_joint = normalize(prob_user * prob_usage)
 
                 u = np.random.uniform()
                 start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
                 end = int(start + duration)
-                consumption[start:end, j, ind_enduse, pattern_num] = intensity
+                consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
+                temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
+                consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
 
         return consumption
 
@@ -256,7 +278,8 @@ class Dishwasher(EndUse):
             if end > (24 * 60 * 60)*(day_num+1):  #ToDo: Find better way to simulate dishwashers that are turned on in the night
                 end = 24 * 60 * 60*(day_num+1)
             difference = end - start
-            consumption[start:end, j, ind_enduse, pattern_num] = pattern[:difference]
+            consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference] 
+            consumption[start:end, j, ind_enduse, pattern_num, 1] = 0
 
         return consumption
 
@@ -289,7 +312,7 @@ class KitchenTap(EndUse):
 
         return distribution(r, p)
 
-    def fct_duration_intensity(self):
+    def fct_duration_intensity_temperature(self):
 
         subtype = chooser(self.statistics['subtype'], 'penetration')
 
@@ -306,8 +329,9 @@ class KitchenTap(EndUse):
         high = i_stats['high']
 
         intensity = dist(low=low, high=high)
+        temperature = self.statistics['subtype'][subtype]['temperature']
 
-        return duration, intensity
+        return duration, intensity, temperature
 
     def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day_num=0):
 
@@ -327,12 +351,15 @@ class KitchenTap(EndUse):
 
         for i in range(freq):
 
-            duration, intensity = self.fct_duration_intensity()
+            duration, intensity, temperature = self.fct_duration_intensity_temperature()
             u = np.random.uniform()
             prob_joint = normalize(prob_user * prob_usage)  # ToDo: Check if joint probability can be computed outside of for loop for all functions
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
             end = start + duration
-            consumption[start:end, j, ind_enduse, pattern_num] = intensity
+            consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
+            temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
+            consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
+
 
         return consumption
 
@@ -349,7 +376,7 @@ class OutsideTap(EndUse):
         average = f_stats['average']
         return distribution(average)
 
-    def fct_duration_intensity(self):
+    def fct_duration_intensity_temperature(self):
 
         subtype = chooser(self.statistics['subtype'], 'penetration')
 
@@ -366,8 +393,9 @@ class OutsideTap(EndUse):
         high = i_stats['high']
 
         intensity = dist(low=low, high=high)
+        temperature = self.statistics['subtype'][subtype]['temperature']
 
-        return duration, intensity
+        return duration, intensity, temperature
 
     def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day_num=0):
 
@@ -387,14 +415,16 @@ class OutsideTap(EndUse):
 
         for i in range(freq):
 
-            duration, intensity = self.fct_duration_intensity()
+            duration, intensity, temperature = self.fct_duration_intensity_temperature()
 
             prob_joint = normalize(prob_user * prob_usage)
             u = np.random.uniform()
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
             end = start + duration
 
-            consumption[start:end, j, ind_enduse, pattern_num] = intensity
+            consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
+            temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
+            consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
 
         return consumption
 
@@ -413,7 +443,7 @@ class Shower(EndUse):
 
         return distribution(n, p)
 
-    def fct_duration_intensity(self, age=None):
+    def fct_duration_intensity_temperature(self, age=None):
 
         d_stats = self.statistics['duration']
         distribution = getattr(np.random, d_stats['distribution'].lower())
@@ -424,8 +454,9 @@ class Shower(EndUse):
         duration = int(pd.Timedelta(minutes=duration).total_seconds())
 
         intensity = self.statistics['subtype'][self.name]['intensity']
+        temperature = self.statistics['temperature']
 
-        return duration, intensity
+        return duration, intensity, temperature
 
     def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day_num=0):
 
@@ -436,13 +467,15 @@ class Shower(EndUse):
             prob_user = user.presence.values
 
             for i in range(freq):
-                duration, intensity = self.fct_duration_intensity(age=user.age)
+                duration, intensity, temperature = self.fct_duration_intensity_temperature(age=user.age)
 
                 prob_joint = normalize(prob_user * prob_usage)
                 u = np.random.uniform()
                 start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
                 end = start + duration
-                consumption[start:end, j, ind_enduse, pattern_num] = intensity
+                consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
+                temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
+                consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
 
         return consumption
 
@@ -507,7 +540,8 @@ class WashingMachine(EndUse):
             if end > (24 * 60 * 60)*(day_num+1):
                 end = 24 * 60 * 60*(day_num+1)
             difference = end - start
-            consumption[start:end, j, ind_enduse, pattern_num] = pattern[:difference]
+            consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]       
+            consumption[start:end, j, ind_enduse, pattern_num, 1] = 0
 
         return consumption
 
@@ -526,13 +560,13 @@ class Wc(EndUse):
 
         return distribution(average)
 
-    def fct_duration_intensity(self):
+    def fct_duration_intensity_temperature(self):
 
         flush_interuption = self.statistics['subtype'][self.name]['flush_interuption']
         prob_flush_interuption = self.statistics['prob_flush_interuption']
 
         intensity = self.statistics['intensity']
-
+        temperature = self.statistics['temperature']
         average = to_timedelta(self.statistics['subtype'][self.name]['duration'])
 
         # dist = duration_decorator(getattr(np.random, d_stats['distribution'].lower()))
@@ -545,7 +579,7 @@ class Wc(EndUse):
 
         duration = int(average.total_seconds())
 
-        return duration, intensity
+        return duration, intensity, temperature
 
 
     def simulate(self, consumption, users=None, ind_enduse=None, pattern_num=1, day_num=0):
@@ -558,13 +592,16 @@ class Wc(EndUse):
 
             for i in range(freq):
 
-                duration, intensity = self.fct_duration_intensity()
+                duration, intensity, temperature = self.fct_duration_intensity_temperature()
 
                 prob_joint = normalize(prob_user * prob_usage)
                 u = np.random.uniform()
                 start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
                 end = start + duration
-                consumption[start:end, j, ind_enduse, pattern_num] = intensity
+                consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
+                temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
+                consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
+
 
         return consumption
 

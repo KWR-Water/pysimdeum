@@ -281,14 +281,14 @@ class House(Property):
         users = [x.id for x in self.users] + ['household']
         enduse = [x.statistics['classname'] for x in self.appliances]
         patterns = [x for x in range(0, num_patterns)]
-        consumption = np.zeros((len(time), len(users), len(enduse), num_patterns))
+        flowtype = ['totalflow', 'hotflow']
+        consumption = np.zeros((len(time), len(users), len(enduse), num_patterns, len(flowtype)))
         number_of_days = int(timedelta/pd.to_timedelta('1 day'))
         for num in patterns:
             for k, appliance in enumerate(self.appliances):
                 for day in range(0, number_of_days, 1):
                     consumption = appliance.simulate(consumption, users=self.users, ind_enduse=k, pattern_num=num, day_num=day)
-
-        self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns], dims=['time', 'user', 'enduse', 'patterns'])
+        self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns, flowtype], dims=['time', 'user', 'enduse', 'patterns', 'flowtypes'])
 
         return self.consumption
 

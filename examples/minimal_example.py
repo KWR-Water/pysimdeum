@@ -17,7 +17,7 @@ print(house.appliances)
 consumption = house.simulate(num_patterns=100)
 
 # Build statistics from consumption
-tot_cons = consumption.sum(['enduse', 'user']).mean([ 'patterns'])
+tot_cons = consumption.sum(['enduse', 'user']).sel(flowtypes='totalflow').mean([ 'patterns'])
 print(tot_cons)
 
 # Plot total consumption
