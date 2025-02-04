@@ -224,7 +224,7 @@ class BathroomTap(EndUse):
             discharge_flow_rate = intensity
 
         while remaining_water > 0:
-            discharge_duration = min(remaining_water / discharge_flow_rate, duration)
+            discharge_duration = remaining_water / discharge_flow_rate
             end = int(start + discharge_duration)            
             discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate
             remaining_water -= discharge_flow_rate * discharge_duration

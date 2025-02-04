@@ -26,8 +26,8 @@ average = 4.1  # average frequency of end-use
 
         [subtype.washing_shaving.discharge_intensity]
             distribution = 'Uniform'
-            low = 0.067
-            high = 0.133
+            low = 0
+            high = 0.02
 
     [subtype.brushing_teeth]
         penetration = 66.6
@@ -44,5 +44,5 @@ average = 4.1  # average frequency of end-use
 
         [subtype.brushing_teeth.discharge_intensity]
             distribution = 'Uniform'
-            low = 0.067
-            high = 0.133
+            low = 0
+            high = 0.02
