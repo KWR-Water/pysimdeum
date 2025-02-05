@@ -1,0 +1,3 @@
+# pysimdeum run
+
+Run full
