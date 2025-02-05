@@ -4,3 +4,8 @@ pandas
 toml
 xarray
 scipy
+mike
+mkdocs
+mkdocs-material
+mkdocs-click
+mkdocstrings-python
