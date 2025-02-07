@@ -87,6 +87,7 @@ class House(Property):
     users: list = field(default_factory=list)  # List of users/inhabitants present in the house
     appliances: list = field(default_factory=list)  # List of appliances/water end-use devices in the house
     consumption: xr.DataArray = field(default_factory=xr.DataArray)  # property to store the consumption of a house
+    discharge: xr.DataArray = field(default_factory=xr.DataArray)  # property to store the discharge of a house
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}:\n\tid\t=\t{self.id}\n\ttype\t=' \
@@ -266,7 +267,7 @@ class House(Property):
                                         dims=['time', 'user', 'enduse'])
         return self.consumption
 
-    def simulate(self, date=None, duration='1 day', num_patterns=1):
+    def simulate(self, date=None, duration='1 day', num_patterns=1, simulate_discharge=False):
 
         if date is None:
             date = datetime.now().date()
@@ -284,13 +285,28 @@ class House(Property):
         flowtype = ['totalflow', 'hotflow']
         consumption = np.zeros((len(time), len(users), len(enduse), num_patterns, len(flowtype)))
         number_of_days = int(timedelta/pd.to_timedelta('1 day'))
+        
+        if simulate_discharge:
+            dischargetype = ['discharge']
+            discharge = np.zeros((len(time), len(users), len(enduse), num_patterns, len(dischargetype)))
+        else:
+            discharge = None
+
         for num in patterns:
             for k, appliance in enumerate(self.appliances):
                 for day in range(0, number_of_days, 1):
-                    consumption = appliance.simulate(consumption, users=self.users, ind_enduse=k, pattern_num=num, day_num=day)
-        self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns, flowtype], dims=['time', 'user', 'enduse', 'patterns', 'flowtypes'])
+                    if simulate_discharge:
+                        consumption, discharge = appliance.simulate(consumption, discharge, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, simulate_discharge=simulate_discharge)
+                    else:
+                        consumption, _ = appliance.simulate(consumption, None, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, simulate_discharge=simulate_discharge)
 
-        return self.consumption
+        if simulate_discharge:
+            self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns, flowtype], dims=['time', 'user', 'enduse', 'patterns', 'flowtypes'])
+            self.discharge = xr.DataArray(data=discharge, coords=[time, users, enduse, patterns, dischargetype], dims=['time', 'user', 'enduse', 'patterns', 'dischargetypes'])
+        else:
+            self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns, flowtype], dims=['time', 'user', 'enduse', 'patterns', 'flowtypes'])
+
+        return self.consumption, (self.discharge if simulate_discharge else None)
 
     def save_house(self, outputname):
 #        if self.consumption == None: #only save simulated houses
@@ -311,6 +327,7 @@ class HousePattern:
     users: list = field(default_factory=list, init=False)
     appliances: list = field(default_factory=list, init=False)
     consumption: list = field(default_factory=list, init=False)
+    discharge: list = field(default_factory=list, init=False)
 
     def __post__init__(self, house):
 
@@ -318,6 +335,7 @@ class HousePattern:
             self.users = self.house.users
             self.appliances = self.house.appliances 
             self.consumption = self.house.consumption.sum('user').sum('enduse')
+            self.discharge = self.house.discharge.sum('user').sum('enduse')
         
         elif type(self.house) == str:
             with open(house, 'rb') as f:
@@ -325,6 +343,7 @@ class HousePattern:
                 self.users = new_house_pattern.users
                 self.appliances = new_house_pattern.appliances
                 self.consumption = new_house_pattern.consumption
+                self.discharge = new_house_pattern.discharge
    
     def save_house_pattern(self, outputname):
         with open(outputname + '.housepattern', 'wb') as f:

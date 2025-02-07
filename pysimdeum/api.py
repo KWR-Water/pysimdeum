@@ -11,6 +11,6 @@ def built_house(house_type: str = "") -> House:
     house.furnish_house()
     for user in house.users:
         user.compute_presence(statistics=stats)
-    house.simulate(num_patterns=100)
+    house.simulate(num_patterns=1, simulate_discharge=False)
 
     return house
