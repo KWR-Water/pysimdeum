@@ -5,7 +5,7 @@ temperature = 40 # temperature of used-water [%]
 offset = 0  # offset defines the time where a second use of the end-use is blocked
 size = 120  # size of bathtub filling [L], but this parameter is not used
 duration = '10 Minutes'  # duration of filling a bathtub depends on the size and the intensity of the filling
-intensity = 0.2  # fixed intensity for bathtub filling corresponds to the maximum water flow at full tap opening [L/s]
+intensity = 0.2  # fixed intensity for bathtub filling corresponds to the maximum water flow at full tap opening [L/s
 
 [penetration]  # penetraton rate of houses with bathtubes [%] depennds on the number of people living in a house
     1 = 28
@@ -27,3 +27,12 @@ intensity = 0.2  # fixed intensity for bathtub filling corresponds to the maximu
         senior = 0.028571
         total = 0.042857
 
+[discharge_intensity]
+    distribution = 'Uniform'
+    low = 0.4
+    high = 0.6
+
+[usage_delay] # minutes
+    distribution = 'Uniform'
+    low = 20
+    high = 40

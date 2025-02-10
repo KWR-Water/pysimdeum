@@ -4,8 +4,9 @@ penetration = 100  # penetraton rate of houses with wc [%]
 # pattern_generator = ''  # if a pattern exists, otherwise this field is an empty string
 offset = 0  # offset defines the time where a second use of the end-use is blocked
 temperature = 10  # temperature of used-water [%]
-prob_flush_interuption = 70  # probability if a water savings option of a toilett is installed that it will be used [%]
+prob_flush_interuption = 70  # probability if a water savings option of a toilet is installed that it will be used [%]
 intensity = 0.042  # fixed intensity for toilet flush corresponds to the pipesize to fill the cistern [L/s]
+discharge_intensity = 1.2
 
 [frequency]
     distribution = 'Poisson'  # type of distribution from where the frequency of the  end-use will be drawn
