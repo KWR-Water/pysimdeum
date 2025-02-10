@@ -22,7 +22,6 @@ distribution = 'Negative_binomial'
     5 = 9.1
 
 [subtype]
-
     [subtype.consumption]
 
         penetration = 37.5

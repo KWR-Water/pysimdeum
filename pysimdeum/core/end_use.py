@@ -343,10 +343,10 @@ class KitchenTap(EndUse):
 
     def fct_duration_intensity_temperature(self):
 
-        subtype = chooser(self.statistics['subtype'], 'penetration')
+        self.subtype = chooser(self.statistics['subtype'], 'penetration')
 
-        d_stats = self.statistics['subtype'][subtype]['duration']
-        i_stats = self.statistics['subtype'][subtype]['intensity']
+        d_stats = self.statistics['subtype'][self.subtype]['duration']
+        i_stats = self.statistics['subtype'][self.subtype]['intensity']
 
         dist = getattr(np.random, d_stats['distribution'].lower())
         mean = np.log(pd.Timedelta(d_stats['average']).total_seconds()) - 0.5
@@ -358,7 +358,7 @@ class KitchenTap(EndUse):
         high = i_stats['high']
 
         intensity = dist(low=low, high=high)
-        temperature = self.statistics['subtype'][subtype]['temperature']
+        temperature = self.statistics['subtype'][self.subtype]['temperature']
 
         return duration, intensity, temperature
     
