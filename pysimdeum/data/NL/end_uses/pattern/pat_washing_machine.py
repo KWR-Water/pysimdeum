@@ -63,7 +63,7 @@ def washingmachine_discharge_pattern(enduse_pattern, discharge_time=30, resoluti
         discharge_rate = total_water_consumed / discharge_time
 
         # Assign the calculated flow rate to the discharge pattern
-        discharge_pattern.loc[discharge_start:discharge_end] = discharge_rate
+        discharge_pattern.loc[discharge_start:discharge_end - pd.Timedelta(seconds=1)] = discharge_rate # restrict range to not be inclusive of final timstamp as this would result in extra discharge
 
     # Account for the final phase_on section (the above just looks at gaps between phase_on sections)
     if len(phase_on_sections) > 0:
@@ -75,6 +75,6 @@ def washingmachine_discharge_pattern(enduse_pattern, discharge_time=30, resoluti
         remaining_time = periods - int(last_end.total_seconds())
         discharge_start = last_end + pd.Timedelta(seconds=remaining_time // 3) # leave 2/3 of the time for a 'spin' cycle
         discharge_end = discharge_start + pd.Timedelta(seconds=discharge_time)
-        discharge_pattern.loc[discharge_start:discharge_end] = flow_rate
+        discharge_pattern.loc[discharge_start:discharge_end - pd.Timedelta(seconds=1)] = flow_rate # restrict range to not be inclusive of final timstamp as this would result in extra discharge
 
     return discharge_pattern
