@@ -377,9 +377,21 @@ class KitchenTap(EndUse):
         if discharge_flow_rate > intensity:
             discharge_flow_rate = intensity
 
+        # Check if the tap is turned off before the end of the duration, if so, update the start time
+        if discharge[start, j, ind_enduse, pattern_num, 0] > 0:
+            next_zero_timestamp = start + 1
+            while next_zero_timestamp < len(discharge) and discharge[next_zero_timestamp, j, ind_enduse, pattern_num, 0] > 0: 
+                next_zero_timestamp += 1
+
+            if next_zero_timestamp < len(discharge):
+                start = next_zero_timestamp
+            else:
+                print("?")
+                return discharge
+
         while remaining_water > 0:
             discharge_duration = remaining_water / discharge_flow_rate
-            end = int(start + discharge_duration)            
+            end = int(start + discharge_duration)         
             discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate
             remaining_water -= discharge_flow_rate * discharge_duration
             start = end
@@ -417,7 +429,6 @@ class KitchenTap(EndUse):
                 if discharge is None:
                     raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
                 discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num)
-
 
         return consumption, (discharge if simulate_discharge else None)
 
