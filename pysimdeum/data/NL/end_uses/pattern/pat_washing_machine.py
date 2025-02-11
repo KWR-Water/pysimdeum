@@ -7,7 +7,7 @@ def washingmachine_daily_pattern(x=None, resolution='1s'):
     if x is None:
         x = '34 24 17 43 41 57 57 212 290 338 392 325 226 222 200 175 124 106 139 185 133 165 101 147 34'
     data = list(map(float, x.split(' ')))
-    index = pd.timedelta_range(start='00:00:00', freq='1H', periods=25)
+    index = pd.timedelta_range(start='00:00:00', freq='1h', periods=25)
     s = pd.Series(data=data, index=index)
     s = s.resample(resolution).mean().interpolate(method='linear')
     s = s[s.index.days == s.index[0].days]

@@ -318,7 +318,7 @@ class Dishwasher(EndUse):
 
             end_of_day = 24 * 60 * 60 * (day_num + 1)
             if end > end_of_day:
-                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day)
+                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, self.name)
             else:
                 difference = end - start
                 consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]
@@ -599,7 +599,7 @@ class WashingMachine(EndUse):
 
             end_of_day = 24 * 60 * 60 * (day_num + 1)
             if end > end_of_day:
-                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day)
+                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, "WashingMachine")
             else:
                 difference = end - start
                 consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]

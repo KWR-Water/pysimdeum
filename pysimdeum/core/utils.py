@@ -100,7 +100,7 @@ def to_timedelta(time: Union[str, float, pd.Timedelta]) -> pd.Timedelta:
     return value
 
 
-def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day):
+def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, name):
     """Handles the spillover of consumption events that extend beyond the end of the current day.
 
     Splits the consumption event into two parts: the part that fits within the current days and the part that spills over into the next day. The spillover part is moved to the start of the day, making an assumption that appliance had the same usage event beginning the previous day.
@@ -118,20 +118,18 @@ def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse
     Returns:
         numpy.ndarray: The updated consumption array with the spillover consumption handled.
     """
+    print("An event for ", name, " use has spilled over to the next day. Adjusting spillover times...")
     # Part that fits within the current day
-    print("end of day", end_of_day)
     difference = end_of_day - start
-    print("difference", difference)
     consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
     consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
 
     # Part that spills over into the next day
     spillover_start = 0
     spillover_end = end - end_of_day
-    print("end", end)
-    print("spillover end", spillover_end)
     consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 0] = pattern[difference:difference + spillover_end]
     consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 1] = 0
+    print("Spillover adjustment complete.")
 
     return consumption
 
@@ -154,10 +152,7 @@ def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_tim
     Returns:
         numpy.ndarray: The updated discharge array with the spillover discharge handled.
     """
-    print("end_of_day", end_of_day)
-    print("discharge_time", discharge_time)
     spillover_time = discharge_time - end_of_day
-    print("spillover_time", spillover_time)
     discharge[spillover_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
 
     return discharge

@@ -147,7 +147,7 @@ class Presence:
             pass
 
 
-        pdf = pdf.astype('float').resample('1S').fillna('ffill')[:-1]
+        pdf = pdf.astype('float').resample('1s').fillna('ffill')[:-1]
 
         pdf /= np.sum(pdf)  # normalize
 

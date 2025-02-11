@@ -8,7 +8,7 @@ def dishwasher_daily_pattern(x=None, resolution='1s'):
     if x is None:
         x = '70 49 33 69 30 19 9 37 80 52 52 45 53 78 34 44 38 101 489 390 170 185 240 574 70'
     data = list(map(float, x.split(' ')))
-    index = pd.timedelta_range(start='00:00:00', freq='1H', periods=len(data))
+    index = pd.timedelta_range(start='00:00:00', freq='1h', periods=len(data))
     s = pd.Series(data=data, index=index)
     s = s.resample(resolution).mean().interpolate(method='linear') # todo interpolate with cubic splines does not work
     s = s[s.index.days == s.index[0].days]
