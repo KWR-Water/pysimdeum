@@ -538,6 +538,15 @@ class WashingMachine(EndUse):
         pattern = self.statistics['enduse_pattern']
         # duration = pattern.index[-1] - pattern.index[0]
         return pattern
+    
+    def calculate_discharge(self, discharge, start, pattern, j, ind_enduse, pattern_num):
+        discharge_pattern = self.statistics['discharge_pattern']
+
+        for time in discharge_pattern[discharge_pattern > 0].index:
+            discharge_time  = start + int(time.total_seconds())
+            discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+
+        return discharge
 
     def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
 
@@ -571,6 +580,11 @@ class WashingMachine(EndUse):
             difference = end - start
             consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]       
             consumption[start:end, j, ind_enduse, pattern_num, 1] = 0
+
+            if simulate_discharge:
+                if discharge is None:
+                    raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
+                discharge = self.calculate_discharge(discharge, start, pattern, j, ind_enduse, pattern_num)
 
         return consumption, (discharge if simulate_discharge else None)
 
