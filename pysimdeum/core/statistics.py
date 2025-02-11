@@ -2,7 +2,7 @@ import os
 import toml
 from dataclasses import dataclass, field
 from pysimdeum.data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
-    dishwasher_enduse_pattern
+    dishwasher_enduse_pattern, dishwasher_discharge_pattern
 from pysimdeum.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
 from pysimdeum.data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
     washingmachine_enduse_pattern, washingmachine_discharge_pattern
@@ -57,6 +57,7 @@ class Statistics:
         self.end_uses['WashingMachine']['discharge_pattern'] = washingmachine_discharge_pattern(self.end_uses['WashingMachine']['enduse_pattern'])
         self.end_uses['Dishwasher']['daily_pattern'] = dishwasher_daily_pattern()
         self.end_uses['Dishwasher']['enduse_pattern'] = dishwasher_enduse_pattern()
+        self.end_uses['Dishwasher']['discharge_pattern'] = dishwasher_discharge_pattern(self.end_uses['Dishwasher']['enduse_pattern'])
         self.end_uses['KitchenTap']['daily_pattern'] = ktap_daily_pattern()
 
 

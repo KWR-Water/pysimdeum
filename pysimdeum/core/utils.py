@@ -100,6 +100,69 @@ def to_timedelta(time: Union[str, float, pd.Timedelta]) -> pd.Timedelta:
     return value
 
 
+def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day):
+    """Handles the spillover of consumption events that extend beyond the end of the current day.
+
+    Splits the consumption event into two parts: the part that fits within the current days and the part that spills over into the next day. The spillover part is moved to the start of the day, making an assumption that appliance had the same usage event beginning the previous day.
+
+    Args:
+        consumption (numpy.ndarray): The array representing the consumption data.
+        pattern (numpy.ndarray): The pattern of consumption to be applied.
+        start (int): The start time of the consumption event in seconds from the beginning of the day.
+        end (int): The end time of the consumption event in seconds from the beginning of the day.
+        j (int): The index of the user.
+        ind_enduse (int): The index of the end-use appliance.
+        pattern_num (int): The pattern number.
+        end_of_day (int): The end time of the current day in seconds from the beginning of the day.
+
+    Returns:
+        numpy.ndarray: The updated consumption array with the spillover consumption handled.
+    """
+    # Part that fits within the current day
+    print("end of day", end_of_day)
+    difference = end_of_day - start
+    print("difference", difference)
+    consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
+    consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
+
+    # Part that spills over into the next day
+    spillover_start = 0
+    spillover_end = end - end_of_day
+    print("end", end)
+    print("spillover end", spillover_end)
+    consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 0] = pattern[difference:difference + spillover_end]
+    consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 1] = 0
+
+    return consumption
+
+
+def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_time, j, ind_enduse, pattern_num, end_of_day):
+    """Handles the spillover of discharge times that occur beyond the end of the current day, making an assumption that appliance had the same usage event beginning the previous day.
+
+    This function shifts the discharge time to the start of the day.
+
+    Args:
+        discharge (numpy.ndarray): The array representing the discharge data.
+        discharge_pattern (pandas.Series): The pattern of discharge to be applied.
+        time (int): The time in seconds from the start of the appliance pattern
+        discharge_time (int): The discharge time in seconds from the beginning of the day.
+        j (int): The index of the user.
+        ind_enduse (int): The index of the end-use appliance.
+        pattern_num (int): The pattern number.
+        end_of_day (int): The end time of the current day in seconds from the beginning of the day.
+
+    Returns:
+        numpy.ndarray: The updated discharge array with the spillover discharge handled.
+    """
+    print("end_of_day", end_of_day)
+    print("discharge_time", discharge_time)
+    spillover_time = discharge_time - end_of_day
+    print("spillover_time", spillover_time)
+    discharge[spillover_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+
+    return discharge
+
+
 @dataclass
 class Base:
     """Base class of pysimdeum for generating objects. 

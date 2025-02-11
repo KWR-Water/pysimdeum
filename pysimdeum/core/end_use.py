@@ -2,7 +2,7 @@ import copy
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass, field
-from pysimdeum.core.utils import chooser, duration_decorator, normalize, to_timedelta
+from pysimdeum.core.utils import chooser, duration_decorator, normalize, to_timedelta, handle_spillover_consumption, handle_discharge_spillover
 from pysimdeum.core.statistics import Statistics	
 
 
@@ -278,6 +278,18 @@ class Dishwasher(EndUse):
     def fct_duration_pattern(self, start=None):
         pattern = self.statistics['enduse_pattern']
         return pattern
+    
+    def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, end_of_day):
+        discharge_pattern = self.statistics['discharge_pattern']
+
+        for time in discharge_pattern[discharge_pattern > 0].index:
+            discharge_time  = start + int(time.total_seconds())
+            if discharge_time > end_of_day:
+                discharge = handle_discharge_spillover(discharge, discharge_pattern, time, discharge_time, j, ind_enduse, pattern_num, end_of_day)
+            else:
+                discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+
+        return discharge
 
     def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
 
@@ -304,11 +316,18 @@ class Dishwasher(EndUse):
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
             end = start + duration
 
-            if end > (24 * 60 * 60)*(day_num+1):  #ToDo: Find better way to simulate dishwashers that are turned on in the night
-                end = 24 * 60 * 60*(day_num+1)
-            difference = end - start
-            consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference] 
-            consumption[start:end, j, ind_enduse, pattern_num, 1] = 0
+            end_of_day = 24 * 60 * 60 * (day_num + 1)
+            if end > end_of_day:
+                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day)
+            else:
+                difference = end - start
+                consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]
+                consumption[start:end, j, ind_enduse, pattern_num, 1] = 0
+
+            if simulate_discharge:
+                if discharge is None:
+                    raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
+                discharge = self.calculate_discharge(discharge, start, j, ind_enduse, pattern_num, end_of_day)
 
         return consumption, (discharge if simulate_discharge else None)
 
@@ -539,12 +558,15 @@ class WashingMachine(EndUse):
         # duration = pattern.index[-1] - pattern.index[0]
         return pattern
     
-    def calculate_discharge(self, discharge, start, pattern, j, ind_enduse, pattern_num):
+    def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, end_of_day):
         discharge_pattern = self.statistics['discharge_pattern']
 
         for time in discharge_pattern[discharge_pattern > 0].index:
             discharge_time  = start + int(time.total_seconds())
-            discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+            if discharge_time > end_of_day:
+                discharge = handle_discharge_spillover(discharge, discharge_pattern, time, discharge_time, j, ind_enduse, pattern_num, end_of_day)
+            else:
+                discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
 
         return discharge
 
@@ -575,16 +597,18 @@ class WashingMachine(EndUse):
             start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
             end = start + duration
 
-            if end > (24 * 60 * 60)*(day_num+1):
-                end = 24 * 60 * 60*(day_num+1)
-            difference = end - start
-            consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]       
-            consumption[start:end, j, ind_enduse, pattern_num, 1] = 0
+            end_of_day = 24 * 60 * 60 * (day_num + 1)
+            if end > end_of_day:
+                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day)
+            else:
+                difference = end - start
+                consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]
+                consumption[start:end, j, ind_enduse, pattern_num, 1] = 0
 
             if simulate_discharge:
                 if discharge is None:
                     raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
-                discharge = self.calculate_discharge(discharge, start, pattern, j, ind_enduse, pattern_num)
+                discharge = self.calculate_discharge(discharge, start, j, ind_enduse, pattern_num, end_of_day)
 
         return consumption, (discharge if simulate_discharge else None)
 
