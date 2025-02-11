@@ -152,6 +152,32 @@ class Bathtub(EndUse):
         # independent of subtype
         return self.statistics['temperature']
 
+    def calculate_discharge(self, discharge, end, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num):
+        remaining_water = intensity * duration
+
+        # Sample a usage_delay from a uniform distribution
+        usage_delay_stats = self.statistics['usage_delay']
+        usage_delay = np.random.uniform(usage_delay_stats['low'], usage_delay_stats['high']) * 60
+
+        start = int(end + usage_delay)
+
+        # Sample a value from the discharge_intensity distribution
+        discharge_intensity_stats = self.statistics['discharge_intensity']
+        dist = getattr(np.random, discharge_intensity_stats['distribution'].lower())
+        low = discharge_intensity_stats['low']
+        high = discharge_intensity_stats['high']
+        discharge_flow_rate = dist(low=low, high=high)
+
+        while remaining_water > 0:
+            discharge_duration = remaining_water / discharge_flow_rate
+            end = int(start + discharge_duration)
+            discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate
+            remaining_water -= discharge_flow_rate * discharge_duration
+            start = end
+
+        return discharge
+
+
     def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
 
         prob_usage = self.usage_probability().values
@@ -172,6 +198,11 @@ class Bathtub(EndUse):
                 consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
                 consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
+
+                if simulate_discharge:
+                    if discharge is None:
+                        raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
+                    discharge = self.calculate_discharge(discharge, end, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num)
 
         return consumption, (discharge if simulate_discharge else None)
 
@@ -611,6 +642,23 @@ class Wc(EndUse):
         return duration, intensity, temperature
 
 
+    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num):
+        incoming_water = intensity * duration
+        end = int(start)
+
+        # Sample a value from the discharge_intensity distribution
+        discharge_flow_rate = self.statistics['discharge_intensity']
+
+        while incoming_water > 0:
+            discharge_duration = incoming_water / discharge_flow_rate
+            start = int(end - discharge_duration)
+            discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate
+            incoming_water -= discharge_flow_rate * discharge_duration
+            end = start
+
+        return discharge
+
+
     def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
 
         prob_usage = self.usage_probability().values
@@ -631,6 +679,10 @@ class Wc(EndUse):
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
                 consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
 
+                if simulate_discharge:
+                    if discharge is None:
+                        raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
+                    discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num)
 
         return consumption, (discharge if simulate_discharge else None)
 
