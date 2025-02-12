@@ -2,7 +2,7 @@ import copy
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass, field
-from pysimdeum.core.utils import chooser, duration_decorator, normalize, to_timedelta, handle_spillover_consumption, handle_discharge_spillover
+from pysimdeum.core.utils import chooser, duration_decorator, normalize, to_timedelta, handle_spillover_consumption, handle_discharge_spillover, sample_start_time
 from pysimdeum.core.statistics import Statistics	
 
 
@@ -310,11 +310,13 @@ class Dishwasher(EndUse):
         pattern = self.fct_duration_pattern().values
         duration = len(pattern)
 
-        for i in range(freq):
+        previous_events = []
 
-            u = np.random.random()
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
-            end = start + duration
+        for i in range(freq):
+            start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+
+            # add event times to list of previous events
+            previous_events.append((start, end))
 
             end_of_day = 24 * 60 * 60 * (day_num + 1)
             if end > end_of_day:
@@ -591,11 +593,13 @@ class WashingMachine(EndUse):
         pattern = self.fct_duration_pattern()
         duration = len(pattern)
 
-        for i in range(freq):
+        previous_events = []
 
-            u = np.random.random()
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
-            end = start + duration
+        for i in range(freq):
+            start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+            
+            # add event times to list of previous events
+            previous_events.append((start, end))
 
             end_of_day = 24 * 60 * 60 * (day_num + 1)
             if end > end_of_day:

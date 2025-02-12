@@ -100,6 +100,30 @@ def to_timedelta(time: Union[str, float, pd.Timedelta]) -> pd.Timedelta:
     return value
 
 
+def sample_start_time(prob_joint, day_num, duration, previous_events):
+    """
+    Samples a valid start time for an event, ensuring no overlap with previous events
+    and no start within duration before the last sampled start time.
+
+    Args:
+        prob_joint (numpy.ndarray): The joint probability distribution.
+        day_num (int): The current day number in the simulation.
+        duration (int): The duration of the event.
+        previous_events (list): List of tuples containing start and end times of previous events.
+
+    Returns:
+        int: The sampled start time.
+        int: The calculated end time.
+    """
+    while True:
+        u = np.random.random()
+        start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds()) * day_num
+        end = start + duration
+
+        # Check for overlapping events or events within duration before the last sample start
+        if not any((start < event_end and start >= event_start) or (start < event_start and start >= event_start - int(duration)) for event_start, event_end in previous_events):
+            return start, end
+
 def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, name):
     """Handles the spillover of consumption events that extend beyond the end of the current day.
 
