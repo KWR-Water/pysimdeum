@@ -371,7 +371,9 @@ class KitchenTap(EndUse):
         dist = getattr(np.random, discharge_intensity_stats['distribution'].lower())
         low = discharge_intensity_stats['low']
         high = discharge_intensity_stats['high']
-        discharge_flow_rate = dist(low=low, high=high)
+        discharge_flow_rate = 0
+        while discharge_flow_rate == 0: #ensure the discharge is not zero
+            discharge_flow_rate = dist(low=low, high=high)
 
         # limit discharge_flow_rate to the intensity of the tap if there is not enough water to discharge
         if discharge_flow_rate > intensity:
@@ -386,13 +388,20 @@ class KitchenTap(EndUse):
             if next_zero_timestamp < len(discharge):
                 start = next_zero_timestamp
             else:
-                print("?")
+                print("Warning: No zero value found in discharge array.")
                 return discharge
 
         while remaining_water > 0:
             discharge_duration = remaining_water / discharge_flow_rate
-            end = int(start + discharge_duration)         
-            discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate
+            end = int(start + discharge_duration)
+            print("subtype: ", self.subtype)
+            print("start:", start)
+            # check if subtype = consumption (drinking), if so the discharge flow rate is set to 0
+            if self.subtype == 'consumption':
+                discharge[start:end, j, ind_enduse, pattern_num, 0] = 0
+            else:
+                discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate         
+            #discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate
             remaining_water -= discharge_flow_rate * discharge_duration
             start = end
 
