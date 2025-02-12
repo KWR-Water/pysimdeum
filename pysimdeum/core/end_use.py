@@ -394,8 +394,6 @@ class KitchenTap(EndUse):
         while remaining_water > 0:
             discharge_duration = remaining_water / discharge_flow_rate
             end = int(start + discharge_duration)
-            print("subtype: ", self.subtype)
-            print("start:", start)
             # check if subtype = consumption (drinking), if so the discharge flow rate is set to 0
             if self.subtype == 'consumption':
                 discharge[start:end, j, ind_enduse, pattern_num, 0] = 0
