@@ -123,6 +123,7 @@ def sample_start_time(prob_joint, day_num, duration, previous_events):
         # Check for overlapping events or events within duration before the last sample start
         if not any((start < event_end and start >= event_start) or (start < event_start and start >= event_start - int(duration)) for event_start, event_end in previous_events):
             return start, end
+        
 
 def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, name):
     """Handles the spillover of consumption events that extend beyond the end of the current day.
@@ -180,6 +181,127 @@ def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_tim
     discharge[spillover_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
 
     return discharge
+
+
+def complex_daily_pattern(config, resolution='1s'):
+    """Generates a daily pattern for water usage based on the provided configuration.
+
+    This function reads the daily pattern data from the provided configuration,
+    resamples it to the specified resolution, and interpolates the values to create
+    a smooth daily pattern.
+
+    Args:
+        config (dict): Configuration dictionary containing the daily pattern data.
+        resolution (str, optional): The time resolution for resampling the data. Defaults to '1s'.
+
+    Returns:
+        pd.Series: A pandas Series representing the daily pattern, resampled and interpolated
+        to the specified resolution.
+    """
+    x = config['daily_pattern_input']['x']
+    data = list(map(float, x.split(' ')))
+    index = pd.timedelta_range(start='00:00:00', freq='1h', periods=25)
+    s = pd.Series(data=data, index=index)
+    s = s.resample(resolution).mean().interpolate(method='linear')
+    s = s[s.index.days == s.index[0].days]
+    return s
+
+
+def complex_enduse_pattern(config, resolution='1s'):
+    """Generates the end-use pattern for an appliance with consumption cycles based on the provided configuration.
+
+    This function reads the intensity, runtime, and cycle times from the provided configuration,
+    creates a time series for the specified resolution, and assigns the intensity to the specified
+    cycle times.
+
+    Args:
+        resolution (str, optional): The time resolution for the time series. Defaults to '1s'.
+
+    Returns:
+        pd.Series: A pandas Series representing the end-use pattern for the appliance,
+        with the specified intensity assigned to the specified cycle times.
+    """
+    intensity = config['enduse_pattern_input']['intensity']
+    runtime = config['enduse_pattern_input']['runtime']
+    cycle_times = config['enduse_pattern_input']['cycle_times']
+
+    index = pd.timedelta_range(start='00:00:00', freq=resolution, periods=runtime)
+    s = pd.Series(0, index=index)
+
+    for cycle in cycle_times:
+        start = cycle['start']
+        end = cycle['end']
+        s.iloc[start:end] = intensity
+
+    return s
+
+
+def complex_discharge_pattern(config, enduse_pattern, resolution='1s'):
+    """Generates the discharge pattern for an appliance with discharge cycles based on the provided configuration and end-use pattern.
+
+    This function reads the discharge time and runtime from the provided configuration,
+    identifies the start and end of each phase_on section in the end-use pattern, calculates
+    the total water consumed for each section, and distributes it as discharge over the specified
+    resolution.
+
+    Args:
+        config (dict): Configuration dictionary containing the discharge pattern and end-use pattern data.
+        enduse_pattern (pd.Series): A pandas Series representing the end-use pattern for the appliance.
+        resolution (str, optional): The time resolution for the discharge pattern. Defaults to '1s'.
+
+    Returns:
+        pd.Series: A pandas Series representing the discharge pattern for the appliance,
+        with the calculated discharge rates assigned to the specified cycle times.
+    """
+    discharge_time = config['discharge_pattern_input']['discharge_time']
+    runtime = config['enduse_pattern_input']['runtime']
+
+    index = pd.timedelta_range(start='00:00:00', freq=resolution, periods=runtime)
+    discharge_pattern = pd.Series(0, index=index)
+
+    # Identify the start and end of each phase_on section
+    phase_on_sections = []
+    in_phase = False
+    for i in range(len(enduse_pattern)):
+        if enduse_pattern.iloc[i] > 0 and not in_phase:
+            start = enduse_pattern.index[i]
+            in_phase = True
+        elif enduse_pattern.iloc[i] == 0 and in_phase:
+            end = enduse_pattern.index[i-1]
+            phase_on_sections.append((start, end))
+            in_phase = False
+    if in_phase:
+        end = enduse_pattern.index[-1]
+        phase_on_sections.append((start, end))
+
+    # Calculate the total water consumed for each phase_on section and distribute it as discharge
+    for i in range(1, len(phase_on_sections)):
+        next_start = phase_on_sections[i][0]
+        discharge_end = next_start - pd.Timedelta(seconds=10) # 10 second gap between discharge and next phase_on
+        discharge_start = discharge_end - pd.Timedelta(seconds=discharge_time) 
+
+        # Calculate the total water consumed for the phase_on section
+        total_water_consumed = enduse_pattern[phase_on_sections[i-1][0]:phase_on_sections[i-1][1]].sum()
+
+        # Calculate the flow rate based on the total water consumed and discharge time
+        discharge_rate = total_water_consumed / discharge_time
+
+        # Assign the calculated flow rate to the discharge pattern
+        discharge_pattern.loc[discharge_start:discharge_end - pd.Timedelta(seconds=1)] = discharge_rate # restrict range to not be inclusive of final timstamp as this would result in extra discharge
+
+    # Account for the final phase_on section (the above just looks at gaps between phase_on sections)
+    if len(phase_on_sections) > 0:
+        last_start, last_end = phase_on_sections[-1]
+        total_water_consumed = enduse_pattern[last_start:last_end].sum()
+        flow_rate = total_water_consumed / discharge_time
+
+        # Calculate the time from last_end to the end of the periods time
+        remaining_time = runtime - int(last_end.total_seconds())
+        discharge_start = last_end + pd.Timedelta(seconds=remaining_time // 3) # leave 2/3 of the time for a 'spin' or 'drain' cycle
+        discharge_end = discharge_start + pd.Timedelta(seconds=discharge_time)
+        discharge_pattern.loc[discharge_start:discharge_end - pd.Timedelta(seconds=1)] = flow_rate # restrict range to not be inclusive of final timstamp as this would result in extra discharge
+
+    return discharge_pattern
 
 
 @dataclass
