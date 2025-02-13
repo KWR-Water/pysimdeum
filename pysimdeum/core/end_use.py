@@ -178,7 +178,7 @@ class Bathtub(EndUse):
         return discharge
 
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
 
         prob_usage = self.usage_probability().values
 
@@ -264,7 +264,7 @@ class BathroomTap(EndUse):
         return discharge
 
 
-    def simulate(self, consumption, discharge, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
+    def simulate(self, consumption, discharge, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
         prob_usage = self.usage_probability().values
 
         for j, user in enumerate(users):
@@ -310,19 +310,21 @@ class Dishwasher(EndUse):
         pattern = self.statistics['enduse_pattern']
         return pattern
     
-    def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, end_of_day):
+    def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, day_num, end_of_day, total_days, spillover=False):
         discharge_pattern = self.statistics['discharge_pattern']
 
         for time in discharge_pattern[discharge_pattern > 0].index:
             discharge_time  = start + int(time.total_seconds())
-            if discharge_time > end_of_day:
-                discharge = handle_discharge_spillover(discharge, discharge_pattern, time, discharge_time, j, ind_enduse, pattern_num, end_of_day)
+            if discharge_time > end_of_day and spillover:
+                discharge = handle_discharge_spillover(discharge, discharge_pattern, time, discharge_time, j, ind_enduse, pattern_num, end_of_day, total_days)
+            elif ((day_num + 1) == total_days) and (discharge_time > end_of_day):
+                pass
             else:
                 discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
 
         return discharge
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
 
         prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
         freq = self.fct_frequency(numusers=len(users))
@@ -350,8 +352,13 @@ class Dishwasher(EndUse):
             previous_events.append((start, end))
 
             end_of_day = 24 * 60 * 60 * (day_num + 1)
-            if end > end_of_day:
-                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, self.name)
+            if end > end_of_day and spillover:
+                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, self.name, total_days)
+            elif ((day_num + 1) == total_days) and (end > end_of_day):
+                difference = end_of_day - start
+                print(difference)
+                consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
+                consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
             else:
                 difference = end - start
                 consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]
@@ -360,7 +367,7 @@ class Dishwasher(EndUse):
             if simulate_discharge:
                 if discharge is None:
                     raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
-                discharge = self.calculate_discharge(discharge, start, j, ind_enduse, pattern_num, end_of_day)
+                discharge = self.calculate_discharge(discharge, start, j, ind_enduse, pattern_num, day_num, end_of_day, total_days, spillover=spillover)
 
         return consumption, (discharge if simulate_discharge else None)
 
@@ -414,7 +421,7 @@ class KitchenTap(EndUse):
 
         return duration, intensity, temperature
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
 
         prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
 
@@ -478,7 +485,7 @@ class OutsideTap(EndUse):
 
         return duration, intensity, temperature
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
 
         prob_usage = self.usage_probability().values
 
@@ -539,7 +546,7 @@ class Shower(EndUse):
 
         return duration, intensity, temperature
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
 
         prob_usage = self.usage_probability().values
 
@@ -591,19 +598,21 @@ class WashingMachine(EndUse):
         # duration = pattern.index[-1] - pattern.index[0]
         return pattern
     
-    def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, end_of_day):
+    def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, day_num, end_of_day, total_days, spillover=False):
         discharge_pattern = self.statistics['discharge_pattern']
 
         for time in discharge_pattern[discharge_pattern > 0].index:
             discharge_time  = start + int(time.total_seconds())
-            if discharge_time > end_of_day:
-                discharge = handle_discharge_spillover(discharge, discharge_pattern, time, discharge_time, j, ind_enduse, pattern_num, end_of_day)
+            if discharge_time > end_of_day and spillover:
+                discharge = handle_discharge_spillover(discharge, discharge_pattern, time, discharge_time, j, ind_enduse, pattern_num, end_of_day, total_days)
+            elif ((day_num + 1) == total_days) and (discharge_time > end_of_day):
+                pass
             else:
                 discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
 
         return discharge
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
 
         prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
 
@@ -633,8 +642,13 @@ class WashingMachine(EndUse):
             previous_events.append((start, end))
 
             end_of_day = 24 * 60 * 60 * (day_num + 1)
-            if end > end_of_day:
-                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, "WashingMachine")
+            if end > end_of_day and spillover:
+                consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, "WashingMachine", total_days)
+            elif ((day_num + 1) == total_days) and (end > end_of_day):
+                difference = end_of_day - start
+                print(difference)
+                consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
+                consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
             else:
                 difference = end - start
                 consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]
@@ -643,7 +657,7 @@ class WashingMachine(EndUse):
             if simulate_discharge:
                 if discharge is None:
                     raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
-                discharge = self.calculate_discharge(discharge, start, j, ind_enduse, pattern_num, end_of_day)
+                discharge = self.calculate_discharge(discharge, start, j, ind_enduse, pattern_num, day_num, end_of_day, total_days, spillover=spillover)
 
         return consumption, (discharge if simulate_discharge else None)
 
@@ -701,7 +715,7 @@ class Wc(EndUse):
         return discharge
 
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
 
         prob_usage = self.usage_probability().values
 
