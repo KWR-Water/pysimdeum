@@ -51,7 +51,7 @@ pip install git+https://github.com/KWR-Water/pysimdeum.git
 git clone git@github.com:KWR-Water/pysimdeum.git
 cd pysimdeum
 mamba create -n pysimdeum python=3.11 pip -c conda-forge
-mamba acrtivate pysimdeum
+mamba activate pysimdeum
 pip install -r requirements.txt .
 
 ```
