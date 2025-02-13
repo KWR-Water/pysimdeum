@@ -116,10 +116,12 @@ plt.show()
 <figcaption>Plot of total flow consumption for a one-person household.</figcaption>
 </figure>
 
+
 <figure>
 <img src="/images/consumption_totalflow_rollingav.png", width="100%", style="background-color:white;", alt="Consumption total flow, 1-hour rolling average">
 <figcaption>Plot of 1-hour rolling average total flow consumption for a one-person household.</figcaption>
 </figure>
+
 
 Or produce plots for a specific enduse such as `KitchenTap`
 
