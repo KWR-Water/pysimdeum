@@ -1,55 +1,60 @@
+<!--- the "--8<--" html comments define what part of the README to add to the index page of the documentation -->
+<!--- --8<-- [start:docs] -->
 # PYSIMDEUM
 
-`pysimdeum` is a Python package for modelling and simulating residential stochastic water demand at the end-use level.
+`pysimdeum` is a Python package for modelling and simulating residential stochastic water demand and discharge at the end-use level.
 
 Main functionalities:
 
 -	Build and populate houses with users and water end-use devices according to country specific statistics
--	Simulate water usage stochastically based on the statistics 
+-	Simulate water usage and demand stochastically based on the statistics 
 -	The results are stored as `xarray.DataArray`, so all the simulation information can be accessed and aggregated afterwards (e.g., specific end-uses, sums over water usage of users, rolling means over time, ...)
 -   Serialization: `pysimdeum`  supports different output formats (e.g., csv, excel, netcdf, ...)
 -	Plotting results using matplotlib
 
-A detailed documentation will be soon available under https://pysimdeum.readthedocs.io.
+For more detailed instructions, see our [documentation](https://pysimdeum.readthedocs.io/en/latest/).
 
 Output is based on statistics about household sizes and water use of the Netherlands. These can be changed either within the code or by creating the correct toml files. An overview of worldwide differences is available in:
 
 Mazzoni, F., Alvisi, S., Blokker, E. J. M., Buchberger, S. G., Castelletti, A., Cominola, A., Gross, M. P., Jacobs, H. E., Mayer, P., Steffelbauer, D. B., Stewart, R. A., Stillwell, A. S., Tzatchkov, V., Yamanaka, V. H. A. and Franchini, M. (2022). "Investigating the characteristics of residential end uses of water: a worldwide review." Water Research, art. no. 119500, doi:https://doi.org/10.1016/j.watres.2022.119500.https://www.sciencedirect.com/science/article/pii/S0043135422014452 https://livelink.kwrwater.nl/livelink/livelink.exe/Open/69638292
-
----
-**Warning!**
-
-Be warned, that `pysimdeum`  is still changing a lot. Until it's marked as 1.0.0, you should assume that it is unstable and act accordingly. We are trying to avoid breaking changes but they can and will occur!
-
----
+<!--- --8<-- [end:docs] -->
 
 ## Installation
 
 `pysimdeum`  uses features only available in a newer Python version, which is why Python >= 3.8 is needed along with several Python package dependencies.
 
+### As a user
+
 `pysimdeum`  is available on PyPI and can be easily installed together with its dependencies using `pip`:
 
+<!--- --8<-- [start:docs-install-PyPI] -->
 ```bash
 pip install pysimdeum
 ```
+<!--- --8<-- [end:docs-install-PyPI] -->
 
 Alternatively, you can install `pysimdeum`  from its repository:
 
 
+<!--- --8<-- [start:docs-install-repo] -->
 ```bash
 pip install git+https://github.com/KWR-Water/pysimdeum.git
 ```
+<!--- --8<-- [end:docs-install-repo] -->
 
-### Dependencies
 
-`pysimdeum`  requires the following Python packages:
+### As a developer
 
-- matplotlib
-- numpy
-- pandas
-- toml
-- xarray
-- scipy
+<!--- --8<-- [start:docs-install-dev] -->
+```bash
+git clone git@github.com:KWR-Water/pysimdeum.git
+cd pysimdeum
+mamba create -n pysimdeum python=3.11 pip -c conda-forge
+mamba acrtivate pysimdeum
+pip install -r requirements.txt .
+
+```
+<!--- --8<-- [end:docs-install-dev] -->
 
 ## Basic Usage
 
