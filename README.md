@@ -112,7 +112,7 @@ plt.show()
 ```
 <div style="display: flex; justify-content: center;">
     <figure>
-        <img src="/images/consumption_totalflow.png", width="60%", style="background-color:white;", alt="Consumption total flow">
+        <img src="/images/consumption_totalflow.png", width="60%", style="background-color:white; margin:auto", alt="Consumption total flow">
         <figcaption>Plot of total flow consumption for a one-person household.</figcaption>
     </figure>
 </div>
@@ -120,7 +120,7 @@ plt.show()
 
 <div style="display: flex; justify-content: center;">
     <figure>
-        <img src="/images/consumption_totalflow_rollingav.png", width="60%", style="background-color:white;", alt="Consumption total flow, 1-hour rolling average">
+        <img src="/images/consumption_totalflow_rollingav.png", width="60%", style="background-color:white; margin:auto", alt="Consumption total flow, 1-hour rolling average">
         <figcaption>Plot of 1-hour rolling average total flow consumption for a one-person household.</figcaption>
     </figure>
 </div>
@@ -134,7 +134,7 @@ consumption.sum(["user"]).sel(enduse="KitchenTap").sel(flowtypes="totalflow").pl
 
 <div style="display: flex; justify-content: center;">
     <figure>
-        <img src="/images/consumption_ktap_totalflow.png", width="60%", style="background-color:white;", alt="KitchenTap total consumption">
+        <img src="/images/consumption_ktap_totalflow.png", width="60%", style="background-color:white; margin:auto", alt="KitchenTap total consumption">
         <figcaption>Plot of total consumption of the KitchenTap appliance in a one-person household</figcaption>
     </figure>
 </div>
