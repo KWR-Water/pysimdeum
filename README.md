@@ -6,7 +6,7 @@
 
 Main functionalities:
 
--	Build and populate houses with users and water end-use devices according to country specific statistics
+-	Build and populate houses with users and water end-use devices according to region (e.g. country, city, state) specific statistics
 -	Simulate water usage and demand stochastically based on the statistics 
 -	The results are stored as `xarray.DataArray`, so all the simulation information can be accessed and aggregated afterwards (e.g., specific end-uses, sums over water usage of users, rolling means over time, ...)
 -   Serialisation: `pysimdeum`  supports different output formats (e.g., csv, excel, netcdf, ...)
