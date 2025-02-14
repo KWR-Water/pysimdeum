@@ -267,7 +267,7 @@ class House(Property):
                                         dims=['time', 'user', 'enduse'])
         return self.consumption
 
-    def simulate(self, date=None, duration='1 day', num_patterns=1, simulate_discharge=False):
+    def simulate(self, date=None, duration='1 day', num_patterns=1, simulate_discharge=False, spillover=False):
 
         if date is None:
             date = datetime.now().date()
@@ -296,9 +296,9 @@ class House(Property):
             for k, appliance in enumerate(self.appliances):
                 for day in range(0, number_of_days, 1):
                     if simulate_discharge:
-                        consumption, discharge = appliance.simulate(consumption, discharge, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, simulate_discharge=simulate_discharge)
+                        consumption, discharge = appliance.simulate(consumption, discharge, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, total_days=number_of_days, simulate_discharge=simulate_discharge, spillover=spillover)
                     else:
-                        consumption, _ = appliance.simulate(consumption, None, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, simulate_discharge=simulate_discharge)
+                        consumption, _ = appliance.simulate(consumption, None, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, total_days=number_of_days, simulate_discharge=simulate_discharge, spillover=spillover)
 
         if simulate_discharge:
             self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns, flowtype], dims=['time', 'user', 'enduse', 'patterns', 'flowtypes'])

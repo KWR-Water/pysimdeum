@@ -124,7 +124,7 @@ def sample_start_time(prob_joint, day_num, duration, previous_events):
         if not any((start < event_end and start >= event_start) or (start < event_start and start >= event_start - int(duration)) for event_start, event_end in previous_events):
             return start, end
 
-def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, name):
+def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, name, total_days):
     """Handles the spillover of consumption events that extend beyond the end of the current day.
 
     Splits the consumption event into two parts: the part that fits within the current days and the part that spills over into the next day. The spillover part is moved to the start of the day, making an assumption that appliance had the same usage event beginning the previous day.
@@ -138,11 +138,13 @@ def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse
         ind_enduse (int): The index of the end-use appliance.
         pattern_num (int): The pattern number.
         end_of_day (int): The end time of the current day in seconds from the beginning of the day.
+        name(str): The name of the appliance.
+        total_days (int): The total number of days in the simulation.
 
     Returns:
         numpy.ndarray: The updated consumption array with the spillover consumption handled.
     """
-    print("An event for ", name, " use has spilled over to the next day. Adjusting spillover times...")
+    print("A usage event for ", name, " use has spilled over to the next day. Adjusting spillover times...")
     # Part that fits within the current day
     difference = end_of_day - start
     consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
@@ -151,14 +153,27 @@ def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse
     # Part that spills over into the next day
     spillover_start = 0
     spillover_end = end - end_of_day
-    consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 0] = pattern[difference:difference + spillover_end]
-    consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 1] = 0
-    print("Spillover adjustment complete.")
+
+    # Calculate the day index for the spillover
+    current_day = start // (24 * 60 * 60)
+    next_day = (current_day + 1) % total_days # if next day exceeds total number of days in the sim, wraps around to the beginning (day 0)
+
+    if next_day == 0:
+        consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 0] = pattern[difference:difference + spillover_end]
+        consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 1] = 0
+    else:
+        # Continue to the next day
+        spillover_start = next_day * 24 * 60 * 60
+        spillover_end = spillover_start + spillover_end
+        consumption[spillover_start:spillover_end, j, ind_enduse, pattern_num, 0] = pattern[difference:difference + (spillover_end - spillover_start)]
+        consumption[spillover_start:spillover_end, j, ind_enduse, pattern_num, 1] = 0
+
+    print("Spillover consumption adjustment complete.")
 
     return consumption
 
 
-def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_time, j, ind_enduse, pattern_num, end_of_day):
+def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_time, j, ind_enduse, pattern_num, end_of_day, total_days):
     """Handles the spillover of discharge times that occur beyond the end of the current day, making an assumption that appliance had the same usage event beginning the previous day.
 
     This function shifts the discharge time to the start of the day.
@@ -167,17 +182,24 @@ def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_tim
         discharge (numpy.ndarray): The array representing the discharge data.
         discharge_pattern (pandas.Series): The pattern of discharge to be applied.
         time (int): The time in seconds from the start of the appliance pattern
-        discharge_time (int): The discharge time in seconds from the beginning of the day.
+        discharge_time (int): The discharge time in seconds from the beginning of the simulation.
         j (int): The index of the user.
         ind_enduse (int): The index of the end-use appliance.
         pattern_num (int): The pattern number.
         end_of_day (int): The end time of the current day in seconds from the beginning of the day.
+        total_days (int): The total number of days in the simulation.
 
     Returns:
         numpy.ndarray: The updated discharge array with the spillover discharge handled.
     """
-    spillover_time = discharge_time - end_of_day
-    discharge[spillover_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+    if discharge_time >= (total_days * 24 * 60 * 60):
+        spillover_time = discharge_time - end_of_day
+        discharge[spillover_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+    else:
+        # Continue to the next day
+        discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+
+    #discharge[spillover_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
 
     return discharge
 
