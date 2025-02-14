@@ -395,10 +395,10 @@ class KitchenTap(EndUse):
 
     def fct_duration_intensity_temperature(self):
 
-        subtype = chooser(self.statistics['subtype'], 'penetration')
+        self.subtype = chooser(self.statistics['subtype'], 'penetration')
 
-        d_stats = self.statistics['subtype'][subtype]['duration']
-        i_stats = self.statistics['subtype'][subtype]['intensity']
+        d_stats = self.statistics['subtype'][self.subtype]['duration']
+        i_stats = self.statistics['subtype'][self.subtype]['intensity']
 
         dist = getattr(np.random, d_stats['distribution'].lower())
         mean = np.log(pd.Timedelta(d_stats['average']).total_seconds()) - 0.5
@@ -410,9 +410,52 @@ class KitchenTap(EndUse):
         high = i_stats['high']
 
         intensity = dist(low=low, high=high)
-        temperature = self.statistics['subtype'][subtype]['temperature']
+        temperature = self.statistics['subtype'][self.subtype]['temperature']
 
         return duration, intensity, temperature
+    
+    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num):
+        remaining_water = intensity * duration
+        start = int(start)
+
+        # Sample a value from the discharge_intensity distribution
+        discharge_intensity_stats = self.statistics['subtype'][self.subtype]['discharge_intensity']
+        dist = getattr(np.random, discharge_intensity_stats['distribution'].lower())
+        low = discharge_intensity_stats['low']
+        high = discharge_intensity_stats['high']
+        discharge_flow_rate = 0
+        while discharge_flow_rate == 0: #ensure the discharge is not zero
+            discharge_flow_rate = dist(low=low, high=high)
+
+        # limit discharge_flow_rate to the intensity of the tap if there is not enough water to discharge
+        if discharge_flow_rate > intensity:
+            discharge_flow_rate = intensity
+
+        # Check if the tap is turned off before the end of the duration, if so, update the start time
+        if discharge[start, j, ind_enduse, pattern_num, 0] > 0:
+            next_zero_timestamp = start + 1
+            while next_zero_timestamp < len(discharge) and discharge[next_zero_timestamp, j, ind_enduse, pattern_num, 0] > 0: 
+                next_zero_timestamp += 1
+
+            if next_zero_timestamp < len(discharge):
+                start = next_zero_timestamp
+            else:
+                print("Warning: No zero value found in discharge array.")
+                return discharge
+
+        while remaining_water > 0:
+            discharge_duration = remaining_water / discharge_flow_rate
+            end = int(start + discharge_duration)
+            # check if subtype = consumption (drinking), if so the discharge flow rate is set to 0
+            if self.subtype == 'consumption':
+                discharge[start:end, j, ind_enduse, pattern_num, 0] = 0
+            else:
+                discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate         
+            #discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate
+            remaining_water -= discharge_flow_rate * discharge_duration
+            start = end
+
+        return discharge
 
     def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, simulate_discharge=False):
 
@@ -441,6 +484,10 @@ class KitchenTap(EndUse):
             temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
             consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
 
+            if simulate_discharge:
+                if discharge is None:
+                    raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
+                discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num)
 
         return consumption, (discharge if simulate_discharge else None)
 

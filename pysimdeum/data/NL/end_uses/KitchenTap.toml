@@ -22,7 +22,6 @@ distribution = 'Negative_binomial'
     5 = 9.1
 
 [subtype]
-
     [subtype.consumption]
 
         penetration = 37.5
@@ -37,6 +36,11 @@ distribution = 'Negative_binomial'
             low = 0.0
             high = 0.167
 
+        [subtype.consumption.discharge_intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.02
+
     [subtype.dishes]
         penetration = 25
         temperature = 55
@@ -49,6 +53,11 @@ distribution = 'Negative_binomial'
             distribution = 'Uniform'
             low = 0.0
             high = 0.25
+
+        [subtype.dishes.discharge_intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.02
 
     [subtype.washing_hands]
         penetration = 25
@@ -63,6 +72,11 @@ distribution = 'Negative_binomial'
             low = 0.0
             high = 0.167
 
+        [subtype.washing_hands.discharge_intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.02
+
     [subtype.other]
         penetration = 12.5
         temperature = 10
@@ -75,3 +89,8 @@ distribution = 'Negative_binomial'
             distribution = 'Uniform'
             low = 0.0
             high = 0.167
+
+        [subtype.other.discharge_intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.02
