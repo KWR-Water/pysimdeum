@@ -356,7 +356,6 @@ class Dishwasher(EndUse):
                 consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, self.name, total_days)
             elif ((day_num + 1) == total_days) and (end > end_of_day):
                 difference = end_of_day - start
-                print(difference)
                 consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
                 consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
             else:
@@ -646,7 +645,6 @@ class WashingMachine(EndUse):
                 consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, "WashingMachine", total_days)
             elif ((day_num + 1) == total_days) and (end > end_of_day):
                 difference = end_of_day - start
-                print(difference)
                 consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
                 consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
             else:
