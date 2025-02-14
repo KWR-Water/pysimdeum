@@ -181,6 +181,35 @@ def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_tim
 
     return discharge
 
+def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num):
+    """Checks if the tap is turned off before the end of the duration. If so, updates the start time to the next zero value in the discharge array.
+
+    This function shifts the discharge start time to the next available zero value in the discharge array.
+
+    Args:
+        discharge (numpy.ndarray): The array representing the discharge data.
+        start (int): The start time of the discharge event in seconds from the beginning of the day.
+        j (int): The index of the user.
+        ind_enduse (int): The index of the end-use appliance.
+        pattern_num (int): The pattern number.
+
+    Returns:
+        numpy.ndarray: The updated start index or original array if no zero is found
+    """
+
+    if discharge[start, j, ind_enduse, pattern_num, 0] > 0:
+        next_zero_timestamp = start + 1
+        while next_zero_timestamp < len(discharge) and discharge[next_zero_timestamp, j, ind_enduse, pattern_num, 0] > 0: 
+            next_zero_timestamp += 1
+
+        if next_zero_timestamp < len(discharge):
+            return next_zero_timestamp # return update start time
+        else:
+            print("Warning: No zero value found in discharge array.")
+            return discharge
+
+    return start #return original start
+
 
 @dataclass
 class Base:
