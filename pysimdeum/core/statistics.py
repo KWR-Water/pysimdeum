@@ -49,13 +49,32 @@ class Statistics:
         self.end_uses['WashingMachine'] = toml.load(open(washing_machine_file, 'r'))
 
         # Pattern
+        self._initialize_patterns()
+
+    def _initialize_patterns(self):
         self.end_uses['WashingMachine']['daily_pattern'] = complex_daily_pattern(self.end_uses['WashingMachine'])
         self.end_uses['WashingMachine']['enduse_pattern'] = complex_enduse_pattern(self.end_uses['WashingMachine'])
         self.end_uses['WashingMachine']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['WashingMachine'], self.end_uses['WashingMachine']['enduse_pattern'])
         self.end_uses['Dishwasher']['daily_pattern'] = complex_daily_pattern(self.end_uses['Dishwasher'])
         self.end_uses['Dishwasher']['enduse_pattern'] = complex_enduse_pattern(self.end_uses['Dishwasher'])
-        self.end_uses['Dishwasher']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['WashingMachine'], self.end_uses['Dishwasher']['enduse_pattern'])
+        self.end_uses['Dishwasher']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['Dishwasher'], self.end_uses['Dishwasher']['enduse_pattern'])
         self.end_uses['KitchenTap']['daily_pattern'] = ktap_daily_pattern()
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        # Remove the unpickleable entries
+        for end_use in ['WashingMachine', 'Dishwasher', 'KitchenTap']:
+            if end_use in state['end_uses']:
+                state['end_uses'][end_use] = state['end_uses'][end_use].copy()
+                state['end_uses'][end_use].pop('daily_pattern', None)
+                state['end_uses'][end_use].pop('enduse_pattern', None)
+                state['end_uses'][end_use].pop('discharge_pattern', None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        # Reinitialize the unpickleable entries
+        self._initialize_patterns()
 
 
 def main():
