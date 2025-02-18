@@ -68,38 +68,7 @@ class Statistics:
             return [self._convert_to_dict(v) for v in data]
         else:
             return data
-    """
-    def _remove_unpickleable_entries(self, data):
-        unpickleable = {}
-        for key, value in data.items():
-            try:
-                pickle.dumps(value)
-            except (pickle.PicklingError, TypeError, AttributeError) as e:
-                print(f"Unpickleable entry found: key={key}, value={value}, error={e}")
-        for key in unpickleable:
-            del data[key]
-        return unpickleable
-
-    def _restore_unpickleable_entries(self, data, unpickleable):
-        data.update(unpickleable)
-
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        # Remove the unpickleable entries
-        state['_unpickleable'] = {}
-        for key, end_use in self.end_uses.items():
-            #print(key, end_use)
-            state['_unpickleable'][key] = self._remove_unpickleable_entries(end_use)
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        # Reinitialize the unpickleable entries
-        self._initialize_patterns()
-        for key, patterns in state['_unpickleable'].items():
-            if key in self.end_uses:
-                self._restore_unpickleable_entries(self.end_uses[key], patterns)
-"""
+    
 def main():
     print(DATA_DIR)
     stats = Statistics()
