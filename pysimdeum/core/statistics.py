@@ -66,7 +66,7 @@ class Statistics:
         for key, value in data.items():
             try:
                 pickle.dumps(value)
-            except (pickle.PicklingError, TypeError):
+            except (pickle.PicklingError, TypeError, AttributeError):
                 unpickleable[key] = value
         for key in unpickleable:
             data.pop(key)
