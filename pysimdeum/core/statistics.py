@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pysimdeum.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
 from pysimdeum.core.utils import complex_daily_pattern, complex_enduse_pattern, complex_discharge_pattern
 from pysimdeum.data import DATA_DIR
+import pickle
 
 @dataclass
 class Statistics:
@@ -60,19 +61,35 @@ class Statistics:
         self.end_uses['Dishwasher']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['Dishwasher'], self.end_uses['Dishwasher']['enduse_pattern'])
         self.end_uses['KitchenTap']['daily_pattern'] = ktap_daily_pattern()
 
+    def _remove_unpickleable_entries(self, data):
+        unpickleable = {}
+        for key, value in data.items():
+            try:
+                pickle.dumps(value)
+            except (pickle.PicklingError, TypeError):
+                unpickleable[key] = value
+        for key in unpickleable:
+            data.pop(key)
+        return unpickleable
+
+    def _restore_unpickleable_entries(self, data, unpickleable):
+        data.update(unpickleable)
+
     def __getstate__(self):
         state = self.__dict__.copy()
         # Remove the unpickleable entries
-        for end_use in self.end_uses.values():
-            end_use.pop('daily_pattern', None)
-            end_use.pop('enduse_pattern', None)
-            end_use.pop('discharge_pattern', None)
+        state['_unpickleable'] = {}
+        for key, end_use in self.end_uses.items():
+            state['_unpickleable'][key] = self._remove_unpickleable_entries(end_use)
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
         # Reinitialize the unpickleable entries
         self._initialize_patterns()
+        for key, patterns in state['_unpickleable'].items():
+            if key in self.end_uses:
+                self._restore_unpickleable_entries(self.end_uses[key], patterns)
 
 
 def main():
