@@ -80,7 +80,7 @@ class Statistics:
         # Remove the unpickleable entries
         state['_unpickleable'] = {}
         for key, end_use in self.end_uses.items():
-            print(key, end_use)
+            #print(key, end_use)
             state['_unpickleable'][key] = self._remove_unpickleable_entries(end_use)
         return state
 
