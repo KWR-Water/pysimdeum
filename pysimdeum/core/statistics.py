@@ -1,12 +1,10 @@
 import os
 import toml
 from dataclasses import dataclass, field
-from pysimdeum.data.NL.end_uses.pattern.pat_dishwasher import dishwasher_daily_pattern, \
-    dishwasher_enduse_pattern, dishwasher_discharge_pattern
 from pysimdeum.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
-from pysimdeum.data.NL.end_uses.pattern.pat_washing_machine import washingmachine_daily_pattern, \
-    washingmachine_enduse_pattern, washingmachine_discharge_pattern
+from pysimdeum.core.utils import complex_daily_pattern, complex_enduse_pattern, complex_discharge_pattern
 from pysimdeum.data import DATA_DIR
+import pickle
 
 @dataclass
 class Statistics:
@@ -45,29 +43,35 @@ class Statistics:
         self.end_uses['Wc'] = toml.load(open(wc_file, 'r'))
         self.end_uses['Bathtub'] = toml.load(open(bathtub_file, 'r'))
         self.end_uses['BathroomTap'] = toml.load(open(brtap_file, 'r'))
-        self.end_uses['Dishwasher'] = toml.load(open(dishwasher_file, 'r'))
+        self.end_uses['Dishwasher'] = self._convert_to_dict(toml.load(open(dishwasher_file, 'r')))
         self.end_uses['KitchenTap'] = toml.load(open(kitchen_tap_file, 'r'))
         self.end_uses['OutsideTap'] = toml.load(open(outside_tap_file, 'r'))
         self.end_uses['Shower'] = toml.load(open(shower_file, 'r'))
-        self.end_uses['WashingMachine'] = toml.load(open(washing_machine_file, 'r'))
+        self.end_uses['WashingMachine'] = self._convert_to_dict(toml.load(open(washing_machine_file, 'r')))
 
         # Pattern
-        self.end_uses['WashingMachine']['daily_pattern'] = washingmachine_daily_pattern()
-        self.end_uses['WashingMachine']['enduse_pattern'] = washingmachine_enduse_pattern()
-        self.end_uses['WashingMachine']['discharge_pattern'] = washingmachine_discharge_pattern(self.end_uses['WashingMachine']['enduse_pattern'])
-        self.end_uses['Dishwasher']['daily_pattern'] = dishwasher_daily_pattern()
-        self.end_uses['Dishwasher']['enduse_pattern'] = dishwasher_enduse_pattern()
-        self.end_uses['Dishwasher']['discharge_pattern'] = dishwasher_discharge_pattern(self.end_uses['Dishwasher']['enduse_pattern'])
+        self._initialize_patterns()
+
+    def _initialize_patterns(self):
+        self.end_uses['WashingMachine']['daily_pattern'] = complex_daily_pattern(self.end_uses['WashingMachine'])
+        self.end_uses['WashingMachine']['enduse_pattern'] = complex_enduse_pattern(self.end_uses['WashingMachine'])
+        self.end_uses['WashingMachine']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['WashingMachine'], self.end_uses['WashingMachine']['enduse_pattern'])
+        self.end_uses['Dishwasher']['daily_pattern'] = complex_daily_pattern(self.end_uses['Dishwasher'])
+        self.end_uses['Dishwasher']['enduse_pattern'] = complex_enduse_pattern(self.end_uses['Dishwasher'])
+        self.end_uses['Dishwasher']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['Dishwasher'], self.end_uses['Dishwasher']['enduse_pattern'])
         self.end_uses['KitchenTap']['daily_pattern'] = ktap_daily_pattern()
 
-
+    def _convert_to_dict(self, data):
+        if isinstance(data, dict):
+            return {k: self._convert_to_dict(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [self._convert_to_dict(v) for v in data]
+        else:
+            return data
+    
 def main():
-
     print(DATA_DIR)
-
     stats = Statistics()
 
-
 if __name__ == '__main__':
-
     main()

@@ -3,6 +3,22 @@ classname = 'WashingMachine'
 offset = 0
 temperature = 10
 
+[daily_pattern_input]
+    x = "34 24 17 43 41 57 57 212 290 338 392 325 226 222 200 175 124 106 139 185 133 165 101 147 34"
+
+[enduse_pattern_input]
+    intensity = 0.1667
+    runtime = 7200
+    cycle_times = [
+        {start = 0, end = 121},
+        {start = 3600, end = 3660},
+        {start = 4920, end = 4980},
+        {start = 6120, end = 6180}
+    ]
+
+[discharge_pattern_input]
+    discharge_time = 30
+
 [penetration]
     1 = 92  # [%]
     2 = 98
