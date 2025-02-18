@@ -205,7 +205,6 @@ def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num):
         if next_zero_timestamp < len(discharge):
             return next_zero_timestamp # return update start time
         else:
-            print("Warning: No zero value found in discharge array.")
             return discharge
 
     return start #return original start
