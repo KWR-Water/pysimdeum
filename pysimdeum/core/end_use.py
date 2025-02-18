@@ -182,6 +182,8 @@ class Bathtub(EndUse):
 
         prob_usage = self.usage_probability().values
 
+        previous_events = []
+
         for j, user in enumerate(users):
             freq = self.fct_frequency(age=user.age)
             prob_user = user.presence.values
@@ -192,9 +194,9 @@ class Bathtub(EndUse):
                 temperature = self.statistics['temperature']
                 prob_joint = normalize(prob_user * prob_usage)
 
-                u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
-                end = start + duration
+                start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+                previous_events.append((start, end))
+
                 consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
                 consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
@@ -268,6 +270,8 @@ class BathroomTap(EndUse):
 
     def simulate(self, consumption, discharge, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
         prob_usage = self.usage_probability().values
+        
+        previous_events = []
 
         for j, user in enumerate(users):
             freq = self.fct_frequency()
@@ -279,9 +283,9 @@ class BathroomTap(EndUse):
 
                 prob_joint = normalize(prob_user * prob_usage)
 
-                u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
-                end = int(start + duration)
+                start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+                previous_events.append((start, end))
+
                 consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
                 consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
@@ -472,13 +476,17 @@ class KitchenTap(EndUse):
 
         freq = self.fct_frequency(numusers=len(users))
 
+        previous_events = []
+
         for i in range(freq):
 
             duration, intensity, temperature = self.fct_duration_intensity_temperature()
-            u = np.random.uniform()
+            
             prob_joint = normalize(prob_user * prob_usage)  # ToDo: Check if joint probability can be computed outside of for loop for all functions
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
-            end = start + duration
+            
+            start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+            previous_events.append((start, end))
+
             consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
             temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
             consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
@@ -540,14 +548,16 @@ class OutsideTap(EndUse):
 
         j = len(users)
 
+        previous_events = []
+
         for i in range(freq):
 
             duration, intensity, temperature = self.fct_duration_intensity_temperature()
 
             prob_joint = normalize(prob_user * prob_usage)
-            u = np.random.uniform()
-            start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
-            end = start + duration
+            
+            start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+            previous_events.append((start, end))
 
             consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
             temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
@@ -616,6 +626,8 @@ class Shower(EndUse):
 
         prob_usage = self.usage_probability().values
 
+        previous_events = []
+
         for j, user in enumerate(users):
             freq = self.fct_frequency(age=user.age)
             prob_user = user.presence.values
@@ -624,9 +636,9 @@ class Shower(EndUse):
                 duration, intensity, temperature = self.fct_duration_intensity_temperature(age=user.age)
 
                 prob_joint = normalize(prob_user * prob_usage)
-                u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
-                end = start + duration
+                start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+                previous_events.append((start, end))
+
                 consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
                 consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
@@ -789,6 +801,8 @@ class Wc(EndUse):
 
         prob_usage = self.usage_probability().values
 
+        previous_events = []
+
         for j, user in enumerate(users):
             freq = self.fct_frequency(age=user.age, gender=user.gender)
             prob_user = user.presence.values
@@ -798,9 +812,9 @@ class Wc(EndUse):
                 duration, intensity, temperature = self.fct_duration_intensity_temperature()
 
                 prob_joint = normalize(prob_user * prob_usage)
-                u = np.random.uniform()
-                start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds())*day_num
-                end = start + duration
+                start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+                previous_events.append((start, end))
+
                 consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
                 consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
