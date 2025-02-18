@@ -69,7 +69,7 @@ class Statistics:
             except (pickle.PicklingError, TypeError, AttributeError):
                 unpickleable[key] = value
         for key in unpickleable:
-            data.pop(key)
+            del data[key]
         return unpickleable
 
     def _restore_unpickleable_entries(self, data, unpickleable):
@@ -80,6 +80,7 @@ class Statistics:
         # Remove the unpickleable entries
         state['_unpickleable'] = {}
         for key, end_use in self.end_uses.items():
+            print(key, end_use)
             state['_unpickleable'][key] = self._remove_unpickleable_entries(end_use)
         return state
 
@@ -91,14 +92,9 @@ class Statistics:
             if key in self.end_uses:
                 self._restore_unpickleable_entries(self.end_uses[key], patterns)
 
-
 def main():
-
     print(DATA_DIR)
-
     stats = Statistics()
 
-
 if __name__ == '__main__':
-
     main()
