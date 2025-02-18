@@ -43,11 +43,11 @@ class Statistics:
         self.end_uses['Wc'] = toml.load(open(wc_file, 'r'))
         self.end_uses['Bathtub'] = toml.load(open(bathtub_file, 'r'))
         self.end_uses['BathroomTap'] = toml.load(open(brtap_file, 'r'))
-        self.end_uses['Dishwasher'] = toml.load(open(dishwasher_file, 'r'))
+        self.end_uses['Dishwasher'] = self._convert_to_dict(toml.load(open(dishwasher_file, 'r')))
         self.end_uses['KitchenTap'] = toml.load(open(kitchen_tap_file, 'r'))
         self.end_uses['OutsideTap'] = toml.load(open(outside_tap_file, 'r'))
         self.end_uses['Shower'] = toml.load(open(shower_file, 'r'))
-        self.end_uses['WashingMachine'] = toml.load(open(washing_machine_file, 'r'))
+        self.end_uses['WashingMachine'] = self._convert_to_dict(toml.load(open(washing_machine_file, 'r')))
 
         # Pattern
         self._initialize_patterns()
@@ -61,6 +61,14 @@ class Statistics:
         self.end_uses['Dishwasher']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['Dishwasher'], self.end_uses['Dishwasher']['enduse_pattern'])
         self.end_uses['KitchenTap']['daily_pattern'] = ktap_daily_pattern()
 
+    def _convert_to_dict(self, data):
+        if isinstance(data, dict):
+            return {k: self._convert_to_dict(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [self._convert_to_dict(v) for v in data]
+        else:
+            return data
+    """
     def _remove_unpickleable_entries(self, data):
         unpickleable = {}
         for key, value in data.items():
@@ -91,7 +99,7 @@ class Statistics:
         for key, patterns in state['_unpickleable'].items():
             if key in self.end_uses:
                 self._restore_unpickleable_entries(self.end_uses[key], patterns)
-
+"""
 def main():
     print(DATA_DIR)
     stats = Statistics()
