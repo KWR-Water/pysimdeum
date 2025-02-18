@@ -63,12 +63,10 @@ class Statistics:
     def __getstate__(self):
         state = self.__dict__.copy()
         # Remove the unpickleable entries
-        for end_use in ['WashingMachine', 'Dishwasher', 'KitchenTap']:
-            if end_use in state['end_uses']:
-                state['end_uses'][end_use] = state['end_uses'][end_use].copy()
-                state['end_uses'][end_use].pop('daily_pattern', None)
-                state['end_uses'][end_use].pop('enduse_pattern', None)
-                state['end_uses'][end_use].pop('discharge_pattern', None)
+        for end_use in self.end_uses.values():
+            end_use.pop('daily_pattern', None)
+            end_use.pop('enduse_pattern', None)
+            end_use.pop('discharge_pattern', None)
         return state
 
     def __setstate__(self, state):
