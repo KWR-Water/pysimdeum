@@ -66,8 +66,8 @@ class Statistics:
         for key, value in data.items():
             try:
                 pickle.dumps(value)
-            except (pickle.PicklingError, TypeError, AttributeError):
-                unpickleable[key] = value
+            except (pickle.PicklingError, TypeError, AttributeError) as e:
+                print(f"Unpickleable entry found: key={key}, value={value}, error={e}")
         for key in unpickleable:
             del data[key]
         return unpickleable
