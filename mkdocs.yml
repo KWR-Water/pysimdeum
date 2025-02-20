@@ -4,6 +4,14 @@ nav:
   - Installation: installation.md
   - quick_start.md
   - pysimdeum_run.md
+  - Consumption:
+    - Overview: consumption/overview.md
+    - Common methods: consumption/common_methods.md
+    - Enduse specifics: consumption/enduse_specifics.md
+  - Discharge:
+    - Overview: discharge/overview.md
+    - Common methods: discharge/common_methods.md
+    - Enduse specifics: discharge/enduse_specifics.md
   - config.md
   - Changelog: CHANGELOG.md
 theme:
