@@ -122,8 +122,8 @@ def sample_start_time(prob_joint, day_num, duration, previous_events):
 
         # Check for overlapping events or events within duration before the last sample start
         if not any((start < event_end and start >= event_start) or (start < event_start and start >= event_start - int(duration)) for event_start, event_end in previous_events):
-            return start, end
-        
+            return int(start), int(end)
+
 
 def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, name, total_days):
     """Handles the spillover of consumption events that extend beyond the end of the current day.
