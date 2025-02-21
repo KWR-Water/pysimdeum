@@ -6,11 +6,13 @@ The methodologies for calculating consumption flows for a sampled enduse event a
 
 ## Bathub
 
+## Shower
+
+## Wc
+
 ## Kitchen Tap
 
 ## Outside Tap
-
-## Shower
 
 ## Washing Machine
 
