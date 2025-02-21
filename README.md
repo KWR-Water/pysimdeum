@@ -57,13 +57,13 @@ pip install -r requirements.txt .
 ```
 <!--- --8<-- [end:docs-install-dev] -->
 
-## Enduse consumption and discharge summary
+## Enduse pattern summary
 
 A summary of the consumption and discharge patterns for all possible enduses in `pysimdeum` are shown below:
 
 <div style="display: flex; justify-content: center;">
     <figure style="text-align: center;">
-        <img src="docs/images/discharge_graphic.png", width="60%", style="background-color:white; margin:auto", alt="Consumption discharge pattern summary">
+        <img src="docs/images/discharge_graphic.png", style="background-color:white; margin:auto", alt="Consumption discharge pattern summary">
     </figure>
 </div>
 

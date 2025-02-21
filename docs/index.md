@@ -7,7 +7,7 @@ You can replace this cross-reference or append/prepend to it by updating this pa
 
 A summary of the consumption and discharge patterns for all possible enduses in `pysimdeum` are shown below:
 
-![Consumption discharge graphic](../images/discharge_graphic.png)
+![Consumption discharge graphic](/images/discharge_graphic.png)
 
 Default output is based on statistics about household sizes and water use of the Netherlands. These can be changed either within the code or by creating the correct toml files. An overview of worldwide differences is available in:
 
