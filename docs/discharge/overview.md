@@ -21,6 +21,7 @@ Discharge calculations in `pysimdeum` follow a simple method of calculating the 
 The `discharge` object follows an almost identical structure to the `consumption` object. Results are stored as a `xarray.DataArray` so that simulation information can be accessed and aggregared afterwards (e.g. specific enduses, sum over water discharge of users, rolling means over time etc.).
 
 The `discharge` array has four dimensions:
+
 - Time
 - User
 - Enduse
