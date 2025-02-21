@@ -14,7 +14,7 @@ Discharge of water typically occurs after the consumption event begins. For simp
 
 ## Methodology
 
-Discharge calculations in `pysimdeum` follow a simple method of calculating the volume of water consumed over a consumption event of an enduse, and discharging this at a sampled discharge flow rate.  To provide some stochastic behaviour, low and high ranges of discharge flow rates inform the bounds of a uniform distribution from which a discharge flow rate for a specific enduse discharge event is sampled. Details for each enduse are described in the sections [Common Methods]() and [Enduse specifics]().
+Discharge calculations in `pysimdeum` follow a simple method of calculating the volume of water consumed over a consumption event of an enduse, and discharging this at a sampled discharge flow rate.  To provide stochastic behaviour, low and high ranges of discharge flow rates inform the bounds of a uniform distribution from which a discharge flow rate for a specific enduse discharge event is sampled. Details for each enduse are described in the sections [Common Methods](https://pysimdeum.readthedocs.io/en/latest/discharge/common_methods/) and [Enduse specifics](https://pysimdeum.readthedocs.io/en/latest/discharge/enduse_specifics/).
 
 ## Object structure
 
