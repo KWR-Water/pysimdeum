@@ -23,12 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- 
+- `Washing Machine` and `Dishwasher` enduse pattern generalised https://github.com/KWR-Water/pysimdeum/pull/53
 
 ### Added
 
-- Optionally run discharge simulations linked to simulated consumptions flows
-- Readthedocs documentation available [here](https://pysimdeum.readthedocs.io/en/latest/)
+- Optionally run discharge simulations linked to simulated consumptions flows https://github.com/KWR-Water/pysimdeum/pull/39   https://github.com/KWR-Water/pysimdeum/pull/45   https://github.com/KWR-Water/pysimdeum/pull/46   https://github.com/KWR-Water/pysimdeum/pull/48   https://github.com/KWR-Water/pysimdeum/pull/58   
+- Readthedocs documentation available [here](https://pysimdeum.readthedocs.io/en/latest/) https://github.com/KWR-Water/pysimdeum/pull/52
+- Spillover feature for `WashingMachine` and `Dishwasher` https://github.com/KWR-Water/pysimdeum/pull/54
+- Sample start time protection https://github.com/KWR-Water/pysimdeum/pull/59
 
 ## [v0.1.0]
 
