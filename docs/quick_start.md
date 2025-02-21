@@ -57,12 +57,12 @@ plt.show()
 ```
 
 <figure>
-<img src="../images/consumption_totalflow.png", width="100%", style="background-color:white;", alt="Consumption total flow">
+<img src="/images/consumption_totalflow.png", width="100%", style="background-color:white;", alt="Consumption total flow">
 <figcaption>Plot of total flow consumption for a one-person household.</figcaption>
 </figure>
 
 <figure>
-<img src="../images/consumption_totalflow_rollingav.png", width="100%", style="background-color:white;", alt="Consumption total flow, 1-hour rolling average">
+<img src="/images/consumption_totalflow_rollingav.png", width="100%", style="background-color:white;", alt="Consumption total flow, 1-hour rolling average">
 <figcaption>Plot of 1-hour rolling average total flow consumption for a one-person household.</figcaption>
 </figure>
 
@@ -74,6 +74,6 @@ consumption.sum(["user"]).sel(enduse="KitchenTap").sel(flowtypes="totalflow").pl
 ```
 
 <figure>
-<img src="../images/consumption_ktap_totalflow.png", width="100%", style="background-color:white;", alt="KitchenTap total consumption">
+<img src="/images/consumption_ktap_totalflow.png", width="100%", style="background-color:white;", alt="KitchenTap total consumption">
 <figcaption>Plot of total consumption of the KitchenTap appliance in a one-person household</figcaption>
 </figure>

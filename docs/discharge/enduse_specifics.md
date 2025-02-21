@@ -2,7 +2,7 @@
 
 The methodologies for calculating consumption flows for a sampled enduse event are detailed below.
 
-![Consumption discharge graphic](../images/discharge_graphic.png)
+![Consumption discharge graphic](/images/discharge_graphic.png)
 
 ## Bathroom Tap
 
