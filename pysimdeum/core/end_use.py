@@ -103,6 +103,7 @@ class Bathtub(EndUse):
             **kwargs: keyword arguments for super classes.
         """
         self.name = "Bathtub"
+        self.wastewater_type = "greywater"
 
     def fct_frequency(self, age=None):
         """Random function computing the frequency of use for the Bathtub end-use class.
@@ -214,6 +215,7 @@ class BathroomTap(EndUse):
     
     def __post_init__(self):
         self.name = "BathroomTap"
+        self.wastewater_type = "greywater"
 
     def fct_frequency(self):
 
@@ -302,6 +304,7 @@ class Dishwasher(EndUse):
 
     def __post_init__(self):
         self.name = "Dishwasher"
+        self.wastewater_type = "blackwater"
 
     def fct_frequency(self, numusers=None):
 
@@ -326,7 +329,7 @@ class Dishwasher(EndUse):
             elif ((day_num + 1) == total_days) and (discharge_time > end_of_day):
                 pass
             else:
-                discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+                discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
 
         return discharge
 
@@ -381,6 +384,7 @@ class KitchenTap(EndUse):
 
     def __post_init__(self):
         self.name = "KitchenTap"
+        self.wastewater_type = "blackwater"
 
     def fct_frequency(self, numusers=None):
 
@@ -451,10 +455,9 @@ class KitchenTap(EndUse):
             end = int(start + discharge_duration)
             # check if subtype = consumption (drinking), if so the discharge flow rate is set to 0
             if self.subtype == 'consumption':
-                discharge[start:end, j, ind_enduse, pattern_num, 0] = 0
+                discharge[start:end, j, ind_enduse, pattern_num, 1] = 0
             else:
-                discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate         
-            #discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate
+                discharge[start:end, j, ind_enduse, pattern_num, 1] = discharge_flow_rate         
             remaining_water -= discharge_flow_rate * discharge_duration
             start = end
 
@@ -570,6 +573,7 @@ class Shower(EndUse):
 
     def __post_init__(self):
         self.name = "Shower"
+        self.wastewater_type = "greywater"
 
     def fct_frequency(self, age=None):
 
@@ -655,17 +659,20 @@ class NormalShower(Shower):
 
     def __post_init__(self):
         self.name = "NormalShower"
+        self.wastewater_type = "greywater"
 
 class FancyShower(Shower):
 
     def __post_init__(self):
         self.name = "FancyShower"
+        self.wastewater_type = "greywater"
     
 
 class WashingMachine(EndUse):
 
     def __post_init__(self):
         self.name = "WashingMachine"
+        self.wastewater_type = "blackwater"
 
     def fct_frequency(self, numusers=None):
 
@@ -691,7 +698,7 @@ class WashingMachine(EndUse):
             elif ((day_num + 1) == total_days) and (discharge_time > end_of_day):
                 pass
             else:
-                discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+                discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
 
         return discharge
 
@@ -748,6 +755,7 @@ class Wc(EndUse):
 
     def __post_init__(self):
         self.name = "Wc"
+        self.wastewater_type = "blackwater"
     
 
     def fct_frequency(self, age=None, gender=None):
@@ -790,7 +798,7 @@ class Wc(EndUse):
         while incoming_water > 0:
             discharge_duration = incoming_water / discharge_flow_rate
             start = int(end - discharge_duration)
-            discharge[start:end, j, ind_enduse, pattern_num, 0] = discharge_flow_rate
+            discharge[start:end, j, ind_enduse, pattern_num, 1] = discharge_flow_rate
             incoming_water -= discharge_flow_rate * discharge_duration
             end = start
 
@@ -831,21 +839,25 @@ class WcNormal(Wc):
 
     def __post_init__(self):
         self.name = 'WcNormal'
+        self.wastewater_type = "blackwater"
 
 @dataclass
 class WcNormalSave(Wc):
 
     def __post_init__(self):
         self.name = "WcNormalSave"
+        self.wastewater_type = "blackwater"
 
 @dataclass
 class WcNew(Wc):
 
     def __post_init__(self):
         self.name = "WcNew"
+        self.wastewater_type = "blackwater"
 
 @dataclass
 class WcNewSave(Wc):
 
     def __post_init__(self):
         self.name = "WcNewSave"
+        self.wastewater_type = "blackwater"

@@ -287,7 +287,7 @@ class House(Property):
         number_of_days = int(timedelta/pd.to_timedelta('1 day'))
         
         if simulate_discharge:
-            dischargetype = ['discharge']
+            dischargetype = ['greywater', 'blackwater']
             discharge = np.zeros((len(time), len(users), len(enduse), num_patterns, len(dischargetype)))
         else:
             discharge = None

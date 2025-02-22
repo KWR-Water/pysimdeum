@@ -195,12 +195,10 @@ def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_tim
     """
     if discharge_time >= (total_days * 24 * 60 * 60):
         spillover_time = discharge_time - end_of_day
-        discharge[spillover_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+        discharge[spillover_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
     else:
         # Continue to the next day
-        discharge[discharge_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
-
-    #discharge[spillover_time, j, ind_enduse, pattern_num, 0] = discharge_pattern[time]
+        discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
 
     return discharge
 
