@@ -1,0 +1,57 @@
+# Nutrient statistics per enduse
+
+[Shower]
+    n = 0.1
+    p = 0.2
+    cod = 0.3
+    bod5 = 0.4
+    ss = 0.5
+    amm = 0.6
+
+[Bathtub]
+    n = 0.1
+    p = 0.2
+    cod = 0.3
+    bod5 = 0.4
+    ss = 0.5
+    amm = 0.6
+
+[Wc]
+    n = 0.1
+    p = 0.2
+    cod = 0.3
+    bod5 = 0.4
+    ss = 0.5
+    amm = 0.6
+
+[KitchenTap]
+    n = 0.1
+    p = 0.2
+    cod = 0.3
+    bod5 = 0.4
+    ss = 0.5
+    amm = 0.6
+
+[BathroomTap]
+    n = 0.1
+    p = 0.2
+    cod = 0.3
+    bod5 = 0.4
+    ss = 0.5
+    amm = 0.6
+
+[WashingMachine]
+    n = 0.1
+    p = 0.2
+    cod = 0.3
+    bod5 = 0.4
+    ss = 0.5
+    amm = 0.6
+
+[Dishwasher]
+    n = 0.1
+    p = 0.2
+    cod = 0.3
+    bod5 = 0.4
+    ss = 0.5
+    amm = 0.6
