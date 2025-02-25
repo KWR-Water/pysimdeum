@@ -357,11 +357,17 @@ def complex_discharge_pattern(config, enduse_pattern, resolution='1s'):
 
 
 def process_discharge_nutrients(discharge):
-    """_summary_
+    """Process discharge data and add nutrient concentrations based on values from a .toml file.
+    
+    This function reads nutrient multipliers from a TOML file, converts the discharge data from an
+    xarray.DataArray to a pandas DataFrame, calculates the nutrient concentrations based on the
+    multipliers, and adds the nutrient data back to an xarray.Dataset.
 
     Args:
-        discharge (_type_): _description_
-        toml_file_path (_type_): _description_
+        discharge (xr.DataArray): The discharge data.
+
+    Returns:
+        xr.Dataset: The updated xarray.Dataset containing the discharge data and the nutrient concentrations.
     """
 
     toml_file_path = os.path.join(DATA_DIR, 'NL', 'ww_nutrients.toml')
