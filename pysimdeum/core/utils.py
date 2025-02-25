@@ -3,6 +3,10 @@ import uuid
 import numpy as np
 from dataclasses import dataclass
 from typing import Union
+import toml
+import xarray as xr
+import os
+from pysimdeum.data import DATA_DIR
 
 
 def chooser(data: Union[pd.Series, pd.DataFrame], myproperty: str=''):
@@ -351,6 +355,59 @@ def complex_discharge_pattern(config, enduse_pattern, resolution='1s'):
 
     return discharge_pattern
 
+
+def process_discharge_nutrients(discharge):
+    """_summary_
+
+    Args:
+        discharge (_type_): _description_
+        toml_file_path (_type_): _description_
+    """
+
+    toml_file_path = os.path.join(DATA_DIR, 'NL', 'ww_nutrients.toml')
+
+    # Read the .toml file
+    nutrient_data = toml.load(toml_file_path)
+
+    # Convert a xarray.DataArray to a pd.DataFrame
+    df = discharge.to_dataframe(name='flow').reset_index()
+
+    # list of nutrient types
+    nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
+
+    # Add new columns for each nutrient initialised to zero
+    for nutrient in nutrients:
+        df[nutrient] = 0.0
+    
+    # Set the values for each nutrient based on the multipliers from the TOML file
+    for nutrient in nutrients:
+        for enduse in nutrient_data.keys():
+            multiplier = nutrient_data[enduse][nutrient]
+            df.loc[df['enduse'] == enduse, nutrient] = df['flow'] * multiplier
+
+    # Create an xarray.Dataset and add the discharge DataArray to it
+    ds = xr.Dataset({'discharge': discharge})
+
+    # Add the pandas DataFrame to the xarray.Dataset as a new variable
+    ds['df'] = (('index', 'columns'), df.values)
+    ds['df_index'] = ('index', df.index)
+    ds['df_columns'] = ('columns', df.columns)
+
+    return ds
+
+
+def dataset_to_df(ds):
+    """Convert an xarray.Dataset to a pd.DataFrame.
+
+    Args:
+        ds (xr.Dataset): The input xarray.Dataset containing the 'df', 'df_index', and 'df_columns' variables.
+
+    Returns:
+        pd.DataFrame: The converted pandas DataFrame.
+    """
+    df_from_ds = pd.DataFrame(data=ds['df'].values, index=ds['df_index'].values, columns=ds['df_columns'].values)
+    
+    return df_from_ds
 
 @dataclass
 class Base:
