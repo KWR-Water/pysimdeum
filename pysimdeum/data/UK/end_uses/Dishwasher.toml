@@ -1,0 +1,37 @@
+# Statistics of dishwasher end-use
+classname = 'Dishwasher'
+offset = 0
+temperature = 10
+
+[daily_pattern_input]
+    x = "70 49 33 69 30 19 9 37 80 52 52 45 53 78 34 44 38 101 489 390 170 185 240 574 70"
+
+[enduse_pattern_input]
+    intensity = 0.1667
+    runtime = 7200
+    cycle_times = [
+        {start = 0, end = 24},
+        {start = 1860, end = 1884},
+        {start = 3660, end = 3684},
+        {start = 5460, end = 5472}
+    ]
+
+[discharge_pattern_input]
+    discharge_time = 8
+
+[penetration]
+    1 = 40   # [%]
+    2 = 63
+    3 = 76
+    4 = 84
+    5 = 78
+
+[frequency]
+    distribution = 'Poisson'
+    [frequency.average]
+        1 = 0.2143  # [1/day]
+        2 = 0.2286
+        3 = 0.1857
+        4 = 0.2000
+        5 = 0.1429
+

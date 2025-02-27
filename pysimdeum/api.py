@@ -2,9 +2,13 @@ from pysimdeum.core.statistics import Statistics
 from pysimdeum.core.house import Property, HousePattern, House
 
 
-def built_house(house_type: str = "") -> House:
+def built_house(house_type: str = "", country: str = None) -> House:
 
-    stats = Statistics()
+    if country is None:
+        country = 'NL'
+    else:
+        country = country
+    stats = Statistics(country=country)
     prop = Property(statistics=stats)
     house = prop.built_house(house_type=house_type)
     house.populate_house()

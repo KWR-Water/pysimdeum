@@ -1,0 +1,73 @@
+# household statistics from Families and households in the UK: 2023 dataset from the Office of National Statistics
+
+# One person households
+['one_person']
+people = 1 # Number of people per household
+households = 30 # Number of households (%)
+# division_gender = [48, 52] # Gender division: male, female (%)
+
+    [one_person.division_gender]
+    male = 48
+    female = 52
+
+    [one_person.division_age]
+    # Age division (%)
+    child = 0 # Children (0-12 years old)
+    teen = 0 # Teens (13-15 years old)
+    adult = 57 # Adults (16-64 years old)
+    senior = 43 # Seniors (> 65 years old)
+
+    [one_person.job]
+    # Subdivision % of adults with job away from home
+    male = 65.5
+    female = 65.5
+
+# Two person households
+['two_person']
+people = 2 # Number of people per household
+households = 34 # Number of households (%)
+#division_gender = [50, 50] # Gender division: male, female (%)
+
+    [two_person.division_gender]
+    male_female = 97
+    male_male = 1.5
+    female_female = 1.5
+
+    [two_person.division_age]
+    # Age division (%)
+    child = 0 # Children (0-12 years old)
+    teen = 0 # Teens (13-18 years old)
+    adult = 70 # Adults (19-64 years old)
+    senior = 30 # Seniors (> 65 years old)
+
+    [two_person.job]
+    # Subdivision % of adults with job away from home
+    both = 67.5
+    only_male = 0
+    only_female = 0
+    neither_person = 32.5
+
+# Families with children
+['family']
+people = 3.75 # Number of people per household
+households = 36 # Number of households (%)
+# division_gender = [50, 50] # Gender division: male, female (%)
+
+    [family.division_gender]
+    male = 50
+    female = 50
+
+    [family.division_age]
+    # Age division (%)
+    child = 31.6 # Children (0-15 years old)
+    teen = 0 # Teens (13-18 years old) # not a grouping in UK statistics
+    adult = 64.1 # Adults (16-64 years old)
+    senior = 4.3 # Seniors (> 65 years old)
+
+    [family.job]
+    # Subdivision % of adults with job away from home
+    # still from NL
+    both = 70
+    only_male = 0 # only father
+    only_female = 0 # only mother
+    neither_person = 30 # neither parent
