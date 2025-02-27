@@ -1,0 +1,41 @@
+# statistics for outside tap use
+classname = 'OutsideTap'
+
+penetration = 58
+offset = 0
+
+[frequency]
+    distribution = 'Poisson'
+    average = 0.44
+
+[subtype]
+
+    [subtype.garden]
+
+        penetration = 75
+        temperature = 10
+
+        [subtype.garden.duration]
+            distribution = 'Lognormal'
+            average = '300 Seconds'
+
+        [subtype.garden.intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.2
+
+
+    [subtype.other]
+
+        penetration = 25
+        temperature = 10
+
+        [subtype.other.duration]
+            distribution = 'Lognormal'
+            average = '15 Seconds'
+
+        [subtype.other.intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.2
+
