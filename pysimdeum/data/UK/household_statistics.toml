@@ -66,7 +66,6 @@ households = 36 # Number of households (%)
 
     [family.job]
     # Subdivision % of adults with job away from home
-    # still from NL
     both = 70
     only_male = 0 # only father
     only_female = 0 # only mother

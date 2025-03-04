@@ -4,10 +4,7 @@ from pysimdeum.core.house import Property, HousePattern, House
 
 def built_house(house_type: str = "", country: str = None) -> House:
 
-    if country is None:
-        country = 'NL'
-    else:
-        country = country
+    country = country or 'NL'
     stats = Statistics(country=country)
     prop = Property(statistics=stats)
     house = prop.built_house(house_type=house_type)
