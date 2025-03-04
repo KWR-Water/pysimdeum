@@ -2,43 +2,43 @@
 
 [Shower]
     [Shower.n]
-        low = 0.1
-        high = 0.15
+        low = 0.01
+        high = 0.017
     [Shower.p]
-        low = 0.2
-        high = 0.25
+        low = 0.002
+        high = 0.002
     [Shower.cod]
-        low = 0.3
-        high = 0.35
+        low = 0.35
+        high = 0.424
     [Shower.bod5]
-        low = 0.4
-        high = 0.45
+        low = 0.17
+        high = 0.25
     [Shower.ss]
-        low = 0.5
-        high = 0.55
+        low = 0.076
+        high = 0.12
     [Shower.amm]
-        low = 0.6
-        high = 0.65
+        low = 0.0015
+        high = 0.002
 
 [Bathtub]
     [Bathtub.n]
-        low = 0.1
-        high = 0.15
+        low = 0.006
+        high = 0.017
     [Bathtub.p]
-        low = 0.2
-        high = 0.25
+        low = 0.002
+        high = 0.002
     [Bathtub.cod]
-        low = 0.3
-        high = 0.35
+        low = 0.282
+        high = 0.424
     [Bathtub.bod5]
-        low = 0.4
-        high = 0.45
+        low = 0.17
+        high = 0.25
     [Bathtub.ss]
-        low = 0.5
-        high = 0.55
+        low = 0.076
+        high = 0.12
     [Bathtub.amm]
-        low = 0.6
-        high = 0.65
+        low = 0.0013
+        high = 0.002
 
 [Wc]
     [Wc.n]
@@ -62,80 +62,80 @@
 
 [KitchenTap]
     [KitchenTap.n]
-        low = 0.1
-        high = 0.15
+        low = 0.04
+        high = 0.068
     [KitchenTap.p]
-        low = 0.2
-        high = 0.25
+        low = 0.013
+        high = 0.074
     [KitchenTap.cod]
-        low = 0.3
-        high = 0.35
+        low = 0.936
+        high = 1.38
     [KitchenTap.bod5]
-        low = 0.4
-        high = 0.45
+        low = 0.536
+        high = 0.8
     [KitchenTap.ss]
-        low = 0.5
-        high = 0.55
+        low = 0.72
+        high = 0.72
     [KitchenTap.amm]
-        low = 0.6
-        high = 0.65
+        low = 0.0042
+        high = 0.006
 
 [BathroomTap]
     [BathroomTap.n]
-        low = 0.1
-        high = 0.15
+        low = 0.012
+        high = 0.012
     [BathroomTap.p]
-        low = 0.2
-        high = 0.25
+        low = 0.028
+        high = 0.049
     [BathroomTap.cod]
-        low = 0.3
-        high = 0.35
+        low = 0.383
+        high = 0.433
     [BathroomTap.bod5]
-        low = 0.4
-        high = 0.45
+        low = 0.148
+        high = 0.252
     [BathroomTap.ss]
-        low = 0.5
-        high = 0.55
+        low = 0.04
+        high = 0.15
     [BathroomTap.amm]
-        low = 0.6
-        high = 0.65
+        low = 0.00016
+        high = 0.00115
 
 [WashingMachine]
     [WashingMachine.n]
-        low = 0.1
-        high = 0.15
+        low = 0.013
+        high = 0.02
     [WashingMachine.p]
-        low = 0.2
-        high = 0.25
+        low = 0.032
+        high = 0.171
     [WashingMachine.cod]
-        low = 0.3
-        high = 0.35
+        low = 0.725
+        high = 0.725
     [WashingMachine.bod5]
-        low = 0.4
-        high = 0.45
+        low = 0.11
+        high = 0.662
     [WashingMachine.ss]
-        low = 0.5
-        high = 0.55
+        low = 0.09
+        high = 0.19
     [WashingMachine.amm]
-        low = 0.6
-        high = 0.65
+        low = 0.013
+        high = 0.02
 
 [Dishwasher]
     [Dishwasher.n]
-        low = 0.1
-        high = 0.15
+        low = 0.04
+        high = 0.05
     [Dishwasher.p]
-        low = 0.2
-        high = 0.25
+        low = 0.068
+        high = 0.068
     [Dishwasher.cod]
-        low = 0.3
-        high = 0.35
+        low = 1
+        high = 1
     [Dishwasher.bod5]
-        low = 0.4
-        high = 0.45
+        low = 0.11
+        high = 1.04
     [Dishwasher.ss]
-        low = 0.5
-        high = 0.55
+        low = 0.09
+        high = 0.44
     [Dishwasher.amm]
-        low = 0.6
-        high = 0.65
+        low = 0.0045
+        high = 0.05
