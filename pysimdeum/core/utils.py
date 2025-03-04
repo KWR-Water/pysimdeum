@@ -388,7 +388,9 @@ def process_discharge_nutrients(discharge):
     # Set the values for each nutrient based on the multipliers from the TOML file
     for nutrient in nutrients:
         for enduse in nutrient_data.keys():
-            multiplier = nutrient_data[enduse][nutrient]
+            low = nutrient_data[enduse][nutrient]['low']
+            high = nutrient_data[enduse][nutrient]['high']
+            multiplier = np.random.uniform(low, high) # sample from uniform distribution
             df.loc[df['enduse'] == enduse, nutrient] = df['flow'] * multiplier
 
     # Create an xarray.Dataset and add the discharge DataArray to it

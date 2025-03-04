@@ -1,57 +1,141 @@
 # Nutrient statistics per enduse
 
 [Shower]
-    n = 0.1
-    p = 0.2
-    cod = 0.3
-    bod5 = 0.4
-    ss = 0.5
-    amm = 0.6
+    [Shower.n]
+        low = 0.1
+        high = 0.15
+    [Shower.p]
+        low = 0.2
+        high = 0.25
+    [Shower.cod]
+        low = 0.3
+        high = 0.35
+    [Shower.bod5]
+        low = 0.4
+        high = 0.45
+    [Shower.ss]
+        low = 0.5
+        high = 0.55
+    [Shower.amm]
+        low = 0.6
+        high = 0.65
 
 [Bathtub]
-    n = 0.1
-    p = 0.2
-    cod = 0.3
-    bod5 = 0.4
-    ss = 0.5
-    amm = 0.6
+    [Bathtub.n]
+        low = 0.1
+        high = 0.15
+    [Bathtub.p]
+        low = 0.2
+        high = 0.25
+    [Bathtub.cod]
+        low = 0.3
+        high = 0.35
+    [Bathtub.bod5]
+        low = 0.4
+        high = 0.45
+    [Bathtub.ss]
+        low = 0.5
+        high = 0.55
+    [Bathtub.amm]
+        low = 0.6
+        high = 0.65
 
 [Wc]
-    n = 0.1
-    p = 0.2
-    cod = 0.3
-    bod5 = 0.4
-    ss = 0.5
-    amm = 0.6
+    [Wc.n]
+        low = 0.1
+        high = 0.15
+    [Wc.p]
+        low = 0.2
+        high = 0.25
+    [Wc.cod]
+        low = 0.3
+        high = 0.35
+    [Wc.bod5]
+        low = 0.4
+        high = 0.45
+    [Wc.ss]
+        low = 0.5
+        high = 0.55
+    [Wc.amm]
+        low = 0.6
+        high = 0.65
 
 [KitchenTap]
-    n = 0.1
-    p = 0.2
-    cod = 0.3
-    bod5 = 0.4
-    ss = 0.5
-    amm = 0.6
+    [KitchenTap.n]
+        low = 0.1
+        high = 0.15
+    [KitchenTap.p]
+        low = 0.2
+        high = 0.25
+    [KitchenTap.cod]
+        low = 0.3
+        high = 0.35
+    [KitchenTap.bod5]
+        low = 0.4
+        high = 0.45
+    [KitchenTap.ss]
+        low = 0.5
+        high = 0.55
+    [KitchenTap.amm]
+        low = 0.6
+        high = 0.65
 
 [BathroomTap]
-    n = 0.1
-    p = 0.2
-    cod = 0.3
-    bod5 = 0.4
-    ss = 0.5
-    amm = 0.6
+    [BathroomTap.n]
+        low = 0.1
+        high = 0.15
+    [BathroomTap.p]
+        low = 0.2
+        high = 0.25
+    [BathroomTap.cod]
+        low = 0.3
+        high = 0.35
+    [BathroomTap.bod5]
+        low = 0.4
+        high = 0.45
+    [BathroomTap.ss]
+        low = 0.5
+        high = 0.55
+    [BathroomTap.amm]
+        low = 0.6
+        high = 0.65
 
 [WashingMachine]
-    n = 0.1
-    p = 0.2
-    cod = 0.3
-    bod5 = 0.4
-    ss = 0.5
-    amm = 0.6
+    [WashingMachine.n]
+        low = 0.1
+        high = 0.15
+    [WashingMachine.p]
+        low = 0.2
+        high = 0.25
+    [WashingMachine.cod]
+        low = 0.3
+        high = 0.35
+    [WashingMachine.bod5]
+        low = 0.4
+        high = 0.45
+    [WashingMachine.ss]
+        low = 0.5
+        high = 0.55
+    [WashingMachine.amm]
+        low = 0.6
+        high = 0.65
 
 [Dishwasher]
-    n = 0.1
-    p = 0.2
-    cod = 0.3
-    bod5 = 0.4
-    ss = 0.5
-    amm = 0.6
+    [Dishwasher.n]
+        low = 0.1
+        high = 0.15
+    [Dishwasher.p]
+        low = 0.2
+        high = 0.25
+    [Dishwasher.cod]
+        low = 0.3
+        high = 0.35
+    [Dishwasher.bod5]
+        low = 0.4
+        high = 0.45
+    [Dishwasher.ss]
+        low = 0.5
+        high = 0.55
+    [Dishwasher.amm]
+        low = 0.6
+        high = 0.65
