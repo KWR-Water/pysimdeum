@@ -7,8 +7,9 @@ The main functionality of pySimdeum is to build and populate houses with users a
 By default, pySimduem will use the NL statistics, with an optional flag to switch to UK data provided in the repo. 
 
 Users can either:
-1. Select country-specific statistics available in the repo, the UK or NL
-2. Provide a custom directory path containing `.toml` statistics files, following the structure provided in [Config Schema](schema.md)
+
+- Select country-specific statistics available in the repo, the UK or NL
+- Provide a custom directory path containing `.toml` statistics files, following the structure provided in [Config Schema](schema.md)
 
 To use predefined `.toml` files, specify the country code when initializing the system, or ignore the `country` flag to use default NL data.
 
@@ -46,7 +47,8 @@ The custom directory must contain `.toml` files structured as follows:
 ### Diurnal Patterns
 
 The `diurnal_patterns.toml` file contains statistical data for modeling water demand patterns based on different demographic groups and their daily activities. 
-The demographics included are: 
+The demographics included are:
+ 
 - child
 - teen 
 - adult working outside the home

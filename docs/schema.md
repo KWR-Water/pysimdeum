@@ -3,17 +3,20 @@
 ## Diurnal Patterns
 
 The schema has a section for each demographic (eg. child, teen etc) as well as aggregate categories (total, weekend), each containing a subsection for key activity:
+
 - `getting_up`: Time when the person wakes up.
 - `leaving_house`: Time when the person leaves the house.
 - `being_away`: Duration of time spent away from home.
 - `sleep`: Time when the person goes to sleep.
 
 Each activity is specified using:
+
 - `dist` (string): Distribution type (e.g., `'norm'`)
 - `mu` (string): Mean time of the activity (in `HH:MM:SS` format)
 - `sd` (string): Standard deviation of the activity time (in `HH:MM:SS` format)
 
 Each activity will follow the structure:
+
 ```toml
 [demographic]
     [demographic.activity]
@@ -37,6 +40,7 @@ Each activity will follow the structure:
 ### Custom Configs
 
 To create a custom configuration:
+
 - Copy an existing structure from the data in the repo.
 - Modify the `mu` values to represent the desired schedule.
 - Adjust the `sd` values to control variability (higher values = more variation).
@@ -46,11 +50,13 @@ To create a custom configuration:
 ## Household Statistics
 
 This config file has a section for each household type. Household types include:
+
 - `one_person`
 - `two_person`
 - `family` 
 
 Each household section contains:
+
 - `people` (number): Number of people per household
 - `households` (number): Percentage of this household type occuring
 - `division_gender`: Gender division.
