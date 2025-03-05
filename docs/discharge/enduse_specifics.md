@@ -14,7 +14,7 @@ The `Bathtub` follows a similarly simple discharge to the `BathroomTap` with one
 
 ## Shower
 
-The `Shower` has the same simple discharge as seen in the `BathroomTap`. Water begins discharging immediately when a consumption event begins, with the exception of when the Offset simultaneous discharge method is applied.
+The `Shower` has the same simple discharge pattern as seen in the `BathroomTap`. Water begins discharging immediately when a consumption event begins, with the exception of when the Offset simultaneous discharge method is applied.
 
 ## Wc
 
