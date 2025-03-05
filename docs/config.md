@@ -1,13 +1,13 @@
 # Config
 
-The main functionality of pySimdeum is to build and populate houses with users and water end-use devices according to region (e.g. country, city, state) specific statistics as well as to simulate water usage and demand stochastically based on these statistics. To do this, the project uses a set of `.toml` config files that contain region specific statistics, stored in the `pysimdeum/data/` folder. Under the data folder default statistics are provided for the NL and UK. Alternatively users can copy this structure and provide config files of their own.
+The main functionality of pySimdeum is to build and populate houses with users and water end-use devices according to region (e.g. country, city, state) specific statistics, as well as to simulate water usage and demand stochastically based on these statistics. To do this, the project uses a set of `.toml` config files that contain region-specific statistics, stored in the `pysimdeum/data/` folder. Under the data folder, default statistics are provided for the NL and UK. Alternatively users can copy this structure and provide config files of their own.
 
 ## Using Config Files
 
-As a default pysimduem will use the NL statistics, with an optional flag to switch to UK data provided in the repo. 
+By default, pySimduem will use the NL statistics, with an optional flag to switch to UK data provided in the repo. 
 
 Users can either:
-1. Select country specific statistics available in the repo, the UK or NL
+1. Select country-specific statistics available in the repo, the UK or NL
 2. Provide a custom directory path containing `.toml` statistics files, following the structure provided in [Config Schema](schema.md)
 
 To use predefined `.toml` files, specify the country code when initializing the system, or ignore the `country` flag to use default NL data.
@@ -43,9 +43,9 @@ The custom directory must contain `.toml` files structured as follows:
 
 ## Description of Files
 
-### Dirunal Patterns
+### Diurnal Patterns
 
-The `dirunal_patterns.toml` file contains statistical data for modeling water demand patterns based on different demographic groups and their daily activities. 
+The `diurnal_patterns.toml` file contains statistical data for modeling water demand patterns based on different demographic groups and their daily activities. 
 The demographics included are: 
 - child
 - teen 
