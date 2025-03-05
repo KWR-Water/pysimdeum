@@ -25,7 +25,21 @@ house = built_house(house_type="family", country="/my/custom/config/")
 ```
 
 The custom directory must contain `.toml` files structured as follows:
-``` /pysimdeum/data/ ├── Region/ │ ├── diurnal_patterns.toml │ ├── household_statistics.toml │ ├── end_uses/ │ ├── BathroomTap.toml │ ├── Bathtub.toml │ ├── Dishwasher.toml │ ├── KitchenTap.toml │ ├── OutsideTap.toml │ ├── Shower.toml │ ├── WashingMachine.toml │ └── WC.toml ``` 
+``` 
+/my/custom/config/ 
+└── Region/ 
+    ├── diurnal_patterns.toml
+    ├── household_statistics.toml 
+    └── end_uses/
+        ├── BathroomTap.toml
+        ├── Bathtub.toml
+        ├── Dishwasher.toml
+        ├── KitchenTap.toml
+        ├── OutsideTap.toml
+        ├── Shower.toml
+        ├── WashingMachine.toml
+        └── WC.toml 
+``` 
 
 ## Description of Files
 
