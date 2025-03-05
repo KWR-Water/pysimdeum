@@ -42,23 +42,23 @@
 
 [Wc]
     [Wc.n]
-        low = 0.1
-        high = 0.15
-    [Wc.p]
-        low = 0.2
-        high = 0.25
-    [Wc.cod]
         low = 0.3
-        high = 0.35
+        high = 0.3
+    [Wc.p]
+        low = 0.0361
+        high = 0.0361
+    [Wc.cod]
+        low = 0.751
+        high = 0.751
     [Wc.bod5]
         low = 0.4
-        high = 0.45
+        high = 0.4
     [Wc.ss]
-        low = 0.5
-        high = 0.55
+        low = 0.391
+        high = 0.391
     [Wc.amm]
-        low = 0.6
-        high = 0.65
+        low = 0.04
+        high = 0.04
 
 [KitchenTap]
     [KitchenTap.n]
