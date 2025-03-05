@@ -14,11 +14,15 @@ The `Bathtub` follows a similarly simple discharge to the `BathroomTap` with one
 
 ## Shower
 
+The `Shower` has the same simple discharge pattern as seen in the `BathroomTap`. Water begins discharging immediately when a consumption event begins, with the exception of when the Offset simultaneous discharge method is applied.
+
 ## Wc
 
 The `Wc` is the only enduse that discharges prior to water consumption. As per other enduses, the discharge simulation is still linked to the consumption simulation. The volume of water consumed is the same as that which is discharged. The start time of the consumption event is used as the end of the discharge event.
 
 ## Kitchen Tap
+
+The `KitchenTap` follows the same simple discharge pattern as seen in the `BathroomTap`, for all usage categories, except for consumption. When the tap is used for consumption, i.e. drinking water, it is assumed that there is no discharge in this case. The remaining uses of the `KitchenTap` see water discharging as expected.
 
 ## Outside Tap
 
