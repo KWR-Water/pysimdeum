@@ -1,6 +1,6 @@
 # Config
 
-The main functionality of pySimdeum is to build and populate houses with users and water end-use devices according to region (e.g. country, city, state) specific statistics as well as to simulate water usage and demand stochastically based on these statistics. To do this, the project uses a set of `.toml` config files that contain region specific statistics, stored in the `pysimdeum/data/` folder. Under the data folder default statistics are provided for the NL and UK. Alternatively users and copy this structure and provide config files of their own.
+The main functionality of pySimdeum is to build and populate houses with users and water end-use devices according to region (e.g. country, city, state) specific statistics as well as to simulate water usage and demand stochastically based on these statistics. To do this, the project uses a set of `.toml` config files that contain region specific statistics, stored in the `pysimdeum/data/` folder. Under the data folder default statistics are provided for the NL and UK. Alternatively users can copy this structure and provide config files of their own.
 
 ## Using Config Files
 
