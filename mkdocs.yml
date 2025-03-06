@@ -13,6 +13,7 @@ nav:
     - Common methods: discharge/common_methods.md
     - Enduse specifics: discharge/enduse_specifics.md
   - config.md
+  - Config Schema: schema.md
   - Changelog: CHANGELOG.md
 theme:
   name: material
