@@ -300,7 +300,8 @@ This file defines the statistics and parameters for the `OutsideTap` end-use in 
             - `low` (float): Lower bound of intensity.
             - `high` (float): Upper bound of intensity.
 
-!!! Note that this schema does not contain discharge data, as it is assumed the data does not get discharged to the network.
+!!! info 
+    Note that this schema does not contain discharge data, as it is assumed the data does not get discharged to the network.
 
 Outside tap types of users (`subtype`):
 
