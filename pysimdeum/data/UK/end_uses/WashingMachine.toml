@@ -1,7 +1,9 @@
 # Statistics of washing machine end-use
+# 50 litres/cycle
+
 classname = 'WashingMachine'
 offset = 0
-temperature = 10
+temperature = 40
 
 [daily_pattern_input]
     x = "34 24 17 43 41 57 57 212 290 338 392 325 226 222 200 175 124 106 139 185 133 165 101 147 34"
@@ -20,7 +22,7 @@ temperature = 10
     discharge_time = 30
 
 [penetration]
-    1 = 92  # [%]
+    1 = 98  # [%]
     2 = 98
     3 = 98
     4 = 98
@@ -30,10 +32,10 @@ temperature = 10
 [frequency]
     distribution = 'Poisson'
     [frequency.average]
-        1 = 0.32  # [1/day]
+        1 = 0.36  # [1/day]
         2 = 0.29
         3 = 0.29
-        4 = 0.27
-        5 = 0.29
+        4 = 0.26
+        5 = 0.21
 
 # through subtypes different washing machine patterns (washing programs) could be constructed in the future

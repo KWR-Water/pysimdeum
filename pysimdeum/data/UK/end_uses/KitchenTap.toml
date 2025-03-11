@@ -1,4 +1,6 @@
 # Statistics of kitchen_tap end-use
+# 8 litres per bowl wash, 30 litres per running tap wash
+
 classname = 'KitchenTap'
 
 penetration = 100

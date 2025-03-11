@@ -1,4 +1,6 @@
 # Statistics of toilet end-use
+# 5 flushes/day/occupant; dual-flush 5 litres/flush, post-2001 5 litres/flush, 1980-2001 7.5 litres/flush, 1940-1980 9 litres per flush, pre-1940 12 litres per flush
+
 classname = 'Wc'  # has to be exactly the same name as class constructor
 penetration = 100  # penetraton rate of houses with wc [%]
 # pattern_generator = ''  # if a pattern exists, otherwise this field is an empty string
@@ -32,28 +34,28 @@ discharge_intensity = 1.2
         female = 6.8
         total = 7.2
     [frequency.average.total]
-        male = 5.3
-        female = 6.4
-        total = 5.9
+        male = 5
+        female = 5
+        total = 5
 # different subtypes of toilets which are used to populate a household
 [subtype]
     [subtype.WcNormal]
-        penetration = 33.3  # penetration rate within end-use [%]
+        penetration = 25.2  # penetration rate within end-use [%]
         flush_interuption = false  # presence of water savings option
         cistern_size = 9  # size of cistern of toilet [L] ,but not important for calculation
         duration = '3.6 Minutes'  # duration of water use corresponds to the filling time of the cistern and therefore on its size.
     [subtype.WcNormalSave]
-        penetration = 22.2
+        penetration = 16.8
         flush_interuption = true
         cistern_size = 9
         duration = '3.6 Minutes'
     [subtype.WcNew]
-        penetration = 11.1
+        penetration = 20
         flush_interuption = false
         cistern_size = 6
         duration = '2.4 Minutes'
     [subtype.WcNewSave]
-        penetration = 33.3
+        penetration = 38
         flush_interuption = true
         cistern_size = 6
         duration = '2.4 Minutes'

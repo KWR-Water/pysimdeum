@@ -1,4 +1,6 @@
 # Statistics of bathroom tap end-use
+# 8 litres per bowl wash, 30 litres per running tap wash
+
 classname = 'BathroomTap'  # has to be exactly the same name as class constructor
 penetration = 100  # penetraton rate of houses with bathroom taps [%]
 # pattern_generator = '' # if a pattern exists, otherwise this field is an empty string

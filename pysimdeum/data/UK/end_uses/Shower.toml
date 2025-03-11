@@ -1,9 +1,10 @@
 # statistics for showering
-classname = 'Shower'
+# 13 litres/min power shower, 8 litres/min mixer shower, 5 litres/min electric shower
 
+classname = 'Shower'
 penetration = 100
 offset = '2 Hours'
-temperature = 40
+temperature = 41
 
 pattern = 'name of pattern generator'
 
@@ -11,28 +12,28 @@ pattern = 'name of pattern generator'
     distribution = 'Binomial'  # Binomial distribution binomial(N, p)
     n = 1  # number of showers per day,  either shower or not a shower (could be simplyfied)
     [frequency.p]
-        child = 0.48
-        teen = 0.67
-        work_ad = 0.79
-        home_ad = 0.79
-        senior = 0.69
-        total = 0.72
+        child = 0.63
+        teen = 0.63
+        work_ad = 0.63
+        home_ad = 0.63
+        senior = 0.63
+        total = 0.63
 
 [duration]
     distribution = 'Chisquare'
     [duration.df]
         child = '8.6 Minutes'
         teen = '11.3 Minutes'
-        work_ad = '9.3 Minutes'
-        home_ad = '9.3 Minutes'
+        work_ad = '7.5 Minutes'
+        home_ad = '7.5 Minutes'
         senior = '6.5 Minutes'
-        total = '8.8 Minutes'
+        total = '7.5 Minutes'
 
 [subtype]
 
     [subtype.NormalShower]
         penetration = 50
-        intensity = 0.142  # [L/s]
+        intensity = 0.217  # [L/s]
 
         [subtype.NormalShower.discharge_intensity]
             distribution = 'Uniform'
@@ -42,7 +43,7 @@ pattern = 'name of pattern generator'
     [subtype.FancyShower]
         # combi_heater_with_water_saving_shower_head
         penetration = 50
-        intensity = 0.123  # [L/s]
+        intensity = 0.133  # [L/s]
 
         [subtype.FancyShower.discharge_intensity]
             distribution = 'Uniform'

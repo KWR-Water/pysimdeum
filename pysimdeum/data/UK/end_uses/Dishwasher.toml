@@ -1,4 +1,6 @@
 # Statistics of dishwasher end-use
+# pre-2000 25 litres/cycle, post-2000 14 litres/cycle, Eco setting 10 litres/cycle
+
 classname = 'Dishwasher'
 offset = 0
 temperature = 10
@@ -29,9 +31,9 @@ temperature = 10
 [frequency]
     distribution = 'Poisson'
     [frequency.average]
-        1 = 0.2143  # [1/day]
-        2 = 0.2286
-        3 = 0.1857
-        4 = 0.2000
-        5 = 0.1429
+        1 = 0.1286  # [1/day]
+        2 = 0.1643
+        3 = 0.1476
+        4 = 0.1536
+        5 = 0.1371
 
