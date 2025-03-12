@@ -2,6 +2,7 @@ import pandas as pd
 import uuid
 import numpy as np
 from dataclasses import dataclass
+from scipy.stats import truncnorm
 from typing import Union
 import toml
 import xarray as xr
@@ -354,6 +355,113 @@ def complex_discharge_pattern(config, enduse_pattern, resolution='1s'):
         discharge_pattern.loc[discharge_start:discharge_end - pd.Timedelta(seconds=1)] = flow_rate # restrict range to not be inclusive of final timstamp as this would result in extra discharge
 
     return discharge_pattern
+
+
+def xarray_to_metadata_df(ds, array, metadata):
+    """Extract from xarray.Dataset to a pd.DataFrame and enrich with event metadata.
+
+    Adds 'usage' and 'event_label' columns to the DataFrame based on the metadata.
+
+    Args:
+        ds (xarray.Dataset): The dataset containing the data and metadata.
+        array (str): Name of the array in the dataset to be converted to a DataFrame.
+        metadata (str): Name of the metadata array in the dataset.
+
+    Returns:
+        pd.DataFrame: The enriched DataFrame containing the data and metadata.
+    """
+    df = ds[array].to_dataframe(name='flow').reset_index()
+    df['usage'] = None
+    df['event_label'] = None
+
+    reference_start = df['time'].min()
+
+    events = ds[metadata].values
+    start_times = [reference_start + pd.Timedelta(seconds=event['start']) for event in events]
+    end_times = [reference_start + pd.Timedelta(seconds=event['end']) for event in events]
+    usages = [event['usage'].lower() for event in events]
+    enduses = [event['enduse'] for event in events]
+
+    for start, end, usage, enduse in zip(start_times, end_times, usages, enduses):
+        condition = ((df['time'] >= start)
+                     & (df['time'] < end)
+                     & (df['enduse'] == enduse)
+                     & (df['flow'] != 0)
+        )
+        df.loc[condition, 'usage'] = usage
+        df.loc[condition, 'event_label'] = f"{usage}_{start.timestamp()}_{end.timestamp()}"
+
+    return df
+    
+
+def truncated_normal_dis_sampling(mean_value):
+    """Samples a value from a truncated normal distribution based on the given mean value.
+
+    Distribution is truncated at 0 to prevent negative values.
+
+    Args:
+        mean_value (float): Mean value for the truncated normal distribution.
+
+    Returns:
+        float: Sampled value from the truncated normal distribution. If input value is 0, returns 0.
+    """
+    if mean_value == 0: # if input stat is 0, then should always sample 0
+        return 0
+    std_dev = mean_value * 0.3 # 30% of meean value is just an educated guess based on data types
+    lower_bound = 0
+    upper_bound = np.inf
+    a, b = (lower_bound - mean_value) / std_dev, (upper_bound - mean_value) / std_dev
+    # sample from truncated normal distribution
+    sample = truncnorm.rvs(a, b, loc=mean_value, scale=std_dev)
+
+    return sample
+
+
+def assign_discharge_nutrients(ds):
+    """Calculates nutrient concentrations based on simulated discharge flow data.
+
+    Reads nutrient concentrations in g/use from config file. Enriches the discharge data
+    with discharge event metadata such as specific usage type of enduse. Samples and scalculate
+    nutrient concentrations and assigns concentration to each timestamp.
+
+    Args:
+        ds (xarray.Dataset): The dataset containing discharge data and discharge events metadata.
+
+    Returns:
+        pd.DataFrame: The updated DataFrame containing the discharge data and the nutrient concentrations.
+    """
+
+    toml_file_path = os.path.join(DATA_DIR, 'NL', 'ww_nutrients.toml')
+    nutrient_data = toml.load(toml_file_path)
+
+    df = xarray_to_metadata_df(ds, 'discharge', 'discharge_events')
+    events = df['event_label'].dropna().unique()
+
+    # list of nutrient types
+    nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
+    for nutrient in nutrients:
+        df[nutrient] = 0.0
+
+    # loop through each discharge event
+    for event in events:
+        # filter data for the discharge event
+        event_data = df[df['event_label'] == event]
+        # event metadata
+        enduse = event_data['enduse'].iloc[0]
+        usage = event_data['usage'].iloc[0]
+        # event flow data
+        flow = event_data['flow'].mean()
+        total_flow = flow * len(event_data)
+        
+        # loop through all nutrients
+        for nutrient in nutrients:
+            # sample nutrient value from nutrient congfig file
+            nutrient_per_use = truncated_normal_dis_sampling(nutrient_data[enduse][usage][nutrient])
+            # calculate nutrient concentration
+            nutrient_concentration = nutrient_per_use / total_flow # g/L (g/use / L/use)
+            df.loc[df['event_label'] == event, nutrient] = nutrient_concentration
+
+    return df
 
 
 def process_discharge_nutrients(discharge):

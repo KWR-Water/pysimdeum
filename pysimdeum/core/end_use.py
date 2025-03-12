@@ -16,6 +16,7 @@ class EndUse:
     name: str = "EndUse"  # ... name of the end-use
     cold_water_temp = 10
     hot_water_temp = 60
+    discharge_events = []
 
     def init_consumption(self, users: list=None, time_resolution: str='1s') -> pd.DataFrame:
         """Initialization of a pandas dataframe to store the  consumptions.
@@ -93,7 +94,7 @@ class EndUse:
 @dataclass
 class Bathtub(EndUse):
     """Class for Bathtub end-use."""
-
+    #discharge_events: list = field(default_factory=list)
 
     def __post_init__(self):
         """Initialisation function of Bathtub end-use class.
@@ -104,6 +105,7 @@ class Bathtub(EndUse):
         """
         self.name = "Bathtub"
         self.wastewater_type = "greywater"
+        #self.discharge_events = []
 
     def fct_frequency(self, age=None):
         """Random function computing the frequency of use for the Bathtub end-use class.
@@ -169,6 +171,13 @@ class Bathtub(EndUse):
         high = discharge_intensity_stats['high']
         discharge_flow_rate = dist(low=low, high=high)
 
+        self.discharge_events.append({
+            'enduse': self.name,
+            'usage': self.name, # no bath subtypes
+            'start': start,
+            'end': int(start + (remaining_water / discharge_flow_rate)),
+        })
+
         while remaining_water > 0:
             discharge_duration = remaining_water / discharge_flow_rate
             end = int(start + discharge_duration)
@@ -212,10 +221,12 @@ class Bathtub(EndUse):
 
 @dataclass
 class BathroomTap(EndUse):
+    #discharge_events: list = field(default_factory=list)
     
     def __post_init__(self):
         self.name = "BathroomTap"
         self.wastewater_type = "greywater"
+        #self.discharge_events = []
 
     def fct_frequency(self):
 
@@ -260,6 +271,13 @@ class BathroomTap(EndUse):
 
         start = offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num)
 
+        self.discharge_events.append({
+            'enduse': self.name,
+            'usage': self.subtype, # subtypes are inherited from chooser(toml)
+            'start': start,
+            'end': int(start + (remaining_water / discharge_flow_rate)),
+        })
+
         while remaining_water > 0:
             discharge_duration = remaining_water / discharge_flow_rate
             end = int(start + discharge_duration)            
@@ -301,10 +319,12 @@ class BathroomTap(EndUse):
 
 @dataclass
 class Dishwasher(EndUse):
+    #discharge_events: list = field(default_factory=list)
 
     def __post_init__(self):
         self.name = "Dishwasher"
         self.wastewater_type = "blackwater"
+        #self.discharge_events = []
 
     def fct_frequency(self, numusers=None):
 
@@ -330,6 +350,13 @@ class Dishwasher(EndUse):
                 pass
             else:
                 discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
+
+        self.discharge_events.append({
+            'enduse': self.name,
+            'usage': self.name, # no subtypes currently
+            'start': start,
+            'end': int (start + len(self.fct_duration_pattern())),
+        })
 
         return discharge
 
@@ -381,10 +408,12 @@ class Dishwasher(EndUse):
 
 @dataclass
 class KitchenTap(EndUse):
+    #discharge_events: list = field(default_factory=list)
 
     def __post_init__(self):
         self.name = "KitchenTap"
         self.wastewater_type = "blackwater"
+        #self.discharge_events = []
 
     def fct_frequency(self, numusers=None):
 
@@ -430,7 +459,7 @@ class KitchenTap(EndUse):
 
         return duration, intensity, temperature
     
-    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num):
+    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, usage):
         remaining_water = intensity * duration
         start = int(start)
 
@@ -449,6 +478,13 @@ class KitchenTap(EndUse):
 
         # Check if the tap is turned off before the end of the duration, if so, update the start time
         start = offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num)
+
+        self.discharge_events.append({
+            'enduse': self.name,
+            'usage': usage, # subtypes are from chooser(toml)
+            'start': start,
+            'end': int(start + (remaining_water / discharge_flow_rate)),
+        })
 
         while remaining_water > 0:
             discharge_duration = remaining_water / discharge_flow_rate
@@ -484,6 +520,9 @@ class KitchenTap(EndUse):
         for i in range(freq):
 
             duration, intensity, temperature = self.fct_duration_intensity_temperature()
+
+            # assign usage type (based on subtype)
+            usage = self.subtype
             
             prob_joint = normalize(prob_user * prob_usage)  # ToDo: Check if joint probability can be computed outside of for loop for all functions
             
@@ -497,7 +536,7 @@ class KitchenTap(EndUse):
             if simulate_discharge:
                 if discharge is None:
                     raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
-                discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num)
+                discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, usage)
 
         return consumption, (discharge if simulate_discharge else None)
 
@@ -570,10 +609,12 @@ class OutsideTap(EndUse):
 
 @dataclass
 class Shower(EndUse):
+    #discharge_events: list = field(default_factory=list)
 
     def __post_init__(self):
         self.name = "Shower"
         self.wastewater_type = "greywater"
+        #self.discharge_events = []
 
     def fct_frequency(self, age=None):
 
@@ -616,6 +657,13 @@ class Shower(EndUse):
             discharge_flow_rate = intensity
 
         start = offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num)
+
+        self.discharge_events.append({
+            'enduse': "Shower",
+            'usage': "Shower", # subtypes are class inheritance names
+            'start': start,
+            'end': int(start + (remaining_water / discharge_flow_rate)),
+        })
 
         while remaining_water > 0:
             discharge_duration = remaining_water / discharge_flow_rate
@@ -669,10 +717,12 @@ class FancyShower(Shower):
     
 
 class WashingMachine(EndUse):
+    #discharge_events: list = field(default_factory=list)
 
     def __post_init__(self):
         self.name = "WashingMachine"
         self.wastewater_type = "blackwater"
+        #self.discharge_events = []
 
     def fct_frequency(self, numusers=None):
 
@@ -699,6 +749,13 @@ class WashingMachine(EndUse):
                 pass
             else:
                 discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
+
+        self.discharge_events.append({
+            'enduse': "WashingMachine",
+            'usage': "WashingMachine", # no subtypes currently
+            'start': start,
+            'end': int(start + len(self.fct_duration_pattern())),
+        })
 
         return discharge
 
@@ -752,10 +809,12 @@ class WashingMachine(EndUse):
 
 @dataclass
 class Wc(EndUse):
+    #discharge_events: list = field(default_factory=list)
 
     def __post_init__(self):
         self.name = "Wc"
         self.wastewater_type = "blackwater"
+        self.discharge_events = []
     
 
     def fct_frequency(self, age=None, gender=None):
@@ -788,12 +847,19 @@ class Wc(EndUse):
         return duration, intensity, temperature
 
 
-    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num):
+    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, usage):
         incoming_water = intensity * duration
         end = int(start)
 
         # Sample a value from the discharge_intensity distribution
         discharge_flow_rate = self.statistics['discharge_intensity']
+
+        self.discharge_events.append({
+            'enduse': "Wc",
+            'usage': usage,
+            'start': int(end - (incoming_water / discharge_flow_rate)),
+            'end': end,
+        })
 
         while incoming_water > 0:
             discharge_duration = incoming_water / discharge_flow_rate
@@ -819,6 +885,9 @@ class Wc(EndUse):
 
                 duration, intensity, temperature = self.fct_duration_intensity_temperature()
 
+                # assign usage type (urine or faeces)
+                usage = "urine" if np.random.random() * 100 < self.statistics['prob_urine'] else "faeces"
+
                 prob_joint = normalize(prob_user * prob_usage)
                 start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
                 previous_events.append((start, end))
@@ -830,7 +899,7 @@ class Wc(EndUse):
                 if simulate_discharge:
                     if discharge is None:
                         raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
-                    discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num)
+                    discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, usage)
 
         return consumption, (discharge if simulate_discharge else None)
 

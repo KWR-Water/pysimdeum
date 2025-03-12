@@ -1,141 +1,99 @@
 # Nutrient statistics per enduse
 
 [Shower]
-    [Shower.n]
-        low = 0.01
-        high = 0.017
-    [Shower.p]
-        low = 0.002
-        high = 0.002
-    [Shower.cod]
-        low = 0.35
-        high = 0.424
-    [Shower.bod5]
-        low = 0.17
-        high = 0.25
-    [Shower.ss]
-        low = 0.076
-        high = 0.12
-    [Shower.amm]
-        low = 0.0015
-        high = 0.002
+    [Shower.shower]
+        n = 0.49
+        p = 0.07
+        cod = 13.93
+        bod5 = 7.43
+        ss = 13.93
+        amm = 0.06
 
 [Bathtub]
-    [Bathtub.n]
-        low = 0.006
-        high = 0.017
-    [Bathtub.p]
-        low = 0.002
-        high = 0.002
-    [Bathtub.cod]
-        low = 0.282
-        high = 0.424
-    [Bathtub.bod5]
-        low = 0.17
-        high = 0.25
-    [Bathtub.ss]
-        low = 0.076
-        high = 0.12
-    [Bathtub.amm]
-        low = 0.0013
-        high = 0.002
+    [Bathtub.bathtub]
+        n = 0.85
+        p = 0.15
+        cod = 26.05
+        bod5 = 15.07
+        ss = 7.79
+        amm = 0.12
 
 [Wc]
-    [Wc.n]
-        low = 0.3
-        high = 0.3
-    [Wc.p]
-        low = 0.0361
-        high = 0.0361
-    [Wc.cod]
-        low = 0.751
-        high = 0.751
-    [Wc.bod5]
-        low = 0.4
-        high = 0.4
-    [Wc.ss]
-        low = 0.391
-        high = 0.391
-    [Wc.amm]
-        low = 0.04
-        high = 0.04
+    [Wc.urine]
+        n = 2.00
+        p = 0.23
+        cod = 2.00
+        bod5 = 2.46
+        ss = 0.0
+        amm = 0.92
+    [Wc.faeces]
+        n = 3.09
+        p = 0.48
+        cod = 30.23
+        bod5 = 12.03
+        ss = 3.04
+        amm = 1.10
 
 [KitchenTap]
-    [KitchenTap.n]
-        low = 0.04
-        high = 0.068
-    [KitchenTap.p]
-        low = 0.013
-        high = 0.074
-    [KitchenTap.cod]
-        low = 0.936
-        high = 1.38
-    [KitchenTap.bod5]
-        low = 0.536
-        high = 0.8
-    [KitchenTap.ss]
-        low = 0.72
-        high = 0.72
-    [KitchenTap.amm]
-        low = 0.0042
-        high = 0.006
+    [KitchenTap.consumption]
+        n = 0.35
+        p = 0.28
+        cod = 7.51
+        bod5 = 4.48
+        ss = 4.68
+        amm = 0.03
+    [KitchenTap.dishes]
+        n = 0.35
+        p = 0.28
+        cod = 7.51
+        bod5 = 4.48
+        ss = 4.68
+        amm = 0.03
+    [KitchenTap.washing_hands]
+        n = 0.35
+        p = 0.28
+        cod = 7.51
+        bod5 = 4.48
+        ss = 4.68
+        amm = 0.03
+    [KitchenTap.other]
+        n = 0.35
+        p = 0.28
+        cod = 7.51
+        bod5 = 4.48
+        ss = 4.68
+        amm = 0.03
 
 [BathroomTap]
-    [BathroomTap.n]
-        low = 0.012
-        high = 0.012
-    [BathroomTap.p]
-        low = 0.028
-        high = 0.049
-    [BathroomTap.cod]
-        low = 0.383
-        high = 0.433
-    [BathroomTap.bod5]
-        low = 0.148
-        high = 0.252
-    [BathroomTap.ss]
-        low = 0.04
-        high = 0.15
-    [BathroomTap.amm]
-        low = 0.00016
-        high = 0.00115
+    [BathroomTap.washing_shaving]
+        n = 0.04
+        p = 0.14
+        cod = 1.50
+        bod5 = 0.81
+        ss = 0.35
+        amm = 0.002
+    [BathroomTap.brushing_teeth]
+        n = 0.04
+        p = 0.14
+        cod = 1.50
+        bod5 = 0.81
+        ss = 0.35
+        amm = 0.002
 
 [WashingMachine]
-    [WashingMachine.n]
-        low = 0.013
-        high = 0.02
-    [WashingMachine.p]
-        low = 0.032
-        high = 0.171
-    [WashingMachine.cod]
-        low = 0.725
-        high = 0.725
-    [WashingMachine.bod5]
-        low = 0.11
-        high = 0.662
-    [WashingMachine.ss]
-        low = 0.09
-        high = 0.19
-    [WashingMachine.amm]
-        low = 0.013
-        high = 0.02
+    [WashingMachine.washingmachine]
+        n = 1.49
+        p = 7.29
+        cod = 65.25
+        bod5 = 27.25
+        ss = 14.1
+        amm = 0.82
 
 [Dishwasher]
-    [Dishwasher.n]
-        low = 0.04
-        high = 0.05
-    [Dishwasher.p]
-        low = 0.068
-        high = 0.068
-    [Dishwasher.cod]
-        low = 1
-        high = 1
-    [Dishwasher.bod5]
-        low = 0.11
-        high = 1.04
-    [Dishwasher.ss]
-        low = 0.09
-        high = 0.44
-    [Dishwasher.amm]
-        low = 0.0045
-        high = 0.05
+    [Dishwasher.dishwasher]
+        n = 1.35
+        p = 2.04
+        cod = 30
+        bod5 = 18
+        ss = 9.7
+        amm = 0.82
