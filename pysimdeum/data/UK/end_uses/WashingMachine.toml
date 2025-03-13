@@ -1,4 +1,4 @@
-# Statistics of washing machine end-use
+# Statistics of washing machine end-use, data from At home with water study conducted by the Energy Saving Trust
 # 50 litres/cycle
 
 classname = 'WashingMachine'

@@ -1,4 +1,4 @@
-# Statistics of bathroom tap end-use
+# Statistics of bathroom tap end-use, data from At home with water study conducted by the Energy Saving Trust (2013)
 # 8 litres per bowl wash, 30 litres per running tap wash
 
 classname = 'BathroomTap'  # has to be exactly the same name as class constructor

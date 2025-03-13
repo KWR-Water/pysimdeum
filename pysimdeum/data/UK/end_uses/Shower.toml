@@ -1,8 +1,8 @@
-# statistics for showering
+# statistics for showering, data from At home with water study conducted by the Energy Saving Trust (2013)
 # 13 litres/min power shower, 8 litres/min mixer shower, 5 litres/min electric shower
 
 classname = 'Shower'
-penetration = 100
+penetration = 90
 offset = '2 Hours'
 temperature = 41
 

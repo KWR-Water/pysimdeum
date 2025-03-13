@@ -1,4 +1,4 @@
-# Statistics of toilet end-use
+# Statistics of toilet end-use, data from At home with water study conducted by the Energy Saving Trust (2013)
 # 5 flushes/day/occupant; dual-flush 5 litres/flush, post-2001 5 litres/flush, 1980-2001 7.5 litres/flush, 1940-1980 9 litres per flush, pre-1940 12 litres per flush
 
 classname = 'Wc'  # has to be exactly the same name as class constructor

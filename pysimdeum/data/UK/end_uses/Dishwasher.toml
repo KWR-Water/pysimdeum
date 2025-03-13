@@ -1,4 +1,4 @@
-# Statistics of dishwasher end-use
+# Statistics of dishwasher end-use, data from At home with water study conducted by the Energy Saving Trust
 # pre-2000 25 litres/cycle, post-2000 14 litres/cycle, Eco setting 10 litres/cycle
 
 classname = 'Dishwasher'

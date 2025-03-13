@@ -1,4 +1,4 @@
-# Statistics of bathtub end-use
+# Statistics of bathtub end-use, data from At home with water study conducted by the Energy Saving Trust (2013)
 
 classname = 'Bathtub'  # has to be exactly the same name as class constructor
 # pattern_generator = '' # if a pattern exists, otherwise this field is an empty string
@@ -9,11 +9,12 @@ duration = '10 Minutes'  # duration of filling a bathtub depends on the size and
 intensity = 0.2  # fixed intensity for bathtub filling corresponds to the maximum water flow at full tap opening [L/s
 
 [penetration]  # penetraton rate of houses with bathtubes [%] depennds on the number of people living in a house
-    1 = 58
-    2 = 58
-    3 = 58
-    4 = 58
-    5 = 58
+# Data taken from NL statistics as corresponding UK information not found
+    1 = 28
+    2 = 45
+    3 = 53
+    4 = 54
+    5 = 63
 
 [frequency]
     distribution = 'Poisson'   # type of distribution from where the frequency of the  end-use will be drawn
