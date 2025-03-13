@@ -27,7 +27,7 @@ class Property(Base):
     house_type: str = ""
     _house: Any = None
     statistics: Statistics = None
-    country: str = "NL"
+    country: str = "NL" # Default country
 
     # TODO: implement following quantities
     oopnet_id: str = ""
@@ -51,9 +51,12 @@ class Property(Base):
 
         return self.house_type
 
-    def built_house(self, house_type: str="", housefile: str=""):
+    def built_house(self, house_type: str="", housefile: str="", country: str=None):
 
         # TODO: House chooser seems not to work if API:built_house does not specify a house_type
+        if country:
+            self.country = country
+            self.statistics = Statistics(country=self.country)
 
         if housefile:
             with open(housefile, 'rb') as f:
@@ -64,6 +67,7 @@ class Property(Base):
                 self.house_type = house_type
             else:
                 self._choose_type(self.statistics)
+
             self.house = House(id=self.id,
                             house_type=self.house_type,
                             statistics=self.statistics,

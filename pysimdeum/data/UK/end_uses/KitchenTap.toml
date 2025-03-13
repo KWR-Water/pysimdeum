@@ -1,0 +1,98 @@
+# Statistics of kitchen_tap end-use, data from At home with water study conducted by the Energy Saving Trust (2013)
+# 8 litres per bowl wash, 30 litres per running tap wash
+
+classname = 'KitchenTap'
+
+penetration = 100
+offset = 0
+
+[frequency]
+distribution = 'Negative_binomial'
+
+[frequency.average]
+    1 = 10.1
+    2 = 12.7
+    3 = 12.8
+    4 = 13.1
+    5 = 13.5
+
+[frequency.sigma]
+    1 = 7
+    2 = 7.2
+    3 = 7.7
+    4 = 8.4
+    5 = 9.1
+
+[subtype]
+    [subtype.consumption]
+
+        penetration = 37.5
+        temperature = 10
+
+        [subtype.consumption.duration]
+            average = '15 Seconds'
+            distribution = 'Lognormal'
+
+        [subtype.consumption.intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.167
+
+        [subtype.consumption.discharge_intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.02
+
+    [subtype.dishes]
+        penetration = 25
+        temperature = 55
+
+        [subtype.dishes.duration]
+            average = '45 Seconds'
+            distribution = 'Lognormal'
+
+        [subtype.dishes.intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.25
+
+        [subtype.dishes.discharge_intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.02
+
+    [subtype.washing_hands]
+        penetration = 25
+        temperature = 10
+
+        [subtype.washing_hands.duration]
+            distribution = 'Lognormal'
+            average = '13 Seconds'
+
+        [subtype.washing_hands.intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.167
+
+        [subtype.washing_hands.discharge_intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.02
+
+    [subtype.other]
+        penetration = 12.5
+        temperature = 10
+
+        [subtype.other.duration]
+            distribution = 'Lognormal'
+            average = '37 Seconds'
+
+        [subtype.other.intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.167
+
+        [subtype.other.discharge_intensity]
+            distribution = 'Uniform'
+            low = 0.0
+            high = 0.02

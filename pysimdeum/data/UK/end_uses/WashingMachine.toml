@@ -1,0 +1,41 @@
+# Statistics of washing machine end-use, data from At home with water study conducted by the Energy Saving Trust
+# 50 litres/cycle
+
+classname = 'WashingMachine'
+offset = 0
+temperature = 40
+
+[daily_pattern_input]
+    x = "34 24 17 43 41 57 57 212 290 338 392 325 226 222 200 175 124 106 139 185 133 165 101 147 34"
+
+[enduse_pattern_input]
+    intensity = 0.1667
+    runtime = 7200
+    cycle_times = [
+        {start = 0, end = 121},
+        {start = 3600, end = 3660},
+        {start = 4920, end = 4980},
+        {start = 6120, end = 6180}
+    ]
+
+[discharge_pattern_input]
+    discharge_time = 30
+
+[penetration]
+    1 = 98  # [%]
+    2 = 98
+    3 = 98
+    4 = 98
+    5 = 98
+
+# frequency is dependent on number of people living in the household
+[frequency]
+    distribution = 'Poisson'
+    [frequency.average]
+        1 = 0.36  # [1/day]
+        2 = 0.29
+        3 = 0.29
+        4 = 0.26
+        5 = 0.21
+
+# through subtypes different washing machine patterns (washing programs) could be constructed in the future

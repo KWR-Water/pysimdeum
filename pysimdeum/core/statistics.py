@@ -14,10 +14,16 @@ class Statistics:
     household: dict = field(default_factory=dict)
     diurnal_pattern: dict = field(default_factory=dict)
     end_uses: dict = field(default_factory=dict)
-    statisticsdir: str = os.path.join(DATA_DIR, 'NL')  # TODO: Find good solution for this dirty statistics file workaround
+    statisticsdir: str = ""  # TODO: Find good solution for this dirty statistics file workaround
 
-    def __post_init__(self, country='NL'):
-        self.country = country
+    def __post_init__(self):
+        
+        # Check if pointing to a custom statistics directory or a country in the repository
+        if os.path.isdir(self.country):
+            self.statisticsdir = self.country
+            self.country = None #No country is set as its a custom directory
+        else:
+            self.statisticsdir = os.path.join(DATA_DIR, self.country)
 
         # Load household statistics
         household_file = os.path.join(self.statisticsdir, 'household_statistics.toml')
