@@ -2,7 +2,7 @@
 # 13 litres/min power shower, 8 litres/min mixer shower, 5 litres/min electric shower
 
 classname = 'Shower'
-penetration = 90
+penetration = 100
 offset = '2 Hours'
 temperature = 41
 
