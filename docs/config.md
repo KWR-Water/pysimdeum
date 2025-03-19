@@ -30,7 +30,8 @@ The custom directory must contain `.toml` files structured as follows:
 /my/custom/config/ 
 └── Region/ 
     ├── diurnal_patterns.toml
-    ├── household_statistics.toml 
+    ├── household_statistics.toml
+    ├── ww_nutrients.toml
     └── end_uses/
         ├── BathroomTap.toml
         ├── Bathtub.toml
@@ -60,6 +61,9 @@ It also contains total and weekend activity. Each activity within a section is g
 ### Household Statistics
 
 The `household_statistics.toml` contains statistical data for modeling household compositions and their characteristics based on different household types. The file is organised into several sections, each representing a different type of household. Each section contains sub-sections for specific demographic and employment characteristics. This configuration allows for the simulation of realistic household compositions and their characteristics, which can be used to model water demand patterns based on different household types.
+
+### Wastewater Nutrient Statistics
+The `ww_nutrients.toml` contains statistical data for nutrient concentration of wastewater for each enduse and usage subtype. Statistics are given in g/use to allow for the study of water quality as water usage varies.
 
 ### End Uses
 

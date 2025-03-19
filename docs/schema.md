@@ -47,6 +47,33 @@ To create a custom configuration:
 - Save the `.toml` file in the appropriate config directory.
 
 
+## Wastewater Nutrient Statistics
+
+This config file has a section for each enduse and their following subtypes. If the user adds new enduses or enduse subtypes, these need to be added to this config file with their respecitive nutrient concentrations. Values are provided in g/use.
+
+Each enduse subtype section contains:
+
+- `n` (float): Nitrogen grams per use
+- `p`(float): Phosphorus grams per use
+- `cod`(float): COD grams per use
+- `bod5`(float): BOD grams per use
+- `ss`(float): Suspended solids grams per use
+- `amm`(float): Ammonia grams per use
+
+### Sample File Structure
+
+```toml
+[enduse]
+    [enduse.subtype]
+    n = 0.49
+    p = 0.07
+    cod = 13.93
+    bod5 = 7.43
+    ss = 13.93
+    amm = 0.06
+```
+
+
 ## Household Statistics
 
 This config file has a section for each household type. Household types include:
