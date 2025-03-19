@@ -35,13 +35,13 @@
         amm = 1.10
 
 [KitchenTap]
-    [KitchenTap.consumption]
-        n = 0.35
-        p = 0.28
-        cod = 7.51
-        bod5 = 4.48
-        ss = 4.68
-        amm = 0.03
+    [KitchenTap.consumption] # all zeros as no discharge for this subtype
+        n = 0
+        p = 0
+        cod = 0
+        bod5 = 0
+        ss = 0
+        amm = 0
     [KitchenTap.dishes]
         n = 0.35
         p = 0.28

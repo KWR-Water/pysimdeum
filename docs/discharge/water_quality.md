@@ -22,6 +22,12 @@ The nutrient concentration calculations in `pysimdeum` are performed using a ser
 1. **Nutrient concentration** 
     - The nutrient concentration for each discharge event is calculated by dividing the sampled nutrient value by the total flow for the discharge event, resulting in a concentration in grams per liter (g/L).
 
+1. **Temporal aggregation**
+    - The user can input the period of time aggregation that the output is required in. This can be in seconds, minutes, 15 minutes, 30 minutes, or hourly periods. Defaults to hourly.
+
+!!! info 
+    Note that the period of temporal aggregation selected will affect runtime. Only aggregate in seconds if necessary, as this will significantly increase runtime especially when simulating multiple houses.
+
 ## Temperature
 
 tbc
