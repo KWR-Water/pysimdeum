@@ -3,6 +3,7 @@
 classname = 'Bathtub'  # has to be exactly the same name as class constructor
 # pattern_generator = '' # if a pattern exists, otherwise this field is an empty string
 temperature = 44 # temperature of used-water [%]
+discharge_temperature = 36
 offset = 0  # offset defines the time where a second use of the end-use is blocked
 size = 80  # size of bathtub filling [L], but this parameter is not used
 duration = '10 Minutes'  # duration of filling a bathtub depends on the size and the intensity of the filling

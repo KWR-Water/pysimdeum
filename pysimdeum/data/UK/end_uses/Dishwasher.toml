@@ -4,6 +4,7 @@
 classname = 'Dishwasher'
 offset = 0
 temperature = 10
+discharge_temperature = 35
 
 [daily_pattern_input]
     x = "70 49 33 69 30 19 9 37 80 52 52 45 53 78 34 44 38 101 489 390 170 185 240 574 70"

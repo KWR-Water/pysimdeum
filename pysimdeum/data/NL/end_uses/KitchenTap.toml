@@ -26,6 +26,7 @@ distribution = 'Negative_binomial'
 
         penetration = 37.5
         temperature = 10
+        discharge_temperature = 40
 
         [subtype.consumption.duration]
             average = '15 Seconds'
@@ -44,6 +45,7 @@ distribution = 'Negative_binomial'
     [subtype.dishes]
         penetration = 25
         temperature = 55
+        discharge_temperature = 40
 
         [subtype.dishes.duration]
             average = '45 Seconds'
@@ -62,6 +64,7 @@ distribution = 'Negative_binomial'
     [subtype.washing_hands]
         penetration = 25
         temperature = 10
+        discharge_temperature = 10
 
         [subtype.washing_hands.duration]
             distribution = 'Lognormal'
@@ -80,6 +83,7 @@ distribution = 'Negative_binomial'
     [subtype.other]
         penetration = 12.5
         temperature = 10
+        discharge_temperature = 10
 
         [subtype.other.duration]
             distribution = 'Lognormal'

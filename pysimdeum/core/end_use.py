@@ -176,6 +176,7 @@ class Bathtub(EndUse):
             'usage': self.name, # no bath subtypes
             'start': start,
             'end': int(start + (remaining_water / discharge_flow_rate)),
+            'discharge_temperature': self.statistics['discharge_temperature'],
         })
 
         while remaining_water > 0:
@@ -276,6 +277,7 @@ class BathroomTap(EndUse):
             'usage': self.subtype, # subtypes are inherited from chooser(toml)
             'start': start,
             'end': int(start + (remaining_water / discharge_flow_rate)),
+            'discharge_temperature': self.statistics['subtype'][self.subtype]['discharge_temperature'],
         })
 
         while remaining_water > 0:
@@ -356,6 +358,7 @@ class Dishwasher(EndUse):
             'usage': self.name, # no subtypes currently
             'start': start,
             'end': int (start + len(self.fct_duration_pattern())),
+            'discharge_temperature': self.statistics['discharge_temperature'],
         })
 
         return discharge
@@ -484,6 +487,7 @@ class KitchenTap(EndUse):
             'usage': usage, # subtypes are from chooser(toml)
             'start': start,
             'end': int(start + (remaining_water / discharge_flow_rate)),
+            'discharge_temperature': self.statistics['subtype'][self.subtype]['discharge_temperature'],
         })
 
         while remaining_water > 0:
@@ -663,6 +667,7 @@ class Shower(EndUse):
             'usage': "Shower", # subtypes are class inheritance names
             'start': start,
             'end': int(start + (remaining_water / discharge_flow_rate)),
+            'discharge_temperature': self.statistics['discharge_temperature'],
         })
 
         while remaining_water > 0:
@@ -755,6 +760,7 @@ class WashingMachine(EndUse):
             'usage': "WashingMachine", # no subtypes currently
             'start': start,
             'end': int(start + len(self.fct_duration_pattern())),
+            'discharge_temperature': self.statistics['discharge_temperature'],
         })
 
         return discharge
@@ -859,6 +865,7 @@ class Wc(EndUse):
             'usage': usage,
             'start': int(end - (incoming_water / discharge_flow_rate)),
             'end': end,
+            'discharge_temperature': self.statistics['discharge_temperature'],
         })
 
         while incoming_water > 0:
