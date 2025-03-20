@@ -307,6 +307,15 @@ class House(Property):
         if simulate_discharge:
             self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns, flowtype], dims=['time', 'user', 'enduse', 'patterns', 'flowtypes'])
             self.discharge = xr.DataArray(data=discharge, coords=[time, users, enduse, patterns, dischargetype], dims=['time', 'user', 'enduse', 'patterns', 'dischargetypes'])
+
+            # discharge event metadata
+            discharge_events = []
+            for appliance in self.appliances:
+                if hasattr(appliance, 'discharge_events'):
+                    discharge_events.extend(appliance.discharge_events)
+
+            self.discharge = xr.Dataset({'discharge': self.discharge})
+            self.discharge['discharge_events'] = xr.DataArray(discharge_events)
         else:
             self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns, flowtype], dims=['time', 'user', 'enduse', 'patterns', 'flowtypes'])
 

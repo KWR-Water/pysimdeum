@@ -2,6 +2,7 @@ import pandas as pd
 import uuid
 import numpy as np
 from dataclasses import dataclass
+from scipy.stats import truncnorm
 from typing import Union
 import toml
 import xarray as xr
@@ -356,66 +357,208 @@ def complex_discharge_pattern(config, enduse_pattern, resolution='1s'):
     return discharge_pattern
 
 
-def process_discharge_nutrients(discharge):
-    """Process discharge data and add nutrient concentrations based on values from a .toml file.
-    
-    This function reads nutrient multipliers from a TOML file, converts the discharge data from an
-    xarray.DataArray to a pandas DataFrame, calculates the nutrient concentrations based on the
-    multipliers, and adds the nutrient data back to an xarray.Dataset.
+def xarray_to_metadata_df(ds, array, metadata):
+    """Extract from xarray.Dataset to a pd.DataFrame and enrich with event metadata.
+
+    Adds 'usage' and 'event_label' columns to the DataFrame based on the metadata.
 
     Args:
-        discharge (xr.DataArray): The discharge data.
+        ds (xarray.Dataset): The dataset containing the data and metadata.
+        array (str): Name of the array in the dataset to be converted to a DataFrame.
+        metadata (str): Name of the metadata array in the dataset.
 
     Returns:
-        xr.Dataset: The updated xarray.Dataset containing the discharge data and the nutrient concentrations.
+        pd.DataFrame: The enriched DataFrame containing the data and metadata.
+    """
+    df_ = ds[array].to_dataframe(name='flow').reset_index()
+    ref_start = df_['time'].min()
+    ref_end = df_['time'].max()
+    
+    df = df_[df_['flow'] != 0].copy()
+    df['usage'] = None
+    df['event_label'] = None
+
+    events = ds[metadata].values
+    start_times = [ref_start + pd.Timedelta(seconds=event['start']) for event in events]
+    end_times = [ref_start + pd.Timedelta(seconds=event['end']) for event in events]
+    usages = [event['usage'].lower() for event in events]
+    enduses = [event['enduse'] for event in events]
+
+    for start, end, usage, enduse in zip(start_times, end_times, usages, enduses):
+        condition = ((df['time'] >= start)
+                     & (df['time'] < end)
+                     & (df['enduse'] == enduse)
+                     & (df['flow'] != 0)
+        )
+        df.loc[condition, 'usage'] = usage
+        df.loc[condition, 'event_label'] = f"{usage}_{start.timestamp()}_{end.timestamp()}"
+
+    return df, ref_start, ref_end
+    
+
+def truncated_normal_dis_sampling(mean_value):
+    """Samples a value from a truncated normal distribution based on the given mean value.
+
+    Distribution is truncated at 0 to prevent negative values.
+
+    Args:
+        mean_value (float): Mean value for the truncated normal distribution.
+
+    Returns:
+        float: Sampled value from the truncated normal distribution. If input value is 0, returns 0.
+    """
+    if mean_value == 0: # if input stat is 0, then should always sample 0
+        return 0
+    std_dev = mean_value * 0.3 # 30% of meean value is just an educated guess based on data types
+    lower_bound = 0
+    upper_bound = np.inf
+    a, b = (lower_bound - mean_value) / std_dev, (upper_bound - mean_value) / std_dev
+    # sample from truncated normal distribution
+    sample = truncnorm.rvs(a, b, loc=mean_value, scale=std_dev)
+
+    return sample
+
+
+def assign_discharge_nutrients(ds):
+    """Calculates nutrient concentrations based on simulated discharge flow data.
+
+    Reads nutrient concentrations in g/use from config file. Enriches the discharge data
+    with discharge event metadata such as specific usage type of enduse. Samples and calculates
+    nutrient concentrations and assigns concentration to each timestamp.
+
+    Args:
+        ds (xarray.Dataset): The dataset containing discharge data and discharge events metadata.
+
+    Returns:
+        pd.DataFrame: The updated DataFrame containing the discharge data and the nutrient concentrations.
     """
 
     toml_file_path = os.path.join(DATA_DIR, 'NL', 'ww_nutrients.toml')
-
-    # Read the .toml file
     nutrient_data = toml.load(toml_file_path)
 
-    # Convert a xarray.DataArray to a pd.DataFrame
-    df = discharge.to_dataframe(name='flow').reset_index()
+    df, ref_start, ref_end = xarray_to_metadata_df(ds, 'discharge', 'discharge_events')
 
     # list of nutrient types
     nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
-
-    # Add new columns for each nutrient initialised to zero
     for nutrient in nutrients:
         df[nutrient] = 0.0
-    
-    # Set the values for each nutrient based on the multipliers from the TOML file
-    for nutrient in nutrients:
-        for enduse in nutrient_data.keys():
-            low = nutrient_data[enduse][nutrient]['low']
-            high = nutrient_data[enduse][nutrient]['high']
-            multiplier = np.random.uniform(low, high) # sample from uniform distribution
-            df.loc[df['enduse'] == enduse, nutrient] = df['flow'] * multiplier
 
-    # Create an xarray.Dataset and add the discharge DataArray to it
-    ds = xr.Dataset({'discharge': discharge})
+    # group by event_label
+    grouped = df.groupby('event_label')
 
-    # Add the pandas DataFrame to the xarray.Dataset as a new variable
-    ds['df'] = (('index', 'columns'), df.values)
-    ds['df_index'] = ('index', df.index)
-    ds['df_columns'] = ('columns', df.columns)
+    # Precompute nutrient concentrations for each event
+    nutrient_results = []
+    for event_label, event_data in grouped:
+        if pd.isna(event_label):
+            continue
 
-    return ds
+        # Extract metadata for the event
+        enduse = event_data['enduse'].iloc[0]
+        usage = event_data['usage'].iloc[0]
+
+        # Compute total flow for the event
+        total_flow = event_data['flow'].sum()
+
+        # Calculate nutrient concentrations for the event
+        nutrient_values = {}
+        for nutrient in nutrients:
+            mean_value = nutrient_data[enduse][usage][nutrient]
+            nutrient_per_use = truncated_normal_dis_sampling(mean_value)
+            nutrient_concentration = nutrient_per_use / total_flow if total_flow > 0 else 0
+            nutrient_values[nutrient] = nutrient_concentration
+
+        # Assign nutrient concentrations to the event
+        for nutrient, value in nutrient_values.items():
+            event_data[nutrient] = value
+
+        nutrient_results.append(event_data)
+
+    # Combine results back into a single DataFrame
+    df = pd.concat(nutrient_results)
+
+    return df, ref_start, ref_end
 
 
-def dataset_to_df(ds):
-    """Convert an xarray.Dataset to a pd.DataFrame.
+def hh_discharge_nutrients(ds, time_agg='h'):
+    """
+    Aggregates discharge data and calculates nutrient concentrations over specified time intervals.
+
+    This function processes discharge data from an xarray.Dataset, calculates nutrient concentrations
+    based on flow and event metadata, and aggregates the data over user-specified time intervals.
+    Missing timestamps (zero discharge flows) within the specified range are filled with zeros.
 
     Args:
-        ds (xr.Dataset): The input xarray.Dataset containing the 'df', 'df_index', and 'df_columns' variables.
+        ds (xarray.Dataset): The dataset containing discharge data and discharge event metadata.
+        time_agg (str, optional): The time aggregation level. Options are:
+            - 's': Aggregate by seconds.
+            - 'm': Aggregate by minutes.
+            - '15min': Aggregate by 15-minute intervals.
+            - '30min': Aggregate by 30-minute intervals.
+            - 'h': Aggregate by hours (default).
+
+    Raises:
+        ValueError: If the input DataFrame does not contain the required columns ('time', 'flow', and nutrient types).
+        ValueError: If an invalid `time_agg` value is provided.
 
     Returns:
-        pd.DataFrame: The converted pandas DataFrame.
+        pd.DataFrame: A DataFrame containing the aggregated data with the following columns:
+            - 'time': The aggregated time intervals.
+            - 'flow': The total flow for each time interval.
+            - Nutrient columns (e.g., 'n', 'p', 'cod', 'bod5', 'ss', 'amm'): Nutrient concentrations.
     """
-    df_from_ds = pd.DataFrame(data=ds['df'].values, index=ds['df_index'].values, columns=ds['df_columns'].values)
-    
-    return df_from_ds
+
+    df, ref_start, ref_end = assign_discharge_nutrients(ds)
+
+    nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
+
+    # Check if the DataFrame has the required columns
+    if not all(col in df.columns for col in ['time', 'flow'] + nutrients):
+        raise ValueError("Input DataFrame must contain columns for time, flow, and all nutrient types.")
+
+    # Round time to the specified aggregation level
+    if time_agg == 's':
+        df['agg_time'] = df['time']
+        freq = 'S'
+    elif time_agg == 'm':
+        df['agg_time'] = df['time'].dt.floor('min')  # Round to the nearest minute
+        freq = 'min'
+    elif time_agg == '15min':
+        df['agg_time'] = df['time'].dt.floor('15T')  # Round to the nearest 15 minutes
+        freq = '15T'
+    elif time_agg == '30min':
+        df['agg_time'] = df['time'].dt.floor('30T')  # Round to the nearest 30 minutes
+        freq = '30T'
+    elif time_agg == 'h':
+        df['agg_time'] = df['time'].dt.floor('h')  # Round to the nearest hour
+        freq = 'H'
+    else:
+        raise ValueError("Invalid time_agg value. Use 's' for seconds, 'm' for minutes, '15min' for 15mins, '30min' for 30mins, or 'h' for hours.")
+
+    # Group by date and the aggregated time
+    df['date'] = df['time'].dt.date
+    grouped = df.groupby(['date', 'agg_time'])
+
+    # Group by time and calculate total flow
+    flow = grouped['flow'].sum()
+
+    # Calculate weighted averages for each nutrient
+    weighted_nutrients = {
+        nutrient: grouped.apply(lambda g: (g[nutrient] * g['flow']).sum() / g['flow'].sum())
+        for nutrient in nutrients
+    }
+
+    # Combine results into a single DataFrame
+    hh_nutrients = pd.DataFrame(weighted_nutrients)
+    hh_nutrients['flow'] = flow
+
+    hh_nutrients = hh_nutrients.reset_index()[['agg_time','flow'] + nutrients].rename(columns={'agg_time': 'time'})
+
+    # Generate a complete range of timestamps between ref_start and ref_end
+    full_time_index = pd.date_range(start=ref_start, end=ref_end, freq=freq)
+    hh_nutrients = hh_nutrients.set_index('time').reindex(full_time_index, fill_value=0).rename_axis('time').reset_index()
+
+    return hh_nutrients
+
 
 @dataclass
 class Base:
