@@ -419,7 +419,7 @@ def truncated_normal_dis_sampling(mean_value):
     return sample
 
 
-def assign_discharge_nutrients(ds):
+def assign_discharge_nutrients(ds, country):
     """Calculates nutrient concentrations based on simulated discharge flow data.
 
     Reads nutrient concentrations in g/use from config file. Enriches the discharge data
@@ -428,12 +428,13 @@ def assign_discharge_nutrients(ds):
 
     Args:
         ds (xarray.Dataset): The dataset containing discharge data and discharge events metadata.
+        country (str): NL or UK. The country for which the nutrient concentrations are calculated.
 
     Returns:
         pd.DataFrame: The updated DataFrame containing the discharge data and the nutrient concentrations.
     """
 
-    toml_file_path = os.path.join(DATA_DIR, 'NL', 'ww_nutrients.toml')
+    toml_file_path = os.path.join(DATA_DIR, country, 'ww_nutrients.toml')
     nutrient_data = toml.load(toml_file_path)
 
     df, ref_start, ref_end = xarray_to_metadata_df(ds, 'discharge', 'discharge_events')
@@ -479,7 +480,7 @@ def assign_discharge_nutrients(ds):
     return df, ref_start, ref_end
 
 
-def hh_discharge_nutrients(ds, time_agg='h'):
+def hh_discharge_nutrients(ds, country='NL', time_agg='h'):
     """
     Aggregates discharge data and calculates nutrient concentrations over specified time intervals.
 
@@ -507,7 +508,7 @@ def hh_discharge_nutrients(ds, time_agg='h'):
             - Nutrient columns (e.g., 'n', 'p', 'cod', 'bod5', 'ss', 'amm'): Nutrient concentrations.
     """
 
-    df, ref_start, ref_end = assign_discharge_nutrients(ds)
+    df, ref_start, ref_end = assign_discharge_nutrients(ds, country)
 
     nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
 
