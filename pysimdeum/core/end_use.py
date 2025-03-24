@@ -343,6 +343,8 @@ class Dishwasher(EndUse):
     
     def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, day_num, end_of_day, total_days, spillover=False):
         discharge_pattern = self.statistics['discharge_pattern']
+        
+        cycle_times = []
 
         for time in discharge_pattern[discharge_pattern > 0].index:
             discharge_time  = start + int(time.total_seconds())
@@ -353,11 +355,16 @@ class Dishwasher(EndUse):
             else:
                 discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
 
+                if not cycle_times or discharge_time - cycle_times[-1][1] > 1:
+                    cycle_times.append([discharge_time, discharge_time])
+                else:
+                    cycle_times[-1][1] = discharge_time
+
         self.discharge_events.append({
             'enduse': self.name,
             'usage': self.name, # no subtypes currently
-            'start': start,
-            'end': int (start + len(self.fct_duration_pattern())),
+            'start': [cycle[0] for cycle in cycle_times],
+            'end': [cycle[1] for cycle in cycle_times],
             'discharge_temperature': self.statistics['discharge_temperature'],
         })
 
@@ -746,6 +753,8 @@ class WashingMachine(EndUse):
     def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, day_num, end_of_day, total_days, spillover=False):
         discharge_pattern = self.statistics['discharge_pattern']
 
+        cycle_times = []
+
         for time in discharge_pattern[discharge_pattern > 0].index:
             discharge_time  = start + int(time.total_seconds())
             if discharge_time > end_of_day and spillover:
@@ -755,11 +764,16 @@ class WashingMachine(EndUse):
             else:
                 discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
 
+            if not cycle_times or discharge_time - cycle_times[-1][1] > 1:
+                    cycle_times.append([discharge_time, discharge_time])
+            else:
+                    cycle_times[-1][1] = discharge_time
+
         self.discharge_events.append({
             'enduse': "WashingMachine",
             'usage': "WashingMachine", # no subtypes currently
-            'start': start,
-            'end': int(start + len(self.fct_duration_pattern())),
+            'start': [cycle[0] for cycle in cycle_times],
+            'end': [cycle[1] for cycle in cycle_times],
             'discharge_temperature': self.statistics['discharge_temperature'],
         })
 

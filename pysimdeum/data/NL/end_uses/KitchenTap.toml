@@ -26,7 +26,7 @@ distribution = 'Negative_binomial'
 
         penetration = 37.5
         temperature = 10
-        discharge_temperature = 40
+        discharge_temperature = 0
 
         [subtype.consumption.duration]
             average = '15 Seconds'

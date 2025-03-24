@@ -380,22 +380,29 @@ def xarray_to_metadata_df(ds, array, metadata):
     df['discharge_temperature'] = None
 
     events = ds[metadata].values
-    start_times = [ref_start + pd.Timedelta(seconds=event['start']) for event in events]
-    end_times = [ref_start + pd.Timedelta(seconds=event['end']) for event in events]
-    usages = [event['usage'].lower() for event in events]
-    enduses = [event['enduse'] for event in events]
-    discharge_temperatures = [event['discharge_temperature'] for event in events]
 
-    for start, end, usage, enduse, discharge_temperature in zip(start_times, end_times, usages, enduses, discharge_temperatures):
-        condition = ((df['time'] >= start)
-                     & (df['time'] < end)
-                     & (df['enduse'] == enduse)
-                     & (df['flow'] != 0)
-                    )
-        df.loc[condition, 'usage'] = usage
-        df.loc[condition, 'event_label'] = f"{usage}_{start.timestamp()}_{end.timestamp()}"
-        df.loc[condition, 'discharge_temperature'] = discharge_temperature
-    
+    for event in events:
+        start_times = [ref_start + pd.Timedelta(seconds=start) for start in np.atleast_1d(event['start'])]
+        end_times = [ref_start + pd.Timedelta(seconds=end) for end in np.atleast_1d(event['end'])]
+        usage = event['usage'].lower()
+        enduse = event['enduse']
+        discharge_temperatures = np.atleast_1d(event['discharge_temperature'])
+
+        for start, end, discharge_temperature in zip(start_times, end_times, discharge_temperatures):
+            condition = ((df['time'] >= start)
+                        & (df['time'] < end)
+                        & (df['enduse'] == enduse)
+                        & (df['flow'] != 0)
+                        )
+            
+            if isinstance(discharge_temperature, (list, np.ndarray)):
+                df.loc[condition, 'discharge_temperature'] = discharge_temperature[:len(df[condition])]
+            else:
+                df.loc[condition, 'discharge_temperature'] = discharge_temperature
+
+            df.loc[condition, 'usage'] = usage
+            df.loc[condition, 'event_label'] = f"{usage}_{start.timestamp()}_{end.timestamp()}"
+
     return df, ref_start, ref_end
     
 
