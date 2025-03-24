@@ -7,6 +7,7 @@ penetration = 100  # penetraton rate of houses with wc [%]
 offset = 0  # offset defines the time where a second use of the end-use is blocked
 temperature = 10  # temperature of used-water [%]
 prob_flush_interuption = 70  # probability if a water savings option of a toilet is installed that it will be used [%]
+prob_urine = 85 # probability that usage event is urine, not faeces
 intensity = 0.042  # fixed intensity for toilet flush corresponds to the pipesize to fill the cistern [L/s]
 discharge_intensity = 1.2
 
