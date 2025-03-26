@@ -176,6 +176,7 @@ class Bathtub(EndUse):
             'usage': self.name, # no bath subtypes
             'start': start,
             'end': int(start + (remaining_water / discharge_flow_rate)),
+            'discharge_temperature': self.statistics['discharge_temperature'],
         })
 
         while remaining_water > 0:
@@ -276,6 +277,7 @@ class BathroomTap(EndUse):
             'usage': self.subtype, # subtypes are inherited from chooser(toml)
             'start': start,
             'end': int(start + (remaining_water / discharge_flow_rate)),
+            'discharge_temperature': self.statistics['subtype'][self.subtype]['discharge_temperature'],
         })
 
         while remaining_water > 0:
@@ -341,6 +343,8 @@ class Dishwasher(EndUse):
     
     def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, day_num, end_of_day, total_days, spillover=False):
         discharge_pattern = self.statistics['discharge_pattern']
+        
+        cycle_times = []
 
         for time in discharge_pattern[discharge_pattern > 0].index:
             discharge_time  = start + int(time.total_seconds())
@@ -351,11 +355,29 @@ class Dishwasher(EndUse):
             else:
                 discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
 
+                if not cycle_times or discharge_time - cycle_times[-1][1] > 1:
+                    cycle_times.append([discharge_time, discharge_time])
+                else:
+                    cycle_times[-1][1] = discharge_time
+
+        discharge_temperature = self.statistics['discharge_temperature']
+
+        if isinstance(discharge_temperature, (int, float)):
+            discharge_temperatures = [discharge_temperature] * len(cycle_times)
+        elif isinstance(discharge_temperature, dict):
+            dist = getattr(np.random, discharge_temperature['distribution'].lower())
+            low = discharge_temperature['low']
+            high = discharge_temperature['high']
+            discharge_temperatures = dist(low=low, high=high, size=len(cycle_times)).tolist()
+        else:
+            raise ValueError("Discharge temperature type not implemented.")
+        
         self.discharge_events.append({
             'enduse': self.name,
             'usage': self.name, # no subtypes currently
-            'start': start,
-            'end': int (start + len(self.fct_duration_pattern())),
+            'start': [cycle[0] for cycle in cycle_times],
+            'end': [cycle[1] for cycle in cycle_times],
+            'discharge_temperature': discharge_temperatures,
         })
 
         return discharge
@@ -484,6 +506,7 @@ class KitchenTap(EndUse):
             'usage': usage, # subtypes are from chooser(toml)
             'start': start,
             'end': int(start + (remaining_water / discharge_flow_rate)),
+            'discharge_temperature': self.statistics['subtype'][self.subtype]['discharge_temperature'],
         })
 
         while remaining_water > 0:
@@ -663,6 +686,7 @@ class Shower(EndUse):
             'usage': "Shower", # subtypes are class inheritance names
             'start': start,
             'end': int(start + (remaining_water / discharge_flow_rate)),
+            'discharge_temperature': self.statistics['discharge_temperature'],
         })
 
         while remaining_water > 0:
@@ -741,6 +765,8 @@ class WashingMachine(EndUse):
     def calculate_discharge(self, discharge, start, j, ind_enduse, pattern_num, day_num, end_of_day, total_days, spillover=False):
         discharge_pattern = self.statistics['discharge_pattern']
 
+        cycle_times = []
+
         for time in discharge_pattern[discharge_pattern > 0].index:
             discharge_time  = start + int(time.total_seconds())
             if discharge_time > end_of_day and spillover:
@@ -750,11 +776,29 @@ class WashingMachine(EndUse):
             else:
                 discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
 
+            if not cycle_times or discharge_time - cycle_times[-1][1] > 1:
+                    cycle_times.append([discharge_time, discharge_time])
+            else:
+                    cycle_times[-1][1] = discharge_time
+
+        discharge_temperature = self.statistics['discharge_temperature']
+
+        if isinstance(discharge_temperature, (int, float)):
+            discharge_temperatures = [discharge_temperature] * len(cycle_times)
+        elif isinstance(discharge_temperature, dict):
+            dist = getattr(np.random, discharge_temperature['distribution'].lower())
+            low = discharge_temperature['low']
+            high = discharge_temperature['high']
+            discharge_temperatures = dist(low=low, high=high, size=len(cycle_times)).tolist()
+        else:
+            raise ValueError("Discharge temperature type not implemented.")
+        
         self.discharge_events.append({
             'enduse': "WashingMachine",
             'usage': "WashingMachine", # no subtypes currently
-            'start': start,
-            'end': int(start + len(self.fct_duration_pattern())),
+            'start': [cycle[0] for cycle in cycle_times],
+            'end': [cycle[1] for cycle in cycle_times],
+            'discharge_temperature': discharge_temperatures,
         })
 
         return discharge
@@ -859,6 +903,7 @@ class Wc(EndUse):
             'usage': usage,
             'start': int(end - (incoming_water / discharge_flow_rate)),
             'end': end,
+            'discharge_temperature': self.statistics['discharge_temperature'],
         })
 
         while incoming_water > 0:

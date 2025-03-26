@@ -16,6 +16,7 @@ average = 4.1  # average frequency of end-use
     [subtype.washing_shaving]
         penetration = 33.3  # probability of subtype use [%]
         temperature = 38
+        discharge_temperature = 40
 
         [subtype.washing_shaving.duration]
             distribution = 'Lognormal'
@@ -34,6 +35,7 @@ average = 4.1  # average frequency of end-use
     [subtype.brushing_teeth]
         penetration = 66.6
         temperature = 10
+        discharge_temperature = 10
 
         [subtype.brushing_teeth.duration]
             distribution = 'Lognormal'

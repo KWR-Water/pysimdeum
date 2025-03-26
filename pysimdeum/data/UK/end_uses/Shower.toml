@@ -5,7 +5,7 @@ classname = 'Shower'
 penetration = 100
 offset = '2 Hours'
 temperature = 41
-
+discharge_temperature = 35
 pattern = 'name of pattern generator'
 
 [frequency]  # age dependent
