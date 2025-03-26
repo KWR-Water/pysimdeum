@@ -428,7 +428,7 @@ def truncated_normal_dis_sampling(mean_value):
 
     return sample
 
-def discharge_postprocessing(ds, process_type, process_calculation):
+def discharge_postprocessing(ds, process_type):
     """
     Helper function to perform post-processing on discharge data. 
     Called by assign_discharge_nutrients and assign_discharge_temperature.
@@ -444,6 +444,13 @@ def discharge_postprocessing(ds, process_type, process_calculation):
 
     df, ref_start, ref_end = xarray_to_metadata_df(ds, 'discharge', 'discharge_events')
 
+    toml_file_path = os.path.join(DATA_DIR, 'NL', 'ww_nutrients.toml')
+    nutrient_data = toml.load(toml_file_path)
+
+    nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
+    for nutrient in nutrients:
+        df[nutrient] = 0.0
+
     # group by event_label
     grouped = df.groupby('event_label')
 
@@ -456,12 +463,30 @@ def discharge_postprocessing(ds, process_type, process_calculation):
         # Compute total flow for the event
         total_flow = event_data['flow'].sum()
 
-        # Process speific calculation
-        values = process_calculation(event_data, total_flow)
+        if process_type == 'nutrients':
+            enduse = event_data['enduse'].iloc[0]
+            usage = event_data['usage'].iloc[0]
 
-        # Assign nutrient concentrations to the event
-        for value_name, value in values.items():
-            event_data[value_name] = value
+            # Calculate nutrient concentrations for the event
+            nutrient_values = {}
+            for nutrient in nutrients:
+                mean_value = nutrient_data[enduse][usage][nutrient]
+                nutrient_per_use = truncated_normal_dis_sampling(mean_value)
+                nutrient_concentration = nutrient_per_use / total_flow if total_flow > 0 else 0
+                nutrient_values[nutrient] = nutrient_concentration
+
+            # Assign nutrient concentrations to the event
+            for nutrient, value in nutrient_values.items():
+                event_data[nutrient] = value
+
+        elif process_type == 'temperature':
+            if total_flow > 0:
+                temperature_sum = (event_data['discharge_temperature'] * event_data['flow']).sum()
+                avg_temperature = temperature_sum / total_flow
+            else:
+                avg_temperature = 0.0 # No flo
+
+            event_data['discharge_temperature'] = avg_temperature
 
         results.append(event_data)
 
@@ -473,9 +498,8 @@ def discharge_postprocessing(ds, process_type, process_calculation):
 def assign_discharge_nutrients(ds):
     """Calculates nutrient concentrations based on simulated discharge flow data.
 
-    Reads nutrient concentrations in g/use from config file. Enriches the discharge data
-    with discharge event metadata such as specific usage type of enduse. Samples and calculates
-    nutrient concentrations and assigns concentration to each timestamp.
+    Calls the discharge_postprocessing function to extract discharge data and metadata from the dataset,
+    and calculate the nutrient concentrations for each event.
 
     Args:
         ds (xarray.Dataset): The dataset containing discharge data and discharge events metadata.
@@ -483,28 +507,8 @@ def assign_discharge_nutrients(ds):
     Returns:
         pd.DataFrame: The updated DataFrame containing the discharge data and the nutrient concentrations.
     """
-
-    toml_file_path = os.path.join(DATA_DIR, 'NL', 'ww_nutrients.toml')
-    nutrient_data = toml.load(toml_file_path)
-
-    def calculate_nutrients(event_data, total_flow):
-    # list of nutrient types
-        nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
-        nutrient_values = {}
-
-        enduse = event_data['enduse'].iloc[0]
-        usage = event_data['usage'].iloc[0]
-
-        for nutrient in nutrients:
-            mean_value = nutrient_data[enduse][usage][nutrient]
-            nutrient_per_use = truncated_normal_dis_sampling(mean_value)
-            nutrient_concentration = nutrient_per_use / total_flow if total_flow > 0 else 0
-            nutrient_values[nutrient] = nutrient_concentration
-
-        return nutrient_values
-
     # Call the helper funcion
-    df, ref_start, ref_end = discharge_postprocessing(ds, 'nutrients', calculate_nutrients)
+    df, ref_start, ref_end = discharge_postprocessing(ds, 'nutrients')
 
     return df, ref_start, ref_end
 
@@ -621,9 +625,9 @@ def assign_discharge_temperature(ds):
     """
     Calculates discharge temperatures based on simulated discharge flow data.
 
-    Reads the discharge temperatures from end use config file. Enriches the discharge data
-    with discharge event metadata such as specific usage type of enduse. Calculates
-    proportional discharge temperature and assigns to each timestamp.
+    Calls the discharge_postprocessing function to extract discharge data and metadata from the dataset,
+    and calculate the average discharge temperature for each event. Assigns the calculated temperatures to the
+    corresponding timestamps in the DataFrame
 
     Args:
         ds (xarray.Dataset): The dataset containing discharge data and discharge events metadata.
@@ -632,17 +636,8 @@ def assign_discharge_temperature(ds):
         pd.DataFrame: The updated DataFrame containing the discharge data and the temperatures.
 
     """
-    def calculate_temperature(event_data, total_flow):
-        # Compute weighted average discharge temperature at the event
-        if total_flow > 0:
-            temperature_sum = (event_data['discharge_temperature'] * event_data['flow']).sum()
-            avg_temperature = temperature_sum / total_flow
-        else:
-            avg_temperature = 0.0 # No flow
 
-        return {'discharge_temperature': avg_temperature}
-
-    df, ref_start, ref_end = discharge_postprocessing(ds, 'temperature', calculate_temperature)
+    df, ref_start, ref_end = discharge_postprocessing(ds, 'temperature')
 
     return df, ref_start, ref_end
 

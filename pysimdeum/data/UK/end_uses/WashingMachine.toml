@@ -4,7 +4,10 @@
 classname = 'WashingMachine'
 offset = 0
 temperature = 40
-discharge_temperature = [35, 35, 35, 45]
+[discharge_temperature]
+    distribution = 'Uniform'
+    low = 30
+    high = 60
 
 [daily_pattern_input]
     x = "34 24 17 43 41 57 57 212 290 338 392 325 226 222 200 175 124 106 139 185 133 165 101 147 34"

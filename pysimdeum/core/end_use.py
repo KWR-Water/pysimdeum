@@ -360,12 +360,24 @@ class Dishwasher(EndUse):
                 else:
                     cycle_times[-1][1] = discharge_time
 
+        discharge_temperature = self.statistics['discharge_temperature']
+
+        if isinstance(discharge_temperature, (int, float)):
+            discharge_temperatures = [discharge_temperature] * len(cycle_times)
+        elif isinstance(discharge_temperature, dict):
+            dist = getattr(np.random, discharge_temperature['distribution'].lower())
+            low = discharge_temperature['low']
+            high = discharge_temperature['high']
+            discharge_temperatures = dist(low=low, high=high, size=len(cycle_times)).tolist()
+        else:
+            raise ValueError("Discharge temperature type not implemented.")
+        
         self.discharge_events.append({
             'enduse': self.name,
             'usage': self.name, # no subtypes currently
             'start': [cycle[0] for cycle in cycle_times],
             'end': [cycle[1] for cycle in cycle_times],
-            'discharge_temperature': self.statistics['discharge_temperature'],
+            'discharge_temperature': discharge_temperatures,
         })
 
         return discharge
@@ -769,12 +781,24 @@ class WashingMachine(EndUse):
             else:
                     cycle_times[-1][1] = discharge_time
 
+        discharge_temperature = self.statistics['discharge_temperature']
+
+        if isinstance(discharge_temperature, (int, float)):
+            discharge_temperatures = [discharge_temperature] * len(cycle_times)
+        elif isinstance(discharge_temperature, dict):
+            dist = getattr(np.random, discharge_temperature['distribution'].lower())
+            low = discharge_temperature['low']
+            high = discharge_temperature['high']
+            discharge_temperatures = dist(low=low, high=high, size=len(cycle_times)).tolist()
+        else:
+            raise ValueError("Discharge temperature type not implemented.")
+        
         self.discharge_events.append({
             'enduse': "WashingMachine",
             'usage': "WashingMachine", # no subtypes currently
             'start': [cycle[0] for cycle in cycle_times],
             'end': [cycle[1] for cycle in cycle_times],
-            'discharge_temperature': self.statistics['discharge_temperature'],
+            'discharge_temperature': discharge_temperatures,
         })
 
         return discharge
