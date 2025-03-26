@@ -428,7 +428,7 @@ def truncated_normal_dis_sampling(mean_value):
 
     return sample
 
-def discharge_postprocessing(ds, process_type):
+def discharge_postprocessing(ds, process_type, nutrient_data=None):
     """
     Helper function to perform post-processing on discharge data. 
     Called by assign_discharge_nutrients and assign_discharge_temperature.
@@ -443,9 +443,6 @@ def discharge_postprocessing(ds, process_type):
     """
 
     df, ref_start, ref_end = xarray_to_metadata_df(ds, 'discharge', 'discharge_events')
-
-    toml_file_path = os.path.join(DATA_DIR, 'NL', 'ww_nutrients.toml')
-    nutrient_data = toml.load(toml_file_path)
 
     nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
     for nutrient in nutrients:
@@ -495,7 +492,7 @@ def discharge_postprocessing(ds, process_type):
 
     return df, ref_start, ref_end
 
-def assign_discharge_nutrients(ds):
+def assign_discharge_nutrients(ds, country):
     """Calculates nutrient concentrations based on simulated discharge flow data.
 
     Calls the discharge_postprocessing function to extract discharge data and metadata from the dataset,
@@ -503,12 +500,16 @@ def assign_discharge_nutrients(ds):
 
     Args:
         ds (xarray.Dataset): The dataset containing discharge data and discharge events metadata.
+        country (str): NL or UK. The country for which the nutrient concentrations are calculated.
 
     Returns:
         pd.DataFrame: The updated DataFrame containing the discharge data and the nutrient concentrations.
     """
+    toml_file_path = os.path.join(DATA_DIR, country, 'ww_nutrients.toml')
+    nutrient_data = toml.load(toml_file_path)
+    
     # Call the helper funcion
-    df, ref_start, ref_end = discharge_postprocessing(ds, 'nutrients')
+    df, ref_start, ref_end = discharge_postprocessing(ds, 'nutrients', nutrient_data)
 
     return df, ref_start, ref_end
 
@@ -562,7 +563,7 @@ def discharge_time_agg(df, time_agg='h'):
 
     return df, grouped, freq
 
-def hh_discharge_nutrients(ds, time_agg='h'):
+def hh_discharge_nutrients(ds, country='NL', time_agg='h'):
     """
     Aggregates discharge data and calculates nutrient concentrations over specified time intervals.
 
@@ -589,7 +590,7 @@ def hh_discharge_nutrients(ds, time_agg='h'):
             - 'flow': The total flow for each time interval.
             - Nutrient columns (e.g., 'n', 'p', 'cod', 'bod5', 'ss', 'amm'): Nutrient concentrations.
     """
-    df, ref_start, ref_end = assign_discharge_nutrients(ds)
+    df, ref_start, ref_end = assign_discharge_nutrients(ds, country)
 
     nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
 
