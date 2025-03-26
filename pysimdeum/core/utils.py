@@ -622,25 +622,6 @@ def hh_discharge_nutrients(ds, country='NL', time_agg='h'):
 
     return hh_nutrients
 
-def assign_discharge_temperature(ds):
-    """
-    Calculates discharge temperatures based on simulated discharge flow data.
-
-    Calls the discharge_postprocessing function to extract discharge data and metadata from the dataset,
-    and calculate the average discharge temperature for each event. Assigns the calculated temperatures to the
-    corresponding timestamps in the DataFrame
-
-    Args:
-        ds (xarray.Dataset): The dataset containing discharge data and discharge events metadata.
-
-    Returns:
-        pd.DataFrame: The updated DataFrame containing the discharge data and the temperatures.
-
-    """
-
-    df, ref_start, ref_end = discharge_postprocessing(ds, 'temperature')
-
-    return df, ref_start, ref_end
 
 def hh_discharge_temperature(ds, time_agg='h'):
     """
@@ -670,7 +651,7 @@ def hh_discharge_temperature(ds, time_agg='h'):
             - 'discharge_temperature': The average discharge temperature for each time interval.
     """
 
-    df, ref_start, ref_end = assign_discharge_temperature(ds)
+    df, ref_start, ref_end = discharge_postprocessing(ds, 'temperature')
 
     # Check if the DataFrame has the required columns
     if not all(col in df.columns for col in ['time', 'flow', 'discharge_temperature']):
