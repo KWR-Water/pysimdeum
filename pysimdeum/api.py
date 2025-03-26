@@ -2,7 +2,7 @@ from pysimdeum.core.statistics import Statistics
 from pysimdeum.core.house import Property, HousePattern, House
 
 
-def built_house(house_type: str = "") -> House:
+def built_house(house_type: str = "", simulate_discharge=False, spillover=False ) -> House:
 
     stats = Statistics()
     prop = Property(statistics=stats)
@@ -11,6 +11,18 @@ def built_house(house_type: str = "") -> House:
     house.furnish_house()
     for user in house.users:
         user.compute_presence(statistics=stats)
-    house.simulate(num_patterns=1, simulate_discharge=False)
+    house.simulate(num_patterns=1, simulate_discharge=simulate_discharge, spillover=spillover)
 
     return house
+
+def build_multi_hh(household_data: dict, simulate_discharge=False, spillover=False) -> dict:
+
+    houses = {}
+
+    for household_id, house_type in household_data.items():
+        # generate and simulate the hh
+        house_instance = built_house(house_type=house_type, simulate_discharge=simulate_discharge, spillover=spillover)
+        # store the resulting House instance in the houses dictionary
+        houses[household_id] = house_instance
+
+    return houses
