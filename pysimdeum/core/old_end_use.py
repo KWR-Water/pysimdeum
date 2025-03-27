@@ -2,7 +2,7 @@ from traits.api import HasStrictTraits, Either, Instance, Str, Any
 import copy
 import pandas as pd
 import numpy as np
-from utils import chooser, duration_decorator, normalize, to_timedelta
+from pysimdeum.utils.probability import chooser, duration_decorator, normalize, to_timedelta
 
 
 class EndUse(HasStrictTraits):

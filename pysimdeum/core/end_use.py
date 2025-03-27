@@ -2,7 +2,8 @@ import copy
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass, field
-from pysimdeum.core.utils import chooser, duration_decorator, normalize, to_timedelta, handle_spillover_consumption, handle_discharge_spillover, sample_start_time, offset_simultaneous_discharge
+from pysimdeum.utils.probability import chooser, duration_decorator, normalize, to_timedelta
+from pysimdeum.utils.patterns import handle_spillover_consumption, handle_discharge_spillover, sample_start_time, offset_simultaneous_discharge
 from pysimdeum.core.statistics import Statistics	
 
 
