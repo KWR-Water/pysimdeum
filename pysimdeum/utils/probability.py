@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from typing import Union
 from scipy.stats import truncnorm
+from scipy.optimize import minimize
 
 def chooser(data: Union[pd.Series, pd.DataFrame], myproperty: str=''):
     """Function to choose elements from a pd.Series randomly, which consists of keys representing the elements and probabilities as values [-> Statistics object].
@@ -118,3 +119,56 @@ def truncated_normal_dis_sampling(mean_value):
     sample = truncnorm.rvs(a, b, loc=mean_value, scale=std_dev)
 
     return sample
+
+
+def optimise_probabilities(starting_probs, total_population, total_households, household_sizes):
+    """
+    Optimises household probabilities to match the total population while staying close to starting probabilities.
+
+    Args:
+        starting_probs (list): Initial probabilities for each household category (e.g., census averages).
+        total_population (int): Total population within the boundary area.
+        total_households (int): Total number of households within the boundary area.
+        household_sizes (list): Average household sizes for each category.
+
+    Returns:
+        np.ndarray: Optimized probabilities for each household category.
+    """
+    # Define the objective function (minimize the difference from starting probabilities)
+    def objective(probs):
+        return np.sum((probs - starting_probs) ** 2)
+
+    # Define the equality constraint: resulting population must match total_population
+    def population_constraint(probs):
+        return np.dot(probs * total_households, household_sizes) - total_population
+
+    # Define the equality constraint: probabilities must sum to 1
+    def sum_constraint(probs):
+        return np.sum(probs) - 1
+
+    # Bounds: probabilities must be non-negative
+    bounds = [(0, 1) for _ in starting_probs]
+
+    # Initial guess (starting probabilities)
+    initial_guess = starting_probs
+
+    # Define constraints
+    constraints = [
+        {"type": "eq", "fun": population_constraint},
+        {"type": "eq", "fun": sum_constraint},
+    ]
+
+    # Perform optimization
+    result = minimize(
+        objective,
+        initial_guess,
+        bounds=bounds,
+        constraints=constraints,
+        method="SLSQP"  # Sequential Least Squares Programming
+    )
+
+    # Check if optimization was successful
+    if not result.success:
+        raise ValueError(f"Optimisation failed: {result.message}")
+
+    return result.x
