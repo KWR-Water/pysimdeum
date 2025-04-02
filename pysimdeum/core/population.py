@@ -160,6 +160,7 @@ class Population:
         self.clip_houses_to_subs()
         self.household_data = self.household_data_prep()
         self.houses_instances = build_multi_hh(self.household_data, simulate_discharge=False, spillover=False)
+        self.subcatchment_profiles = self.calculate_subcatchment_profiles()
 
 
     def _clip_boundaries_to_subcatchments(self):
@@ -333,3 +334,74 @@ class Population:
             household_data = self.houses[['house_id', 'occupancy_type']].set_index('house_id')['occupancy_type'].to_dict()
         
         return household_data
+    
+
+    def _house_subcatchment_mapping(self):
+        """Generates a dictionary with subcatchment IDs as keys and lists of house IDs as values.
+
+        Groups houses by their `subcatchment_id` and creates a dictionary where the keys are
+        subcatchment IDs and the values are lists of house TOIDs/
+
+        Returns:
+            dict: A dictionary where:
+                - Keys are `subcatchment_id` (unique identifiers for each subcatchment).
+                - Values are lists of `house_id` (TOIDs) for houses in each subcatchment.
+        """
+        if 'subcatchment_id' not in self.houses.columns or 'house_id' not in self.houses.columns:
+            raise ValueError("The houses GeoDataFrame must contain 'subcatchment_id' and 'house_id' columns.")
+
+        # Group houses by subcatchment_id and collect house_id (TOIDs) as lists
+        self.subcatchment_houses = (
+            self.houses.groupby('subcatchment_id')['house_id']
+            .apply(list)
+            .to_dict()
+        )
+
+        return self.subcatchment_houses
+    
+
+    def calculate_subcatchment_profiles(self):
+        """
+        Calculates the profiles of subcatchments based on household types.
+
+        This method generates a dictionary where the keys are subcatchment IDs and the values
+        are dictionaries containing counts of each household type within that subcatchment.
+        """
+        self.subcatchment_houses = self._house_subcatchment_mapping()
+
+        # Initialise a dictionary to store the aggregated profiles
+        subcatchment_profiles = {}
+
+        # Iterate through each subcatchment and its associated house IDs
+        for subcatchment_id, house_ids in self.subcatchment_houses.items():
+            total_profile = None  # Initialise the total profile for this subcatchment
+
+            # Iterate through each house ID in the subcatchment
+            for house_id in house_ids:
+                # Retrieve the house instance from houses_instances
+                house_instance = self.houses_instances.get(house_id)
+
+                if house_instance is None:
+                    # Skip if the house instance is not found
+                    continue
+
+                # Extract the consumption DataArray and select the total flow
+                house_profile = (
+                    house_instance.consumption
+                    .sum(['enduse', 'user'])  # Sum across end uses and users
+                    .sel(flowtypes='totalflow')  # Select the total flow
+                )
+
+                # Aggregate the house profile into the total profile for the subcatchment
+                if total_profile is None:
+                    total_profile = house_profile
+                else:
+                    total_profile += house_profile
+
+            # Store the aggregated profile for the subcatchment
+            if total_profile is not None:
+                subcatchment_profiles[subcatchment_id] = total_profile
+
+        return subcatchment_profiles
+    
+
