@@ -14,8 +14,8 @@ class DataPrep:
     """
     A class to preprocess input datasets based on a TOML configuration file.
 
-    This class reads datasets from specified file paths, renames columns based on the
-    configuration, and prepares them for use in the Population class.
+    This class reads datasets from specified file paths provided in a config file,
+    renames columns based on the configuration, and prepares them for use in the Population class.
     """
 
     def __init__(
@@ -24,7 +24,7 @@ class DataPrep:
             country: str = 'NL'
         ):
         """
-        Initializes the DataPrep class by determining the configuration file location.
+        Initialises the DataPrep class by determining the configuration file location.
 
         Args:
             config_path (str): Path to the configuration file (TOML format). If None, the country folder is used.
@@ -108,17 +108,33 @@ class Population:
         boundaries (gpd.GeoDataFrame): GeoDataFrame containing boundary geometries.
         boundaries_pop (pd.DataFrame): DataFrame containing population data for boundaries.
         houses (gpd.GeoDataFrame): GeoDataFrame containing house geometries and attributes.
+        boundary_counts (pd.DataFrame): DataFrame containing household and population totals for each boundary.
+        results (dict): Dictionary containing household counts and probabilities for each boundary.
+        houses_instances (list): List of pysimdeum.House instances prepared for simulation.
+        sample (bool): Whether to sample a subset of houses or proces the entire dataset.
     """
 
     def __init__(
             self,
-            datasets: dict
+            datasets: dict,
+            sample: bool = False
         ):
+        """
+        Initialises the Population class with preprocessed datasets.
+
+        Args:
+            datasets (dict): A dictionary containing preprocessed datasets:
+                - 'subcatchments': GeoDataFrame of subcatchments.
+                - 'boundaries': GeoDataFrame of boundaries.
+                - 'boundaries_pop': DataFrame of population data for boundaries.
+                - 'houses': GeoDataFrame of houses.
+        """
         
         self.subcatchments = fix_invalid_geometries(datasets['subcatchments'])
         self.boundaries = datasets['boundaries']
         self.boundaries_pop = datasets['boundaries_pop']
         self.houses = datasets['houses']
+        self.sample = sample
 
         self._prepare_data()
 
@@ -129,7 +145,7 @@ class Population:
         This method performs the following steps:
             1. Clips boundaries and houses to subcatchments.
             2. Calculates household and population totals for each boundary.
-            3. Optimizes household probabilities and assigns occupancy types to houses.
+            3. Optimises household probabilities and assigns occupancy types to houses.
             4. Clips houses to subcatchments and prepares household data for simulation.
         """
 
@@ -214,10 +230,6 @@ class Population:
         in the input DataFrame.
 
         Args:
-            boundary_counts (pd.DataFrame): DataFrame with columns:
-                - 'boundary_label': The label for each boundary (e.g., boundary_id).
-                - 'pop_tot': Total population for each boundary.
-                - 'household_tots': Total number of households for each boundary.
             probabilities (list): Initial probabilities for each household category.
             household_sizes (list): Average household sizes for each category.
 
@@ -233,7 +245,7 @@ class Population:
             total_population = float(row['pop_tot'])
             total_households = int(row['household_tots'])
 
-            # Optimize probabilities for the current boundary
+            # Optimise probabilities for the current boundary
             optimised_probs = optimise_probabilities(
                 starting_probs=np.array(probabilities),
                 total_population=total_population,
@@ -312,9 +324,12 @@ class Population:
 
         Returns:
                 dict: A dictionary where:
-                - Keys are `TOID` (unique identifiers for each house).
-                - Values are `occupancy_type` (type of occupancy for each house, e.g., 'one_person', 'two_person', 'family').
+                    - Keys are `TOID` (unique identifiers for each house).
+                    - Values are `occupancy_type` (type of occupancy for each house, e.g., 'one_person', 'two_person', 'family').
         """
-        household_data = self.houses[['house_id', 'occupancy_type']].sample(10).set_index('house_id')['occupancy_type'].to_dict()
+        if self.sample:
+            household_data = self.houses[['house_id', 'occupancy_type']].sample(10).set_index('house_id')['occupancy_type'].to_dict()
+        else:
+            household_data = self.houses[['house_id', 'occupancy_type']].set_index('house_id')['occupancy_type'].to_dict()
         
         return household_data
