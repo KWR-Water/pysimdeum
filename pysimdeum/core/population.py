@@ -1,10 +1,97 @@
 import pandas as pd
 import geopandas as gpd
 import numpy as np
+import os
 from shapely.ops import unary_union
+from pysimdeum.data import DATA_DIR
 from pysimdeum.utils.probability import optimise_probabilities
 from pysimdeum.utils.misc import fix_invalid_geometries
 from pysimdeum.api import build_multi_hh
+import toml
+
+
+class DataPrep:
+    """
+    A class to preprocess input datasets based on a TOML configuration file.
+
+    This class reads datasets from specified file paths, renames columns based on the
+    configuration, and prepares them for use in the Population class.
+    """
+
+    def __init__(
+            self,
+            config_path: str = None,
+            country: str = 'NL'
+        ):
+        """
+        Initializes the DataPrep class by determining the configuration file location.
+
+        Args:
+            config_path (str): Path to the configuration file (TOML format). If None, the country folder is used.
+            country (str): Country name (e.g., 'NL', 'UK') to locate the configuration file in the default data directory.
+        """
+        if config_path and os.path.isfile(config_path):
+            self.config_file = config_path
+        elif os.path.isdir(country):
+            self.config_file = os.path.join(country, 'spatial_config.toml')
+            self.country = None
+        else:
+            self.config_file = os.path.join(DATA_DIR, country, 'spatial_config.toml')
+            self.country = country
+
+        # validate that the configuration file exists
+        if not os.path.isfile(self.config_file):
+            raise FileNotFoundError(f"Configuration file not found: {self.config_file}")
+
+        # Load the configuration
+        self.config = toml.load(self.config_file)
+        
+        #self.datasets = {}
+        self.load_datasets()
+
+    def _load_and_preprocess(self, dataset_key: str, is_geospatial: bool = False):
+        """
+        Helper method to load and preprocess a dataset.
+
+        Args:
+            dataset_key (str): The key in the configuration file for the dataset (e.g., 'subcatchments').
+            is_geospatial (bool): Whether the dataset is a geospatial file (True for GeoDataFrame).
+
+        Returns:
+            pd.DataFrame or gpd.GeoDataFrame: The preprocessed dataset.
+        """
+        # Get the dataset path and column mappings from the configuration
+        dataset_path = self.config['datasets'][dataset_key]
+        column_mapping = self.config['columns'][dataset_key]
+        column_mapping = {v: k for k, v in column_mapping.items()} # reverse mapping
+
+        # Load the dataset
+        if is_geospatial:
+            dataset = gpd.read_file(dataset_path)
+            if self.country == 'UK':
+                dataset = dataset.to_crs(epsg=27700)
+        else:
+            dataset = pd.read_csv(dataset_path)
+
+        # Rename and select only the columns of interest
+        dataset = dataset.rename(columns=column_mapping)[list(column_mapping.values())]
+
+        return dataset
+
+    def load_datasets(self):
+        """
+        Loads and preprocesses datasets based on the configuration file.
+
+        Returns:
+            dict: A dictionary containing preprocessed datasets.
+        """
+        self.datasets = {
+            'subcatchments': self._load_and_preprocess('subcatchments', is_geospatial=True),
+            'boundaries': self._load_and_preprocess('boundaries', is_geospatial=True),
+            'boundaries_pop': self._load_and_preprocess('boundaries_pop', is_geospatial=False),
+            'houses': self._load_and_preprocess('houses', is_geospatial=True),
+        }
+
 
 class Population:
     """
@@ -25,16 +112,13 @@ class Population:
 
     def __init__(
             self,
-            subcatchments: gpd.GeoDataFrame,
-            boundaries: gpd.GeoDataFrame,
-            boundaries_pop: pd.DataFrame,
-            houses: gpd.GeoDataFrame
+            datasets: dict
         ):
         
-        self.subcatchments = fix_invalid_geometries(subcatchments)
-        self.boundaries = boundaries
-        self.boundaries_pop = boundaries_pop
-        self.houses = houses
+        self.subcatchments = fix_invalid_geometries(datasets['subcatchments'])
+        self.boundaries = datasets['boundaries']
+        self.boundaries_pop = datasets['boundaries_pop']
+        self.houses = datasets['houses']
 
         self._prepare_data()
 
@@ -80,9 +164,7 @@ class Population:
         This method ensures that the population data is restricted to the boundaries
         that are within the subcatchments.
         """
-        self.boundaries_pop = self.boundaries_pop[
-            self.boundaries_pop['OA 2021 Code'].isin(self.boundaries['OA21CD'].unique())
-        ][['OA 2021 Code', 'Total']]
+        self.boundaries_pop = self.boundaries_pop[self.boundaries_pop['boundary_id_code'].isin(self.boundaries['boundary_id'].unique())][['boundary_id_code', 'population']]
 
 
     def _filter_houses(self):
@@ -92,8 +174,8 @@ class Population:
         This method performs a spatial join to retain houses that intersect with the boundaries
         and filters for houses with the `BaseFuncti` attribute set to 'DWELLING'.
         """
-        self.houses = gpd.sjoin(self.houses, self.boundaries, how='inner', predicate='intersects').drop(columns='index_right')
-        self.houses = self.houses[self.houses['BaseFuncti'] == 'DWELLING'][['TOID', 'OA21CD', 'geometry']]
+        self.houses = gpd.sjoin(self.houses, self.boundaries, how='inner', predicate='intersects').drop(columns='index_right').rename(columns={'boundary_id': 'hh_boundary_id'})
+        self.houses = self.houses[self.houses['function'] == 'DWELLING'][['house_id', 'hh_boundary_id', 'geometry']]
 
     
     def spatial_clipping_and_pop_count(self):
@@ -115,12 +197,12 @@ class Population:
 
         # Calculate household and population totals for each OA
         boundary_counts = (
-            self.houses.groupby('OA21CD')
+            self.houses.groupby('hh_boundary_id')
             .size()
             .reset_index(name='household_tots')
-            .merge(self.boundaries_pop, left_on='OA21CD', right_on='OA 2021 Code')
-            .drop(columns='OA 2021 Code')
-            .rename(columns={'Total': 'pop_tot'})
+            .merge(self.boundaries_pop, left_on='hh_boundary_id', right_on='boundary_id_code')
+            .drop(columns='boundary_id_code')
+            .rename(columns={'population': 'pop_tot'})
         )
 
         return boundary_counts
@@ -133,7 +215,7 @@ class Population:
 
         Args:
             boundary_counts (pd.DataFrame): DataFrame with columns:
-                - 'boundary_label': The label for each boundary (e.g., OA21CD).
+                - 'boundary_label': The label for each boundary (e.g., boundary_id).
                 - 'pop_tot': Total population for each boundary.
                 - 'household_tots': Total number of households for each boundary.
             probabilities (list): Initial probabilities for each household category.
@@ -147,7 +229,7 @@ class Population:
 
         # Iterate through each row in the boundary_counts DataFrame
         for _, row in self.boundary_counts.iterrows():
-            boundary_label = row['OA21CD']
+            boundary_label = row['hh_boundary_id']
             total_population = float(row['pop_tot'])
             total_households = int(row['household_tots'])
 
@@ -188,9 +270,9 @@ class Population:
         """
         updated_houses = self.houses.copy()
 
-        for oa, counts in self.results.items():
-            # Filter houses to rows where OA21CD matches the current key
-            filtered_houses = updated_houses[updated_houses['OA21CD'] == oa]
+        for boundary_id, counts in self.results.items():
+            # Filter houses to rows where boundary_id matches the current key
+            filtered_houses = updated_houses[updated_houses['hh_boundary_id'] == boundary_id]
 
             # Shuffle rows to ensure random assignment
             shuffled_houses = filtered_houses.sample(frac=1, random_state=42)
@@ -217,7 +299,7 @@ class Population:
         """
         # filter to houses contained within subs
         self.houses = self.houses[self.houses['geometry'].within(self.subcatchments.union_all())]
-        self.houses = self.houses.sjoin(self.subcatchments[['subcatchme', 'geometry']], predicate='within').drop(columns='index_right')[['TOID','OA21CD','subcatchme','occupancy_type','geometry']] 
+        self.houses = self.houses.sjoin(self.subcatchments[['subcatchment_id', 'geometry']], predicate='within').drop(columns='index_right')[['house_id','hh_boundary_id','subcatchment_id','occupancy_type','geometry']] 
 
 
     def household_data_prep(self):
@@ -233,6 +315,6 @@ class Population:
                 - Keys are `TOID` (unique identifiers for each house).
                 - Values are `occupancy_type` (type of occupancy for each house, e.g., 'one_person', 'two_person', 'family').
         """
-        household_data = self.houses[['TOID', 'occupancy_type']].sample(10).set_index('TOID')['occupancy_type'].to_dict()
+        household_data = self.houses[['house_id', 'occupancy_type']].sample(10).set_index('house_id')['occupancy_type'].to_dict()
         
         return household_data

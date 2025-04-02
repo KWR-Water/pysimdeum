@@ -1,0 +1,22 @@
+[datasets]
+subcatchments = "/Users/val.ismaili/Downloads/ICM-WWG-project/test-subs.shp"
+boundaries = "/Users/val.ismaili/Downloads/Output_Areas_(December_2021)_Boundaries_EW_BFE_(V9).geojson"
+boundaries_pop = "/Users/val.ismaili/Downloads/oa_population.csv"
+houses = "/Users/val.ismaili/Downloads/ICM-WWG-project/Address_Points/address_pts.shp"
+
+[columns.subcatchments]
+geometry = "geometry"
+subcatchment_id = "subcatchme"
+
+[columns.boundaries]
+geometry = "geometry"
+boundary_id = "OA21CD"
+
+[columns.boundaries_pop]
+boundary_id_code = "OA 2021 Code"
+population = "Total"
+
+[columns.houses]
+geometry = "geometry"
+house_id = "TOID"
+function = "BaseFuncti"
