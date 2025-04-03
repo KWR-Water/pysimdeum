@@ -4,7 +4,8 @@ import xarray as xr
 import pickle
 from datetime import datetime
 from typing import Any, Union
-from pysimdeum.core.utils import Base, chooser, normalize
+from pysimdeum.utils.base import Base
+from pysimdeum.utils.probability import chooser, normalize
 from pysimdeum.core.statistics import Statistics
 from pysimdeum.core.user import User
 import pysimdeum.core.end_use as EndUses
