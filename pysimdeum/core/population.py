@@ -6,6 +6,7 @@ from shapely.ops import unary_union
 from pysimdeum.data import DATA_DIR
 from pysimdeum.utils.probability import optimise_probabilities
 from pysimdeum.utils.misc import fix_invalid_geometries
+import pysimdeum.utils.wastewater_quality as wq
 from pysimdeum.api import build_multi_hh
 import toml
 
@@ -117,7 +118,11 @@ class Population:
     def __init__(
             self,
             datasets: dict,
-            sample: bool = False
+            sample: bool = False,
+            duration: str = '1 day',
+            country: str = None,
+            simulate_discharge: bool = False,
+            spillover: bool = False
         ):
         """
         Initialises the Population class with preprocessed datasets.
@@ -137,6 +142,10 @@ class Population:
         self.sample = sample
 
         self._prepare_data()
+
+        self.houses_instances = build_multi_hh(self.household_data, duration=duration, country=country, simulate_discharge=simulate_discharge, spillover=spillover)
+        self.subcatchment_profiles = self.calculate_subcatchment_profiles()
+        #self.subcatchment_nutrients_profiles = self.calculate_subcatchment_nutrient_profiles()
 
     def _prepare_data(self):
         """
@@ -159,8 +168,6 @@ class Population:
         self.houses = self.assign_occupancy_types()
         self.clip_houses_to_subs()
         self.household_data = self.household_data_prep()
-        self.houses_instances = build_multi_hh(self.household_data, simulate_discharge=False, spillover=False)
-        self.subcatchment_profiles = self.calculate_subcatchment_profiles()
 
 
     def _clip_boundaries_to_subcatchments(self):
@@ -403,5 +410,77 @@ class Population:
                 subcatchment_profiles[subcatchment_id] = total_profile
 
         return subcatchment_profiles
+
+
+    def calculate_subcatchment_nutrient_profiles(self):
+        """
+        Calculates the total flow and weighted nutrient concentrations for each subcatchment.
+
+        This method applies the `hh_discharge_nutrients` function to the discharge data
+        of all houses and aggregates the results by subcatchment using vectorized operations.
+
+        Args:
+            hh_discharge_nutrients (function): A function that calculates nutrient concentrations
+                                            and flow rates from the discharge data of a house.
+
+        Returns:
+            dict: A dictionary where:
+                - Keys are `subcatchment_id` (unique identifiers for each subcatchment).
+                - Values are Pandas DataFrames with the following columns:
+                    - `time`: The timestamp.
+                    - `total_flow`: The total flow for all houses in the subcatchment at each timestep.
+                    - Nutrient columns (e.g., `nutrient_1`, `nutrient_2`, etc.) containing the
+                    weighted average nutrient concentrations for the subcatchment at each timestep.
+        """
+        # Initialize a list to store all house nutrient data
+        all_house_data = []
+
+        # Iterate through all houses and calculate nutrient data
+        for house_id, house_instance in self.houses_instances.items():
+            if house_instance is None or not hasattr(house_instance, 'discharge'):
+                # Skip if the house instance is not found or does not have discharge data
+                continue
+
+            # Extract the discharge data for the house
+            house_discharge = house_instance.discharge.discharge
+
+            # Apply the hh_discharge_nutrients function to calculate nutrient concentrations and flow
+            house_nutrients = wq.hh_discharge_nutrients(house_discharge)
+
+            # Add the subcatchment ID to the house nutrient data
+            house_nutrients['subcatchment_id'] = self.houses.loc[self.houses['house_id'] == house_id, 'subcatchment_id'].values[0]
+
+            # Append the house nutrient data to the list
+            all_house_data.append(house_nutrients)
+
+        # Combine all house nutrient data into a single DataFrame
+        all_house_data_df = pd.concat(all_house_data, ignore_index=True)
+
+        # Group by subcatchment and time, and calculate total flow and weighted nutrient concentrations
+        grouped = all_house_data_df.groupby(['subcatchment_id', 'time'])
+        subcatchment_wq_profiles = {}
+
+        for subcatchment_id, group in grouped:
+            # Calculate total flow for the subcatchment
+            total_flow = group['flow'].sum()
+
+            # Calculate weighted average nutrient concentrations
+            weighted_nutrients = group.drop(columns=['subcatchment_id', 'time', 'flow']).multiply(group['flow'], axis=0).sum() / total_flow
+
+            # Combine total flow and weighted nutrients into a single DataFrame
+            subcatchment_df = pd.DataFrame(weighted_nutrients).T
+            subcatchment_df['total_flow'] = total_flow
+            subcatchment_df['time'] = group['time'].iloc[0]
+
+            # Add the DataFrame to the dictionary
+            if subcatchment_id not in subcatchment_wq_profiles:
+                subcatchment_wq_profiles[subcatchment_id] = []
+            subcatchment_wq_profiles[subcatchment_id].append(subcatchment_df)
+
+        # Convert lists of DataFrames to a single DataFrame for each subcatchment
+        for subcatchment_id in subcatchment_wq_profiles:
+            subcatchment_wq_profiles[subcatchment_id] = pd.concat(subcatchment_wq_profiles[subcatchment_id], ignore_index=True)
+
+        return subcatchment_wq_profiles
     
 
