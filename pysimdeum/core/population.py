@@ -417,7 +417,7 @@ class Population:
         Calculates the total flow and weighted nutrient concentrations for each subcatchment.
 
         This method applies the `hh_discharge_nutrients` function to the discharge data
-        of all houses and aggregates the results by subcatchment using vectorized operations.
+        of all houses and aggregates the results by subcatchment using vectorised operations.
 
         Args:
             hh_discharge_nutrients (function): A function that calculates nutrient concentrations
@@ -432,7 +432,7 @@ class Population:
                     - Nutrient columns (e.g., `nutrient_1`, `nutrient_2`, etc.) containing the
                     weighted average nutrient concentrations for the subcatchment at each timestep.
         """
-        # Initialize a list to store all house nutrient data
+        # Initialise a list to store all house nutrient data
         all_house_data = []
 
         # Iterate through all houses and calculate nutrient data
