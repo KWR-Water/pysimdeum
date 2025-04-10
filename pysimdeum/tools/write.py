@@ -29,13 +29,19 @@ def write_simdeum_patterns_to_ddg(houses: list, timestep: int, Q_option: str, pa
     
 
 def write_simdeum_patterns_to_xlsx(houses: list, timestep: int, Q_option: str, patternfile_option: int, output_file: str):
-    # after writeSimdeumPatternToXls (Matlab)
-    # house can eithwer be a list of filenames or a list of houses
-    # timestep the output timestep of the pattern
-    # Q_option for now only 'm3/h' TODO is this true? are the units not L/s?????
-    # for now only 1 all patterns in 1 file
-    # output_file file to write to
-    
+    """Exports total water usage patterns for a list of houses to an Excel file.
+
+    This function aggregates water usage data to the given timestep and writes to an excel file.
+    Based on the total flow for each house.
+
+    Args:
+        houses (list): A list of House objects.
+        timestep (int): Time resolution (in seconds) for aggregating the water usage patterns.
+        Q_option (str): Specifies the flow unit. Currently, only 'm3/h' is supported.
+        patternfile_option (int): Determines how many patterns are written. Currently, only the value 1
+                                    is supported, which means all patterns are written to a single file.        
+        output_file (str): Name of the output Excel file where the patterns will be saved.
+    """    
     output = __get_output_dataframe(houses, timestep, flowtype='totalflow')
     output.to_excel(output_file)
 

@@ -4,6 +4,14 @@ nav:
   - Installation: installation.md
   - quick_start.md
   - pysimdeum_run.md
+  - Examples:
+      - Overview: examples/1_intro_to_pysimdeum.ipynb
+      - Consumption object: examples/2_consumption_object.ipynb
+      - Discharge object: examples/3_discharge_object.ipynb
+      - Multiday simulations and spillover: examples/4_multiday_sims_and_spillover.ipynb
+      - Wastewater quality: examples/5_wastewater_quality.ipynb
+      - Writing data: examples/6_writing_data.ipynb
+
   - Consumption:
     - Overview: consumption/overview.md
     - Common methods: consumption/common_methods.md
@@ -50,6 +58,7 @@ markdown_extensions:
 plugins:
   - search
   - autorefs
+  - mkdocs-jupyter
   - mkdocstrings:
       default_handler: python
       handlers:
