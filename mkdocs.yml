@@ -58,9 +58,6 @@ plugins:
   - search
   - autorefs
   - mkdocs-jupyter
-  - simple:
-      include_dirs:
-        - examples
   - mkdocstrings:
       default_handler: python
       handlers:

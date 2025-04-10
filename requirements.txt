@@ -10,5 +10,4 @@ mkdocs
 mkdocs-material
 mkdocs-click
 mkdocstrings-python
-mkdocs-simple-plugin
 mkdocs-jupyter
