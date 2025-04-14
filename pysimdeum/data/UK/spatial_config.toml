@@ -1,8 +1,8 @@
 [datasets]
-subcatchments = "/Users/val.ismaili/DAA/pysimdeum/examples/data/subcatchments.geojson"
-boundaries = "/Users/val.ismaili/DAA/pysimdeum/examples/data/oa.geojson"
-boundaries_pop = "/Users/val.ismaili/DAA/pysimdeum/examples/data/oa_population.csv"
-houses = "/Users/val.ismaili/DAA/pysimdeum/examples/data/houses.geojson"
+subcatchments = "/Users/val.ismaili/DAA/pysimdeum/docs/examples/data/subcatchments.geojson"
+boundaries = "/Users/val.ismaili/DAA/pysimdeum/docs/examples/data/oa.geojson"
+boundaries_pop = "/Users/val.ismaili/DAA/pysimdeum/docs/examples/data/oa_population.csv"
+houses = "/Users/val.ismaili/DAA/pysimdeum/docs/examples/data/houses.geojson"
 
 [columns.subcatchments]
 geometry = "geometry"
