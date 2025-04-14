@@ -1,0 +1,22 @@
+[datasets]
+subcatchments = "/Users/val.ismaili/DAA/pysimdeum/docs/examples/data/subcatchments.geojson"
+boundaries = "/Users/val.ismaili/DAA/pysimdeum/docs/examples/data/oa.geojson"
+boundaries_pop = "/Users/val.ismaili/DAA/pysimdeum/docs/examples/data/oa_population.csv"
+houses = "/Users/val.ismaili/DAA/pysimdeum/docs/examples/data/houses.geojson"
+
+[columns.subcatchments]
+geometry = "geometry"
+subcatchment_id = "subcatchme"
+
+[columns.boundaries]
+geometry = "geometry"
+boundary_id = "OA21CD"
+
+[columns.boundaries_pop]
+boundary_id_code = "OA 2021 Code"
+population = "Total"
+
+[columns.houses]
+geometry = "geometry"
+house_id = "TOID"
+function = "BaseFuncti"

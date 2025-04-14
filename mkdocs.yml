@@ -11,6 +11,7 @@ nav:
       - Multiday simulations and spillover: examples/4_multiday_sims_and_spillover.ipynb
       - Wastewater quality: examples/5_wastewater_quality.ipynb
       - Writing data: examples/6_writing_data.ipynb
+      - Advanced simulation: examples/7_advanced_simulation_population_fitting_and_subcatchment_aggregation.ipynb
   - Consumption:
     - Overview: consumption/overview.md
     - Common methods: consumption/common_methods.md

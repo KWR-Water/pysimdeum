@@ -2,7 +2,7 @@ import os
 import toml
 from dataclasses import dataclass, field
 from pysimdeum.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
-from pysimdeum.core.utils import complex_daily_pattern, complex_enduse_pattern, complex_discharge_pattern
+from pysimdeum.utils.patterns import complex_daily_pattern, complex_enduse_pattern, complex_discharge_pattern
 from pysimdeum.data import DATA_DIR
 import pickle
 
