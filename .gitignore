@@ -113,3 +113,7 @@ unittest.house
 test.xlsx
 compare.xlsx
 testhot.xlsx
+
+# data files
+*.pkl.gz
+*.xlsx

@@ -3,9 +3,12 @@ numpy
 pandas
 toml
 xarray
+xlsxwriter
 scipy
 mike
 mkdocs
 mkdocs-material
 mkdocs-click
 mkdocstrings-python
+mkdocs-jupyter
+ipykernel
