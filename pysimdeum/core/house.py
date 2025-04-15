@@ -294,6 +294,10 @@ class House(Property):
         if simulate_discharge:
             dischargetype = ['greywater', 'blackwater']
             discharge = np.zeros((len(time), len(users), len(enduse), num_patterns, len(dischargetype)))
+            # Clear discharge_events for all appliances
+            for appliance in self.appliances:
+                if hasattr(appliance, 'discharge_events'):
+                    appliance.discharge_events.clear()
         else:
             discharge = None
 
