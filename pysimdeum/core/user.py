@@ -100,7 +100,7 @@ class Presence:
 
     def pdf(self, peak=0.65, normal=0.335, away=0.0, night=0.015):
         index = pd.timedelta_range(start='00:00:00', end='24:00:00', freq='1Min')
-        pdf = pd.Series(index=index, dtype='float64')
+        pdf = pd.Series(index=index, dtype='object')
 
         up = int((self.up.total_seconds()) / 60) % 1440
         up_p30 = int((up + 30)) % 1440
@@ -147,7 +147,7 @@ class Presence:
             pass
 
 
-        pdf = pdf.astype('float').resample('1s').fillna('ffill')[:-1]
+        pdf = pdf.astype('float').resample('1s').ffill()[:-1]
 
         pdf /= np.sum(pdf)  # normalize
 
