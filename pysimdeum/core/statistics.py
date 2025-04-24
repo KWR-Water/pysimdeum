@@ -37,8 +37,9 @@ class Statistics:
         self.end_uses = dict()
         path2end_use = os.path.join(self.statisticsdir, 'end_uses')
 
-        bathtub_file = os.path.join(path2end_use, 'Bathtub.toml')
-        brtap_file = os.path.join(path2end_use, 'BathroomTap.toml')
+        #NOTE: This is an example of how I would ignore enduses that I'm not interested in
+        # bathtub_file = os.path.join(path2end_use, 'Bathtub.toml')
+        # brtap_file = os.path.join(path2end_use, 'BathroomTap.toml')
         dishwasher_file = os.path.join(path2end_use, 'Dishwasher.toml')
         kitchen_tap_file = os.path.join(path2end_use, 'KitchenTap.toml')
         outside_tap_file = os.path.join(path2end_use, 'OutsideTap.toml')
@@ -47,8 +48,8 @@ class Statistics:
         wc_file = os.path.join(path2end_use, 'Wc.toml')
 
         self.end_uses['Wc'] = toml.load(open(wc_file, 'r'))
-        self.end_uses['Bathtub'] = toml.load(open(bathtub_file, 'r'))
-        self.end_uses['BathroomTap'] = toml.load(open(brtap_file, 'r'))
+        # self.end_uses['Bathtub'] = toml.load(open(bathtub_file, 'r'))
+        # self.end_uses['BathroomTap'] = toml.load(open(brtap_file, 'r'))
         self.end_uses['Dishwasher'] = self._convert_to_dict(toml.load(open(dishwasher_file, 'r')))
         self.end_uses['KitchenTap'] = toml.load(open(kitchen_tap_file, 'r'))
         self.end_uses['OutsideTap'] = toml.load(open(outside_tap_file, 'r'))

@@ -186,7 +186,8 @@ def discharge_time_agg(df, time_agg='h'):
 
     # Group by date and the aggregated time
     df['date'] = df['time'].dt.date
-    grouped = df.groupby(['date', 'agg_time'])
+    #NOTE: Enduse has been added to the group by for the Rapid Assessment Tool simulation, should be removed for regular simulations
+    grouped = df.groupby(['date', 'agg_time', 'enduse'])
 
     return df, grouped, freq
 
@@ -299,5 +300,133 @@ def hh_discharge_temperature(ds, time_agg='h'):
     # Ensure full time range
     full_time_index = pd.date_range(start=ref_start, end=ref_end, freq=freq)
     hh_temp = hh_temp.set_index('agg_time').reindex(full_time_index, fill_value=0).rename_axis('time').reset_index()
+
+    return hh_temp
+
+
+# The following functions were created to be used when simulating houses for the Rapid Assessment tool 
+
+def rat_hh_discharge_nutrients(ds, enduse, country='NL', time_agg='h'):
+    """
+    Aggregates discharge data and calculates nutrient concentrations over specified time intervals.
+
+    This function processes discharge data from an xarray.Dataset, calculates nutrient concentrations
+    based on flow and event metadata, and aggregates the data over user-specified time intervals.
+    Missing timestamps (zero discharge flows) within the specified range are filled with zeros.
+
+    Args:
+        ds (xarray.Dataset): The dataset containing discharge data and discharge event metadata.
+        time_agg (str, optional): The time aggregation level. Options are:
+            - 's': Aggregate by seconds.
+            - 'm': Aggregate by minutes.
+            - '15min': Aggregate by 15-minute intervals.
+            - '30min': Aggregate by 30-minute intervals.
+            - 'h': Aggregate by hours (default).
+
+    Raises:
+        ValueError: If the input DataFrame does not contain the required columns ('time', 'flow', and nutrient types).
+        ValueError: If an invalid `time_agg` value is provided.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the aggregated data with the following columns:
+            - 'time': The aggregated time intervals.
+            - 'flow': The total flow for each time interval.
+            - Nutrient columns (e.g., 'n', 'p', 'cod', 'bod5', 'ss', 'amm'): Nutrient concentrations.
+    """
+    df, ref_start, ref_end = assign_discharge_nutrients(ds, country)
+
+    df = df[df['enduse'] == enduse]
+
+    nutrients = ['n', 'p', 'cod', 'bod5', 'ss', 'amm']
+
+    # Check if the DataFrame has the required columns
+    if not all(col in df.columns for col in ['time', 'flow', 'enduse'] + nutrients):
+        raise ValueError("Input DataFrame must contain columns for time, flow, end_use and all nutrient types.")
+
+    # time aggregation helper function
+    df, grouped, freq = discharge_time_agg(df, time_agg)
+
+    # Group by time and calculate total flow
+    flow = grouped['flow'].sum()
+
+    # Calculate weighted averages for each nutrient
+    weighted_nutrients = {
+        nutrient: grouped.apply(lambda g: (g[nutrient] * g['flow']).sum() / g['flow'].sum())
+        for nutrient in nutrients
+    }
+
+    # Combine results into a single DataFrame
+    #print("pre grouping: ", weighted_nutrients)
+    hh_nutrients = pd.DataFrame(weighted_nutrients)
+    hh_nutrients['flow'] = flow
+
+    hh_nutrients = hh_nutrients.reset_index()[['agg_time', 'enduse', 'flow'] + nutrients].rename(columns={'agg_time': 'time'})
+
+    full_time_index = pd.MultiIndex.from_product(
+        [pd.date_range(start=ref_start, end=ref_end, freq=freq), df['enduse'].unique()],
+        names=['time', 'enduse']
+    )
+
+    hh_nutrients = hh_nutrients.set_index(['time', 'enduse']).reindex(full_time_index, fill_value=0).reset_index()
+
+
+    return hh_nutrients
+
+
+def rat_hh_discharge_temperature(ds, enduse, time_agg='h'):
+    """
+    Aggregates discharge data and calculates discharge temperatures over specified time intervals.
+
+    This function processes discharge data from an xarray.Dataset, calculates discharge temperatures
+    based on flow and event metadata, and aggregates the data over user-specified time intervals.
+    Missing timestamps (zero discharge flows) within the specified range are filled with zeros.
+
+    Args:
+        ds (xarray.Dataset): The dataset containing discharge data and discharge event metadata.
+        time_agg (str, optional): The time aggregation level. Options are:
+            - 's': Aggregate by seconds.
+            - 'm': Aggregate by minutes.
+            - '15min': Aggregate by 15-minute intervals.
+            - '30min': Aggregate by 30-minute intervals.
+            - 'h': Aggregate by hours (default).
+
+    Raises:
+        ValueError: If the input DataFrame does not contain the required columns ('time', 'flow', and 'discharge_temperature').
+        ValueError: If an invalid `time_agg` value is provided.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the aggregated data with the following columns:
+            - 'time': The aggregated time intervals.
+            - 'flow': The total flow for each time interval.
+            - 'discharge_temperature': The average discharge temperature for each time interval.
+    """
+
+    df, ref_start, ref_end = discharge_postprocessing(ds, 'temperature')
+
+    df = df[df['enduse'] == enduse]
+
+    # Check if the DataFrame has the required columns
+    if not all(col in df.columns for col in ['time', 'flow', 'enduse', 'discharge_temperature']):
+        raise ValueError("Input DataFrame must contain columns for time, flow, enduse and discharge_temperature.")
+
+    # time aggregation helper function
+    df, grouped, freq = discharge_time_agg(df, time_agg)
+
+    # Group by time and calculate total flow
+    flow = grouped['flow'].sum()    
+
+    # Weighted average discharge temperature
+    weighted_temperature = grouped.apply(lambda g: (g['flow'] * g['discharge_temperature']).sum() / g['flow'].sum() if g['flow'].sum() > 0 else None)
+
+    # Combine results
+    hh_temp = pd.DataFrame({'flow': flow, 'discharge_temperature': weighted_temperature}).reset_index().rename(columns={'agg_time': 'time'})
+
+    # Ensure full time range
+    full_time_index = pd.MultiIndex.from_product(
+        [pd.date_range(start=ref_start, end=ref_end, freq=freq), df['enduse'].unique()],
+        names=['time', 'enduse']
+    )
+
+    hh_temp = hh_temp.set_index(['time', 'enduse']).reindex(full_time_index, fill_value=0).reset_index()
 
     return hh_temp
