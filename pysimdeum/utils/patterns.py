@@ -182,7 +182,7 @@ def complex_enduse_pattern(config, resolution='1s'):
     cycle_times = config['enduse_pattern_input']['cycle_times']
 
     index = pd.timedelta_range(start='00:00:00', freq=resolution, periods=runtime)
-    s = pd.Series(0, index=index)
+    s = pd.Series(0.0, index=index)
 
     for cycle in cycle_times:
         start = cycle['start']
@@ -213,7 +213,7 @@ def complex_discharge_pattern(config, enduse_pattern, resolution='1s'):
     runtime = config['enduse_pattern_input']['runtime']
 
     index = pd.timedelta_range(start='00:00:00', freq=resolution, periods=runtime)
-    discharge_pattern = pd.Series(0, index=index)
+    discharge_pattern = pd.Series(0.0, index=index)
 
     # Identify the start and end of each phase_on section
     phase_on_sections = []
