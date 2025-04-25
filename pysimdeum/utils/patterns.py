@@ -18,10 +18,6 @@ def sample_start_time(prob_joint, day_num, duration, previous_events):
         int: The sampled start time.
         int: The calculated end time.
     """
-    prob_joint = np.nan_to_num(prob_joint, nan=0.0)  # Replace NaN with 0
-    if prob_joint.sum() == 0:
-        raise ValueError("prob_joint sums to 0, cannot normalize.")
-    prob_joint = normalize(prob_joint)
     while True:
         start_index = np.random.choice(len(prob_joint), p=prob_joint)
         start = start_index + int(pd.to_timedelta('1 day').total_seconds()) * day_num
