@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from pysimdeum.utils.probability import normalize
 
 
 def sample_start_time(prob_joint, day_num, duration, previous_events):
@@ -17,9 +18,13 @@ def sample_start_time(prob_joint, day_num, duration, previous_events):
         int: The sampled start time.
         int: The calculated end time.
     """
+    prob_joint = np.nan_to_num(prob_joint, nan=0.0)  # Replace NaN with 0
+    if prob_joint.sum() == 0:
+        raise ValueError("prob_joint sums to 0, cannot normalize.")
+    prob_joint = normalize(prob_joint)
     while True:
-        u = np.random.random()
-        start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds()) * day_num
+        start_index = np.random.choice(len(prob_joint), p=prob_joint)
+        start = start_index + int(pd.to_timedelta('1 day').total_seconds()) * day_num
         end = start + duration
 
         # Check for overlapping events or events within duration before the last sample start
@@ -104,8 +109,8 @@ def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_tim
 
     return discharge
 
-def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num):
-    """Checks if the tap is turned off before the end of the duration. If so, updates the start time to the next zero value in the discharge array.
+def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num, spillover=False):
+    """Checks if the enduse is turned off before the end of the duration. If so, updates the start time to the next zero value in the discharge array.
 
     This function shifts the discharge start time to the next available zero value in the discharge array.
 
@@ -115,6 +120,7 @@ def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num):
         j (int): The index of the user.
         ind_enduse (int): The index of the end-use appliance.
         pattern_num (int): The pattern number.
+        spillover (bool): Flag indicating whether to handle spillover.
 
     Returns:
         numpy.ndarray: The updated start index or original array if no zero is found
@@ -127,10 +133,19 @@ def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num):
 
         if next_zero_timestamp < len(discharge):
             return next_zero_timestamp # return update start time
-        else:
-            return discharge
+        elif spillover:
+            next_zero_timestamp = 0
+            while next_zero_timestamp < start and discharge[next_zero_timestamp, j, ind_enduse, pattern_num, 0] > 0:
+                next_zero_timestamp += 1
 
-    return start #return original start
+            if next_zero_timestamp < start:
+                return next_zero_timestamp
+            else:
+                print("No zero value found in the discharge array.")
+        else:
+            return len(discharge) - 1
+    else:
+        return start #return original start
 
 
 def complex_daily_pattern(config, resolution='1s', freq='1h'):
