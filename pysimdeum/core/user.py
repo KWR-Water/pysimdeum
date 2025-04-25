@@ -90,7 +90,8 @@ class Presence:
         # x.components.seconds).zfill(2)
 
     def timeindexer(self, l, value, a, b):
-
+        if a == b:
+            return l # skip assignment if start and end are the same
         if a < b:
             l[a:b] = value
         else:
@@ -124,6 +125,7 @@ class Presence:
         pdf = self.timeindexer(pdf, 'away', go, home)
 
         cnts = pdf.value_counts(normalize=True)
+        
         try:
             cnts = cnts.drop('away')
         except:
@@ -145,7 +147,6 @@ class Presence:
             pdf[pdf == 'away'] = 0.0
         except:
             pass
-
 
         pdf = pdf.astype('float').resample('1s').ffill()[:-1]
 
