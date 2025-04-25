@@ -1,7 +1,6 @@
 import os
 import toml
 from dataclasses import dataclass, field
-from pysimdeum.data.NL.end_uses.pattern.pat_ktap import ktap_daily_pattern
 from pysimdeum.utils.patterns import complex_daily_pattern, complex_enduse_pattern, complex_discharge_pattern
 from pysimdeum.data import DATA_DIR
 import pickle
@@ -66,7 +65,7 @@ class Statistics:
         self.end_uses['Dishwasher']['daily_pattern'] = complex_daily_pattern(self.end_uses['Dishwasher'])
         self.end_uses['Dishwasher']['enduse_pattern'] = complex_enduse_pattern(self.end_uses['Dishwasher'])
         self.end_uses['Dishwasher']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['Dishwasher'], self.end_uses['Dishwasher']['enduse_pattern'])
-        self.end_uses['KitchenTap']['daily_pattern'] = ktap_daily_pattern()
+        self.end_uses['KitchenTap']['daily_pattern'] = complex_daily_pattern(self.end_uses['KitchenTap'], freq='15Min')
 
     def _convert_to_dict(self, data):
         if isinstance(data, dict):
