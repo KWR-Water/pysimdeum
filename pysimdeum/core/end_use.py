@@ -256,7 +256,7 @@ class BathroomTap(EndUse):
         temperature = self.statistics['subtype'][self.subtype]['temperature']
         return duration, intensity, temperature
     
-    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num):
+    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, spillover=False):
         remaining_water = intensity * duration
         start = int(start)
 
@@ -271,8 +271,8 @@ class BathroomTap(EndUse):
         if discharge_flow_rate > intensity:
             discharge_flow_rate = intensity
 
-        start = offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num)
-
+        start = offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num, spillover=spillover)
+      
         self.discharge_events.append({
             'enduse': self.name,
             'usage': self.subtype, # subtypes are inherited from chooser(toml)
@@ -316,7 +316,7 @@ class BathroomTap(EndUse):
                 if simulate_discharge:
                     if discharge is None:
                         raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
-                    discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num)
+                    discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, spillover=spillover)
 
         return consumption, (discharge if simulate_discharge else None)
 
@@ -482,7 +482,7 @@ class KitchenTap(EndUse):
 
         return duration, intensity, temperature
     
-    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, usage):
+    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, usage, spillover=False):
         remaining_water = intensity * duration
         start = int(start)
 
@@ -500,7 +500,7 @@ class KitchenTap(EndUse):
             discharge_flow_rate = intensity
 
         # Check if the tap is turned off before the end of the duration, if so, update the start time
-        start = offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num)
+        start = offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num, spillover=spillover)
 
         self.discharge_events.append({
             'enduse': self.name,
@@ -560,7 +560,7 @@ class KitchenTap(EndUse):
             if simulate_discharge:
                 if discharge is None:
                     raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
-                discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, usage)
+                discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, usage, spillover=spillover)
 
         return consumption, (discharge if simulate_discharge else None)
 
@@ -664,7 +664,7 @@ class Shower(EndUse):
 
         return duration, intensity, temperature
     
-    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num):
+    def calculate_discharge(self, discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, spillover=False):
         remaining_water = intensity * duration
 
         start = int(start)
@@ -680,7 +680,7 @@ class Shower(EndUse):
         if discharge_flow_rate > intensity:
             discharge_flow_rate = intensity
 
-        start = offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num)
+        start = offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num, spillover=spillover)
 
         self.discharge_events.append({
             'enduse': "Shower",
@@ -723,7 +723,7 @@ class Shower(EndUse):
                 if simulate_discharge:
                     if discharge is None:
                         raise ValueError("Discharge array is None. It must be initialized before being passed to the simulate function.")
-                    discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num)
+                    discharge = self.calculate_discharge(discharge, start, duration, intensity, temperature_fraction, j, ind_enduse, pattern_num, spillover=spillover)
 
         return consumption, (discharge if simulate_discharge else None)
 
@@ -933,7 +933,7 @@ class Wc(EndUse):
 
                 # assign usage type (urine or faeces)
                 usage = "urine" if np.random.random() * 100 < self.statistics['prob_urine'] else "faeces"
-
+                #print(prob_user)
                 prob_joint = normalize(prob_user * prob_usage)
                 start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
                 previous_events.append((start, end))

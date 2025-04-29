@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from pysimdeum.utils.probability import normalize
 
 
 def sample_start_time(prob_joint, day_num, duration, previous_events):
@@ -18,8 +19,8 @@ def sample_start_time(prob_joint, day_num, duration, previous_events):
         int: The calculated end time.
     """
     while True:
-        u = np.random.random()
-        start = np.argmin(np.abs(np.cumsum(prob_joint) - u)) + int(pd.to_timedelta('1 day').total_seconds()) * day_num
+        start_index = np.random.choice(len(prob_joint), p=prob_joint)
+        start = start_index + int(pd.to_timedelta('1 day').total_seconds()) * day_num
         end = start + duration
 
         # Check for overlapping events or events within duration before the last sample start
@@ -104,8 +105,8 @@ def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_tim
 
     return discharge
 
-def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num):
-    """Checks if the tap is turned off before the end of the duration. If so, updates the start time to the next zero value in the discharge array.
+def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num, spillover=False):
+    """Checks if the enduse is turned off before the end of the duration. If so, updates the start time to the next zero value in the discharge array.
 
     This function shifts the discharge start time to the next available zero value in the discharge array.
 
@@ -115,6 +116,7 @@ def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num):
         j (int): The index of the user.
         ind_enduse (int): The index of the end-use appliance.
         pattern_num (int): The pattern number.
+        spillover (bool): Flag indicating whether to handle spillover.
 
     Returns:
         numpy.ndarray: The updated start index or original array if no zero is found
@@ -127,13 +129,22 @@ def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num):
 
         if next_zero_timestamp < len(discharge):
             return next_zero_timestamp # return update start time
+        elif spillover:
+            next_zero_timestamp = 0
+            while next_zero_timestamp < start and discharge[next_zero_timestamp, j, ind_enduse, pattern_num, 0] > 0:
+                next_zero_timestamp += 1
+
+            if next_zero_timestamp < start:
+                return next_zero_timestamp
+            else:
+                print("No zero value found in the discharge array.")
         else:
-            return discharge
+            return len(discharge) - 1
+    else:
+        return start #return original start
 
-    return start #return original start
 
-
-def complex_daily_pattern(config, resolution='1s'):
+def complex_daily_pattern(config, resolution='1s', freq='1h'):
     """Generates a daily pattern for water usage based on the provided configuration.
 
     This function reads the daily pattern data from the provided configuration,
@@ -148,9 +159,15 @@ def complex_daily_pattern(config, resolution='1s'):
         pd.Series: A pandas Series representing the daily pattern, resampled and interpolated
         to the specified resolution.
     """
+    if freq not in ['1h', '15Min']:
+        raise ValueError("The 'freq' parameter must be either '1h' or '15Min'.")
+    
     x = config['daily_pattern_input']['x']
     data = list(map(float, x.split(' ')))
-    index = pd.timedelta_range(start='00:00:00', freq='1h', periods=25)
+    if freq == '1h':
+        index = pd.timedelta_range(start='00:00:00', freq='1h', periods=25)
+    elif freq == '15Min':
+        index = pd.timedelta_range(start='00:00:00', freq='15Min', end='24:00:00')
     s = pd.Series(data=data, index=index)
     s = s.resample(resolution).mean().interpolate(method='linear')
     s = s[s.index.days == s.index[0].days]
@@ -176,7 +193,7 @@ def complex_enduse_pattern(config, resolution='1s'):
     cycle_times = config['enduse_pattern_input']['cycle_times']
 
     index = pd.timedelta_range(start='00:00:00', freq=resolution, periods=runtime)
-    s = pd.Series(0, index=index)
+    s = pd.Series(0.0, index=index)
 
     for cycle in cycle_times:
         start = cycle['start']
@@ -207,7 +224,7 @@ def complex_discharge_pattern(config, enduse_pattern, resolution='1s'):
     runtime = config['enduse_pattern_input']['runtime']
 
     index = pd.timedelta_range(start='00:00:00', freq=resolution, periods=runtime)
-    discharge_pattern = pd.Series(0, index=index)
+    discharge_pattern = pd.Series(0.0, index=index)
 
     # Identify the start and end of each phase_on section
     phase_on_sections = []
