@@ -98,6 +98,7 @@ The `Population` module requires the following input datasets:
 
 ### Outputs
 The `Population` objects holds standard `House` objects and their associated `consumption` and `discharge` objects that can be accessed as normal. In addition, the subcatchment aggregation allows for the following unique objects to be included (which are ultimately used for export to Infoworks ICM):
+
 * Subcatchment wastewater profiles
     * The `Population` class outputs aggregated profiles for each subcatchment, including:
         * Daily flow
