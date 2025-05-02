@@ -180,7 +180,7 @@ def discharge_time_agg(df, time_agg='h'):
         freq = '30T'
     elif time_agg == 'h':
         df['agg_time'] = df['time'].dt.floor('h')  # Round to the nearest hour
-        freq = 'H'
+        freq = 'h'
     else:
         raise ValueError("Invalid time_agg value. Use 's' for seconds, 'm' for minutes, '15min' for 15mins, '30min' for 30mins, or 'h' for hours.")
 
@@ -245,7 +245,7 @@ def hh_discharge_nutrients(ds, country='NL', time_agg='h'):
 
     # Generate a complete range of timestamps between ref_start and ref_end
     full_time_index = pd.date_range(start=ref_start, end=ref_end, freq=freq)
-    hh_nutrients = hh_nutrients.set_index('time').reindex(full_time_index, fill_value=0).rename_axis('time').reset_index()
+    hh_nutrients = hh_nutrients.set_index('time').reindex(full_time_index, fill_value=0).rename_axis('time').reset_index().iloc[:-1]
 
     return hh_nutrients
 
@@ -298,6 +298,6 @@ def hh_discharge_temperature(ds, time_agg='h'):
 
     # Ensure full time range
     full_time_index = pd.date_range(start=ref_start, end=ref_end, freq=freq)
-    hh_temp = hh_temp.set_index('agg_time').reindex(full_time_index, fill_value=0).rename_axis('time').reset_index()
+    hh_temp = hh_temp.set_index('agg_time').reindex(full_time_index, fill_value=0).rename_axis('time').reset_index().iloc[:-1]
 
     return hh_temp

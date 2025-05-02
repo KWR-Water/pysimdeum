@@ -145,7 +145,7 @@ class Population:
 
         self.houses_instances = build_multi_hh(self.household_data, duration=duration, country=country, simulate_discharge=simulate_discharge, spillover=spillover)
         self.subcatchment_profiles = self.calculate_subcatchment_profiles()
-        #self.subcatchment_nutrients_profiles = self.calculate_subcatchment_nutrient_profiles()
+        self.subcatchment_ww_profiles = self.calculate_subcatchment_ww_nutrient_profiles()
 
     def _prepare_data(self):
         """
@@ -412,25 +412,34 @@ class Population:
         return subcatchment_profiles
 
 
-    def calculate_subcatchment_nutrient_profiles(self):
+    def calculate_subcatchment_ww_nutrient_profiles(self):
         """
-        Calculates the total flow and weighted nutrient concentrations for each subcatchment.
+        Aggregates wastewater flow and nutrient concentrations for each subcatchment.
 
-        This method applies the `hh_discharge_nutrients` function to the discharge data
-        of all houses and aggregates the results by subcatchment using vectorised operations.
-
-        Args:
-            hh_discharge_nutrients (function): A function that calculates nutrient concentrations
-                                            and flow rates from the discharge data of a house.
+        This method processes the discharge data of all houses, calculates nutrient concentrations 
+        and flow rates using the `hh_discharge_nutrients` function, and aggregates the results 
+        by subcatchment and time. The aggregated data includes total flow and weighted average 
+        nutrient concentrations for each subcatchment.
 
         Returns:
             dict: A dictionary where:
                 - Keys are `subcatchment_id` (unique identifiers for each subcatchment).
-                - Values are Pandas DataFrames with the following columns:
-                    - `time`: The timestamp.
-                    - `total_flow`: The total flow for all houses in the subcatchment at each timestep.
-                    - Nutrient columns (e.g., `nutrient_1`, `nutrient_2`, etc.) containing the
-                    weighted average nutrient concentrations for the subcatchment at each timestep.
+                - Values are dictionaries containing:
+                    - `daily_flow` (dict): A dictionary where keys are dates and values are the total 
+                    daily flow (in liters) for the subcatchment.
+                    - `hourly_average` (dict): A dictionary where keys are dates and values are the 
+                    average hourly flow (in liters) for the subcatchment (calculated as daily flow / 24).
+                    - `ww_profile` (pd.DataFrame): A DataFrame containing the aggregated data for the 
+                    subcatchment with the following columns:
+                        - `time`: The timestamp of the aggregated data.
+                        - `flow`: The total flow for all houses in the subcatchment at each timestamp.
+                        - Nutrient columns (e.g., `n`, `p`, `cod`, `bod5`, `ss`, `amm`): Weighted average 
+                        nutrient concentrations for the subcatchment at each timestamp.
+
+        Notes:
+            - The method skips houses that do not have discharge data.
+            - Nutrient concentrations are weighted by flow to calculate the average for each subcatchment.
+            - Missing timestamps are filled with zeros during the aggregation process.
         """
         # Initialise a list to store all house nutrient data
         all_house_data = []
@@ -442,7 +451,7 @@ class Population:
                 continue
 
             # Extract the discharge data for the house
-            house_discharge = house_instance.discharge.discharge
+            house_discharge = house_instance.discharge
 
             # Apply the hh_discharge_nutrients function to calculate nutrient concentrations and flow
             house_nutrients = wq.hh_discharge_nutrients(house_discharge)
@@ -460,27 +469,44 @@ class Population:
         grouped = all_house_data_df.groupby(['subcatchment_id', 'time'])
         subcatchment_wq_profiles = {}
 
-        for subcatchment_id, group in grouped:
-            # Calculate total flow for the subcatchment
+        for (subcatchment_id, time), group in grouped:
+            # Aggregate flow and calculate weighted nutrient concentrations
             total_flow = group['flow'].sum()
 
-            # Calculate weighted average nutrient concentrations
-            weighted_nutrients = group.drop(columns=['subcatchment_id', 'time', 'flow']).multiply(group['flow'], axis=0).sum() / total_flow
+            # Calculate weighted average for nutrient columns
+            nutrient_columns = [col for col in group.columns if col not in ['subcatchment_id', 'time', 'flow']]
+            weighted_nutrients = (group[nutrient_columns].multiply(group['flow'], axis=0).sum() / total_flow).to_dict()
 
-            # Combine total flow and weighted nutrients into a single DataFrame
-            subcatchment_df = pd.DataFrame(weighted_nutrients).T
-            subcatchment_df['total_flow'] = total_flow
-            subcatchment_df['time'] = group['time'].iloc[0]
+            # Create a row with aggregated data
+            aggregated_row = {'time': time, 'flow': total_flow, **weighted_nutrients}
 
-            # Add the DataFrame to the dictionary
+            # Append the aggregated row to the subcatchment's data
             if subcatchment_id not in subcatchment_wq_profiles:
                 subcatchment_wq_profiles[subcatchment_id] = []
-            subcatchment_wq_profiles[subcatchment_id].append(subcatchment_df)
+            subcatchment_wq_profiles[subcatchment_id].append(aggregated_row)
 
-        # Convert lists of DataFrames to a single DataFrame for each subcatchment
-        for subcatchment_id in subcatchment_wq_profiles:
-            subcatchment_wq_profiles[subcatchment_id] = pd.concat(subcatchment_wq_profiles[subcatchment_id], ignore_index=True)
+        # Convert lists of rows into DataFrames for each subcatchment and calculate additional metrics
+        final_profiles = {}
+        for subcatchment_id, rows in subcatchment_wq_profiles.items():
+            # Combine rows into a single DataFrame
+            ww_profile = pd.DataFrame(rows).fillna(0)
 
-        return subcatchment_wq_profiles
+            # Calculate daily flow
+            ww_profile['date'] = ww_profile['time'].dt.date
+            daily_flow = ww_profile.groupby('date')['flow'].sum().to_dict()
+
+            # Calculate hourly average flow
+            hourly_average = {date: flow / 24 for date, flow in daily_flow.items()}
+            
+            ww_profile = ww_profile.drop(columns=['date'])
+
+            # Store the results in the final dictionary
+            final_profiles[subcatchment_id] = {
+                'daily_flow': daily_flow,
+                'hourly_average': hourly_average,
+                'ww_profile': ww_profile
+            }
+
+        return final_profiles
     
 
