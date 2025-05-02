@@ -21,6 +21,7 @@ nav:
     - Common methods: discharge/common_methods.md
     - Enduse specifics: discharge/enduse_specifics.md
     - Water quality: discharge/water_quality.md
+  - Population: population.md
   - config.md
   - Config Schema: schema.md
   - Changelog: CHANGELOG.md

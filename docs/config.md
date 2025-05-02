@@ -32,6 +32,7 @@ The custom directory must contain `.toml` files structured as follows:
     ├── diurnal_patterns.toml
     ├── household_statistics.toml
     ├── ww_nutrients.toml
+    ├── spatial_config.toml
     └── end_uses/
         ├── BathroomTap.toml
         ├── Bathtub.toml
@@ -64,6 +65,9 @@ The `household_statistics.toml` contains statistical data for modeling household
 
 ### Wastewater Nutrient Statistics
 The `ww_nutrients.toml` contains statistical data for nutrient concentration of wastewater for each enduse and usage subtype. Statistics are given in g/use to allow for the study of water quality as water usage varies.
+
+### Spatial config
+The `spatial_config.toml` is a simple configuration file used in conjunction with the `DataPrep` class to support the advanced population fitting for multi house simulation using the `Population` method. It provides paths to the required files and maps the users specific file columns to generic columns expected by pySIMDEUM.
 
 ### End Uses
 

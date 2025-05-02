@@ -117,3 +117,4 @@ testhot.xlsx
 # data files
 *.pkl.gz
 *.xlsx
+*.csv
