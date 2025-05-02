@@ -17,6 +17,7 @@ If the user wants to take a simple approach then one of the first two methods ar
 This method is supported by the `DataPrep` class `spatial_config` which together help prepare the various input files needed for this method into a standardised format that works with the `Population` method.
 
 Data files needed and their expected columns are:
+
 * Census boundaries file (e.g. `.geojson`)
     * census boundary ids
     * geometry
@@ -85,7 +86,7 @@ The `Population` class models household occupancies and aggregates wastewater pr
         * `ww_profile`: A DataFrame with aggregated flow and nutrient concentrations.
 
 ### Requirements
-The `Population` module requires the following input datasets.
+The `Population` module requires the following input datasets:
 * Subcatchments:
     * Geospatial file with subcatchment geometries and unique IDs.
 * Boundaries:
@@ -96,7 +97,7 @@ The `Population` module requires the following input datasets.
     * Geospatial file with house geometries and attributes.
 
 ### Outputs
-The `Population` objects holds standard `House` objects and their associated `consumption` and `discharge` objects that can be accessed as normal. In addition, the subcatchment aggregation allows for the following unique objects to be included (which are ultimately used for export to Infoworks ICM)
+The `Population` objects holds standard `House` objects and their associated `consumption` and `discharge` objects that can be accessed as normal. In addition, the subcatchment aggregation allows for the following unique objects to be included (which are ultimately used for export to Infoworks ICM):
 * Subcatchment wastewater profiles
     * The `Population` class outputs aggregated profiles for each subcatchment, including:
         * Daily flow
