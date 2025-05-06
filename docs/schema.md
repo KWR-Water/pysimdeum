@@ -46,34 +46,6 @@ To create a custom configuration:
 - Adjust the `sd` values to control variability (higher values = more variation).
 - Save the `.toml` file in the appropriate config directory.
 
-
-## Wastewater Nutrient Statistics
-
-This config file has a section for each enduse and their following subtypes. If the user adds new enduses or enduse subtypes, these need to be added to this config file with their respecitive nutrient concentrations. Values are provided in g/use.
-
-Each enduse subtype section contains:
-
-- `n` (float): Nitrogen grams per use
-- `p`(float): Phosphorus grams per use
-- `cod`(float): COD grams per use
-- `bod5`(float): BOD grams per use
-- `ss`(float): Suspended solids grams per use
-- `amm`(float): Ammonia grams per use
-
-### Sample File Structure
-
-```toml
-[enduse]
-    [enduse.subtype]
-    n = 0.49
-    p = 0.07
-    cod = 13.93
-    bod5 = 7.43
-    ss = 13.93
-    amm = 0.06
-```
-
-
 ## Household Statistics
 
 This config file has a section for each household type. Household types include:
@@ -114,6 +86,63 @@ Each household section contains:
         [household_type.job]
         category_1 = <number>  # Job percentage for first category
         category_2 = <number>  # Job percentage for second category
+```
+## Wastewater Nutrient Statistics
+
+This config file has a section for each enduse and their following subtypes. If the user adds new enduses or enduse subtypes, these need to be added to this config file with their respecitive nutrient concentrations. Values are provided in g/use.
+
+Each enduse subtype section contains:
+
+- `n` (float): Nitrogen grams per use
+- `p`(float): Phosphorus grams per use
+- `cod`(float): COD grams per use
+- `bod5`(float): BOD grams per use
+- `ss`(float): Suspended solids grams per use
+- `amm`(float): Ammonia grams per use
+
+### Sample File Structure
+
+```toml
+[enduse]
+    [enduse.subtype]
+    n = 0.49
+    p = 0.07
+    cod = 13.93
+    bod5 = 7.43
+    ss = 13.93
+    amm = 0.06
+```
+
+## Spatial config
+
+This is a simple config file with two sections of:
+
+* `datasets`
+* `columns`
+
+The datasets section details the paths to each file:
+* `subcatchments` = ".../subcatchments.geojson"
+* `boundaries` = ".../oa.geojson"
+* `boundaries_pop` = ".../oa_population.csv"
+* `houses` = ".../houses.geojson"
+
+The columns section maps columns from the users datasets to expected column labels for pySIMDEUM.
+
+### Sample File Structure
+
+```toml
+[datasets]
+subcatchments = ".../subcatchments.geojson"
+boundaries = ".../oa.geojson"
+boundaries_pop = ".../oa_population.csv"
+houses = ".../houses.geojson"
+
+[columns.subcatchments]
+geometry = "geometry"
+subcatchment_id = "subcatchme"
+
+[columns.boundaries]
+...
 ```
 
 ## Bathroom Tap
