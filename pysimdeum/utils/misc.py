@@ -1,5 +1,6 @@
 import geopandas as gpd
 
+
 def fix_invalid_geometries(gdf):
     """
     Fixes invalid geometries in a GeoDataFrame using the buffer(0) trick.
@@ -13,3 +14,4 @@ def fix_invalid_geometries(gdf):
     gdf['geometry'] = gdf['geometry'].buffer(0)
     
     return gdf
+

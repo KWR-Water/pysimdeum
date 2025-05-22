@@ -1,7 +1,22 @@
 import numpy as np
 import pandas as pd
+import sparse
 from pysimdeum.utils.probability import normalize
 
+def add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity, start, end, flow_type):
+        #consumption[start:end, j, ind_enduse, pattern_num, flow_type] = intensity
+        indices = np.arange(start, end)
+        coords = np.vstack([
+                    indices,                
+                    np.full_like(indices, j),  
+                    np.full_like(indices, ind_enduse),   
+                    np.full_like(indices, pattern_num),   
+                    np.full_like(indices, flow_type)    
+                ])
+        data = np.full(indices.shape, intensity)
+        update = sparse.COO(coords=coords, data=data, shape=consumption.shape)
+        consumption = consumption + update
+        return consumption
 
 def sample_start_time(prob_joint, day_num, duration, previous_events):
     """
@@ -51,8 +66,10 @@ def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse
     print("A usage event for ", name, " use has spilled over to the next day. Adjusting spillover times...")
     # Part that fits within the current day
     difference = end_of_day - start
-    consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
-    consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
+    #consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
+    consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end_of_day, 0)
+    #consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
+    consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, 0, start, end_of_day, 1)
 
     # Part that spills over into the next day
     spillover_start = 0
@@ -63,14 +80,18 @@ def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse
     next_day = (current_day + 1) % total_days # if next day exceeds total number of days in the sim, wraps around to the beginning (day 0)
 
     if next_day == 0:
-        consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 0] = pattern[difference:difference + spillover_end]
-        consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 1] = 0
+        #consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 0] = pattern[difference:difference + spillover_end]
+        consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, pattern[difference:difference + spillover_end], spillover_start, spillover_start + spillover_end, 0)
+        #consumption[spillover_start:spillover_start + spillover_end, j, ind_enduse, pattern_num, 1] = 0
+        consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, 0, spillover_start, spillover_start + spillover_end, 1)
     else:
         # Continue to the next day
         spillover_start = next_day * 24 * 60 * 60
         spillover_end = spillover_start + spillover_end
-        consumption[spillover_start:spillover_end, j, ind_enduse, pattern_num, 0] = pattern[difference:difference + (spillover_end - spillover_start)]
-        consumption[spillover_start:spillover_end, j, ind_enduse, pattern_num, 1] = 0
+        #consumption[spillover_start:spillover_end, j, ind_enduse, pattern_num, 0] = pattern[difference:difference + (spillover_end - spillover_start)]
+        consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, pattern[difference:difference + (spillover_end - spillover_start)], spillover_start, spillover_end, 0)
+        #consumption[spillover_start:spillover_end, j, ind_enduse, pattern_num, 1] = 0
+        consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, 0, spillover_start, spillover_end, 1)
 
     print("Spillover consumption adjustment complete.")
 

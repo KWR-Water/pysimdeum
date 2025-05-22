@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+import sparse
 import pickle
 from datetime import datetime
 from typing import Any, Union
@@ -288,7 +289,8 @@ class House(Property):
         enduse = [x.statistics['classname'] for x in self.appliances]
         patterns = [x for x in range(0, num_patterns)]
         flowtype = ['totalflow', 'hotflow']
-        consumption = np.zeros((len(time), len(users), len(enduse), num_patterns, len(flowtype)))
+        consumption = sparse.COO(data=np.zeros((0,)), coords=[[], [], [], [] ,[]], shape=(len(time), len(users), len(enduse), num_patterns, len(flowtype)))
+        #consumption = np.zeros((len(time), len(users), len(enduse), num_patterns, len(flowtype)))
         number_of_days = int(timedelta/pd.to_timedelta('1 day'))
         
         if simulate_discharge:
