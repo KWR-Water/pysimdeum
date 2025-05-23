@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pysimdeum.utils.probability import chooser, duration_decorator, normalize, to_timedelta
 from pysimdeum.utils.patterns import handle_spillover_consumption, handle_discharge_spillover, sample_start_time, offset_simultaneous_discharge
 from pysimdeum.core.statistics import Statistics
-from pysimdeum.utils.patterns import add_to_sparse_consumption_object
+from pysimdeum.utils.patterns import accumulate_sparse_consumption
 
 
 #TODO: Specific EndUse __post_init__ calls can be replaced by directly using the class name instead of setting the name attributes
@@ -211,11 +211,9 @@ class Bathtub(EndUse):
                 start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
                 previous_events.append((start, end))
 
-                #consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
-                #consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
 
                 if simulate_discharge:
                     if discharge is None:
@@ -315,11 +313,9 @@ class BathroomTap(EndUse):
                 start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
                 previous_events.append((start, end))
 
-                #consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
-                #consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
 
                 if simulate_discharge:
                     if discharge is None:
@@ -423,16 +419,10 @@ class Dishwasher(EndUse):
                 consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, self.name, total_days)
             elif ((day_num + 1) == total_days) and (end > end_of_day):
                 difference = end_of_day - start
-                #consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end_of_day, 0)
-                #consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
-                #consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, 0, start, end_of_day, 1)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end_of_day, 0)
             else:
                 difference = end - start
-                #consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end, 0)
-                #consumption[start:end, j, ind_enduse, pattern_num, 1] = 0
-                #consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, 0, start, end, 1)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end, 0)
 
             if simulate_discharge:
                 if discharge is None:
@@ -565,11 +555,9 @@ class KitchenTap(EndUse):
             start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
             previous_events.append((start, end))
 
-            #consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
-            consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
+            consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
             temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
-            #consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
-            consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
+            consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
 
             if simulate_discharge:
                 if discharge is None:
@@ -639,11 +627,9 @@ class OutsideTap(EndUse):
             start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
             previous_events.append((start, end))
 
-            #consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
-            consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
+            consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
             temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
-            #consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
-            consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
+            consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
 
         return consumption, (discharge if simulate_discharge else None)
 
@@ -732,11 +718,9 @@ class Shower(EndUse):
                 start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
                 previous_events.append((start, end))
 
-                #consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
-                #consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
 
                 if simulate_discharge:
                     if discharge is None:
@@ -856,16 +840,10 @@ class WashingMachine(EndUse):
                 consumption = handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse, pattern_num, end_of_day, "WashingMachine", total_days)
             elif ((day_num + 1) == total_days) and (end > end_of_day):
                 difference = end_of_day - start
-                #consumption[start:end_of_day, j, ind_enduse, pattern_num, 0] = pattern[:difference]
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end_of_day, 0)
-                #consumption[start:end_of_day, j, ind_enduse, pattern_num, 1] = 0
-                #consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, 0, start, end_of_day, 1)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end_of_day, 0)
             else:
                 difference = end - start
-                #consumption[start:end, j, ind_enduse, pattern_num, 0] = pattern[:difference]
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end, 0)
-                #consumption[start:end, j, ind_enduse, pattern_num, 1] = 0
-                #consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, 0, start, end, 1)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end, 0)
 
             if simulate_discharge:
                 if discharge is None:
@@ -960,11 +938,9 @@ class Wc(EndUse):
                 start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
                 previous_events.append((start, end))
 
-                #consumption[start:end, j, ind_enduse, pattern_num, 0] = intensity
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
                 temperature_fraction = (temperature - self.cold_water_temp)/(self.hot_water_temp - self.cold_water_temp)
-                #consumption[start:end, j, ind_enduse, pattern_num, 1] = intensity*temperature_fraction
-                consumption = add_to_sparse_consumption_object(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
+                consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity*temperature_fraction, start, end, 1)
 
                 if simulate_discharge:
                     if discharge is None:
