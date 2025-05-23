@@ -4,6 +4,7 @@ pandas
 toml
 xarray
 xlsxwriter
+sparse
 scipy
 mike
 mkdocs
