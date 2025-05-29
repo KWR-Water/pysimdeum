@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `Washing Machine` and `Dishwasher` enduse pattern generalised [#53](https://github.com/KWR-Water/pysimdeum/pull/53)
+-  UK data and ability to change between `NL` and `UK` statistics [#73] https://github.com/KWR-Water/pysimdeum/pull/73
+- `discharge_events` bug fix [#88] https://github.com/KWR-Water/pysimdeum/pull/88
+- `KTap` enduse pattern generalised [#90] https://github.com/KWR-Water/pysimdeum/pull/90
+
 
 ### Added
 
@@ -31,6 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Readthedocs documentation available [here](https://pysimdeum.readthedocs.io/en/latest/) [#52](https://github.com/KWR-Water/pysimdeum/pull/52)
 - Spillover feature for `WashingMachine` and `Dishwasher` [#54](https://github.com/KWR-Water/pysimdeum/pull/54)
 - Sample start time protection [#59](https://github.com/KWR-Water/pysimdeum/pull/59)
+- Wastewater nutrient concentration [#72] https://github.com/KWR-Water/pysimdeum/pull/72    [#81] https://github.com/KWR-Water/pysimdeum/pull/81
+- Wastewater temperature [#83] https://github.com/KWR-Water/pysimdeum/pull/83
+- `Population` class for multi-house simulations and population fitting with spatial components [#85] https://github.com/KWR-Water/pysimdeum/pull/85
+- Jupyter notebook examples [#86] https://github.com/KWR-Water/pysimdeum/pull/86
+- Infoworks wastewater profile write formatting [#91] https://github.com/KWR-Water/pysimdeum/pull/91
+
 
 ## [v0.1.0]
 
