@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  UK data and ability to change between `NL` and `UK` statistics [#73] https://github.com/KWR-Water/pysimdeum/pull/73
 - `discharge_events` bug fix [#88] https://github.com/KWR-Water/pysimdeum/pull/88
 - `KTap` enduse pattern generalised [#90] https://github.com/KWR-Water/pysimdeum/pull/90
+- `Shower` enduse discharge flow pattern switch from uniform distribution to fixed value [#93] https://github.com/KWR-Water/pysimdeum/pull/93
 
 
 ### Added
