@@ -670,11 +670,7 @@ class Shower(EndUse):
         start = int(start)
 
         # Sample a value from the discharge_intensity distribution
-        discharge_intensity_stats = self.statistics['subtype'][self.name]['discharge_intensity']
-        dist = getattr(np.random, discharge_intensity_stats['distribution'].lower())
-        low = discharge_intensity_stats['low']
-        high = discharge_intensity_stats['high']
-        discharge_flow_rate = dist(low=low, high=high)
+        discharge_flow_rate = self.statistics['subtype'][self.name]['discharge_intensity']
 
         # limit discharge_flow_rate to the intensity of the tap if there is not enough water to discharge
         if discharge_flow_rate > intensity:
