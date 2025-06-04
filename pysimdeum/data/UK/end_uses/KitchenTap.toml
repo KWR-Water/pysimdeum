@@ -45,7 +45,7 @@ distribution = 'Negative_binomial'
         [subtype.consumption.discharge_intensity]
             distribution = 'Uniform'
             low = 0.0
-            high = 0.02
+            high = 0.167
 
     [subtype.dishes]
         penetration = 25
@@ -64,7 +64,7 @@ distribution = 'Negative_binomial'
         [subtype.dishes.discharge_intensity]
             distribution = 'Uniform'
             low = 0.0
-            high = 0.02
+            high = 0.25
 
     [subtype.washing_hands]
         penetration = 25
@@ -83,7 +83,7 @@ distribution = 'Negative_binomial'
         [subtype.washing_hands.discharge_intensity]
             distribution = 'Uniform'
             low = 0.0
-            high = 0.02
+            high = 0.167
 
     [subtype.other]
         penetration = 12.5
@@ -102,4 +102,4 @@ distribution = 'Negative_binomial'
         [subtype.other.discharge_intensity]
             distribution = 'Uniform'
             low = 0.0
-            high = 0.02
+            high = 0.167

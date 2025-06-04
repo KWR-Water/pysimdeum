@@ -33,18 +33,10 @@ pattern = 'name of pattern generator'
     [subtype.NormalShower]
         penetration = 50
         intensity = 0.142  # [L/s]
-
-        [subtype.NormalShower.discharge_intensity]
-            distribution = 'Uniform'
-            low = 0.0
-            high = 0.14
+        discharge_intensity = 0.142
 
     [subtype.FancyShower]
         # combi_heater_with_water_saving_shower_head
         penetration = 50
         intensity = 0.123  # [L/s]
-
-        [subtype.FancyShower.discharge_intensity]
-            distribution = 'Uniform'
-            low = 0.0
-            high = 0.12
+        discharge_intensity = 0.123
