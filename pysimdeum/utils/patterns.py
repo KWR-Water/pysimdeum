@@ -27,7 +27,7 @@ def finalize_sparse_consumption(acc):
         return sparse.COO(coords=[[],[],[],[],[]], data=[], shape=acc['shape'])
 
 
-def sample_start_time(prob_joint, day_num, duration, previous_events):
+def sample_start_time(prob_joint, day_num, duration, previous_events, total_days, cuttoff=False):
     """
     Samples a valid start time for an event, ensuring no overlap with previous events
     and no start within duration before the last sampled start time.
@@ -37,6 +37,7 @@ def sample_start_time(prob_joint, day_num, duration, previous_events):
         day_num (int): The current day number in the simulation.
         duration (int): The duration of the event.
         previous_events (list): List of tuples containing start and end times of previous events.
+        cuttoff (boolean): Meant for end_uses that do not have spillover functionality. Cuts off the end time it it surpasses the end of the last day
 
     Returns:
         int: The sampled start time.
@@ -46,7 +47,11 @@ def sample_start_time(prob_joint, day_num, duration, previous_events):
         start_index = np.random.choice(len(prob_joint), p=prob_joint)
         start = start_index + int(pd.to_timedelta('1 day').total_seconds()) * day_num
         end = start + duration
-
+        # if end_use has no spillover functionality, cut off the end time if it surpasses the end of the last day
+        if cuttoff:
+            end_of_day = 24 * 60 * 60 * (day_num + 1)
+            if ((day_num + 1) == total_days) and (end > end_of_day):
+                end = end_of_day
         # Check for overlapping events or events within duration before the last sample start
         if not any((start < event_end and start >= event_start) or (start < event_start and start >= event_start - int(duration)) for event_start, event_end in previous_events):
             return int(start), int(end)

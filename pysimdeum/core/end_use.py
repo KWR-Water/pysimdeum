@@ -226,7 +226,7 @@ class Bathtub(EndUse):
                 temperature = self.statistics['temperature']
                 prob_joint = normalize(prob_user * prob_usage)
 
-                start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+                start, end = sample_start_time(prob_joint, day_num, duration, previous_events, total_days=total_days, cuttoff=True)
                 previous_events.append((start, end))
 
                 consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
@@ -328,7 +328,7 @@ class BathroomTap(EndUse):
 
                 prob_joint = normalize(prob_user * prob_usage)
 
-                start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+                start, end = sample_start_time(prob_joint, day_num, duration, previous_events, total_days=total_days, cuttoff=True)
                 previous_events.append((start, end))
 
                 consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
@@ -437,7 +437,7 @@ class Dishwasher(EndUse):
         previous_events = []
 
         for i in range(freq):
-            start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+            start, end = sample_start_time(prob_joint, day_num, duration, previous_events, total_days=total_days)
 
             # add event times to list of previous events
             previous_events.append((start, end))
@@ -591,7 +591,7 @@ class KitchenTap(EndUse):
             
             prob_joint = normalize(prob_user * prob_usage)  # ToDo: Check if joint probability can be computed outside of for loop for all functions
             
-            start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+            start, end = sample_start_time(prob_joint, day_num, duration, previous_events, total_days=total_days, cuttoff=True)
             previous_events.append((start, end))
 
             consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
@@ -669,7 +669,7 @@ class OutsideTap(EndUse):
 
             prob_joint = normalize(prob_user * prob_usage)
             
-            start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+            start, end = sample_start_time(prob_joint, day_num, duration, previous_events, total_days=total_days, cuttoff=True)
             previous_events.append((start, end))
 
             consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
@@ -760,7 +760,7 @@ class Shower(EndUse):
                 duration, intensity, temperature = self.fct_duration_intensity_temperature(age=user.age)
 
                 prob_joint = normalize(prob_user * prob_usage)
-                start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+                start, end = sample_start_time(prob_joint, day_num, duration, previous_events, total_days=total_days, cuttoff=True)
                 previous_events.append((start, end))
 
                 consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)
@@ -884,7 +884,7 @@ class WashingMachine(EndUse):
         previous_events = []
 
         for i in range(freq):
-            start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+            start, end = sample_start_time(prob_joint, day_num, duration, previous_events, total_days=total_days)
             
             # add event times to list of previous events
             previous_events.append((start, end))
@@ -989,7 +989,7 @@ class Wc(EndUse):
                 usage = "urine" if np.random.random() * 100 < self.statistics['prob_urine'] else "faeces"
                 #print(prob_user)
                 prob_joint = normalize(prob_user * prob_usage)
-                start, end = sample_start_time(prob_joint, day_num, duration, previous_events)
+                start, end = sample_start_time(prob_joint, day_num, duration, previous_events, total_days=total_days, cuttoff=True)
                 previous_events.append((start, end))
 
                 consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, intensity, start, end, 0)

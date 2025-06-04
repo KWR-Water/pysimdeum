@@ -274,7 +274,7 @@ class House(Property):
                                         dims=['time', 'user', 'enduse'])
         return self.consumption
 
-    def simulate(self, date=None, duration='1 day', num_patterns=1, simulate_discharge=False, spillover=False):
+    def simulate(self, date=None, duration='1 day', num_patterns=1, simulate_discharge=False, spillover=False, include_weekend=False):
 
         if date is None:
             date = datetime.now().date()
@@ -308,9 +308,9 @@ class House(Property):
             for k, appliance in enumerate(self.appliances):
                 for day in range(0, number_of_days, 1):
                     if simulate_discharge:
-                        sparse_consumption_arr, discharge = appliance.simulate(sparse_consumption_arr, discharge, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, total_days=number_of_days, simulate_discharge=simulate_discharge, spillover=spillover)
+                        sparse_consumption_arr, discharge = appliance.simulate(sparse_consumption_arr, discharge, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, total_days=number_of_days, simulate_discharge=simulate_discharge, spillover=spillover, include_weekend=include_weekend)
                     else:
-                        sparse_consumption_arr, _ = appliance.simulate(sparse_consumption_arr, None, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, total_days=number_of_days, simulate_discharge=simulate_discharge, spillover=spillover)
+                        sparse_consumption_arr, _ = appliance.simulate(sparse_consumption_arr, None, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, total_days=number_of_days, simulate_discharge=simulate_discharge, spillover=spillover, include_weekend=include_weekend)
         
         consumption = finalize_sparse_consumption(sparse_consumption_arr)
         if simulate_discharge:
