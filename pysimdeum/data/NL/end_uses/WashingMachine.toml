@@ -11,6 +11,9 @@ temperature = 10
 [daily_pattern_input]
     x = "34 24 17 43 41 57 57 212 290 338 392 325 226 222 200 175 124 106 139 185 133 165 101 147 34"
 
+[daily_pattern_weekend_input]
+    x = '14 21 4 11 14 8 23 49 118 288 326 287 237 167 204 130 114 95 75 93 76 57 40 26 14'
+
 [enduse_pattern_input]
     intensity = 0.1667
     runtime = 7200

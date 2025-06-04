@@ -1,8 +1,8 @@
 import copy
 import pandas as pd
 import numpy as np
-import sparse
 from dataclasses import dataclass, field
+from pysimdeum.utils.misc import is_weekend_day
 from pysimdeum.utils.probability import chooser, duration_decorator, normalize, to_timedelta
 from pysimdeum.utils.patterns import handle_spillover_consumption, handle_discharge_spillover, sample_start_time, offset_simultaneous_discharge
 from pysimdeum.core.statistics import Statistics
@@ -49,6 +49,24 @@ class EndUse:
             raise Exception('No Users are defined!')
 
         return consumption
+    
+    def calc_prob_user(self, day_num, user, include_weekend):
+        """Calculates the probability of a user being present on a given day.
+
+        Args:
+            day_num: The day number (0 for the first day).
+            user: user.
+            include_weekend: Boolean indicating whether to include weekend days.
+
+        Returns:
+            A pandas Series with the probability of each user being present.
+        """
+        if (is_weekend_day(day_num) and include_weekend):
+            prob_user = user.weekend_presence.values
+        else:
+            prob_user = user.week_presence.values
+
+        return prob_user
 
     @staticmethod
     def usage_probability(time_resolution: str='1s') -> pd.Series:
@@ -192,7 +210,7 @@ class Bathtub(EndUse):
         return discharge
 
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False, include_weekend=False):
 
         prob_usage = self.usage_probability().values
 
@@ -200,7 +218,7 @@ class Bathtub(EndUse):
 
         for j, user in enumerate(users):
             freq = self.fct_frequency(age=user.age)
-            prob_user = user.presence.values
+            prob_user = self.calc_prob_user(day_num, user, include_weekend)
 
             for i in range(freq):
 
@@ -295,14 +313,14 @@ class BathroomTap(EndUse):
         return discharge
 
 
-    def simulate(self, consumption, discharge, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
+    def simulate(self, consumption, discharge, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False, include_weekend=False):
         prob_usage = self.usage_probability().values
         
         previous_events = []
 
         for j, user in enumerate(users):
             freq = self.fct_frequency()
-            prob_user = user.presence.values
+            prob_user = self.calc_prob_user(day_num, user, include_weekend)
 
             for i in range(freq):
 
@@ -387,16 +405,26 @@ class Dishwasher(EndUse):
 
         return discharge
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False, include_weekend=False):
 
-        prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
+        if (is_weekend_day(day_num) and include_weekend):
+            prob_usage = copy.deepcopy(self.statistics['daily_pattern_weekend'].values)
+        else:
+            prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
+
         freq = self.fct_frequency(numusers=len(users))
 
         for j, user in enumerate(users):
             if j == 0:
-                prob_user = copy.deepcopy(user.presence)
+                if (is_weekend_day(day_num) and include_weekend):
+                    prob_user = copy.deepcopy(user.weekend_presence)
+                else:
+                    prob_user = copy.deepcopy(user.week_presence)
             else:
-                prob_user += user.presence
+                if (is_weekend_day(day_num) and include_weekend):
+                    prob_user += user.weekend_presence
+                else:
+                    prob_user += user.week_presence
 
         prob_user = normalize(prob_user.values)
         j = len(users)
@@ -525,15 +553,26 @@ class KitchenTap(EndUse):
 
         return discharge
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False, include_weekend=False):
 
-        prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
+        if (is_weekend_day(day_num) and include_weekend):
+            prob_usage = copy.deepcopy(self.statistics['daily_pattern_weekend'].values)
+        else:
+            prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
+
+        freq = self.fct_frequency(numusers=len(users))
 
         for j, user in enumerate(users):
-            if j == 0:  # ToDo: Add function that computes usage probability for all users
-                prob_user = copy.deepcopy(user.presence)
+            if j == 0:
+                if (is_weekend_day(day_num) and include_weekend):
+                    prob_user = copy.deepcopy(user.weekend_presence)
+                else:
+                    prob_user = copy.deepcopy(user.week_presence)
             else:
-                prob_user += user.presence
+                if (is_weekend_day(day_num) and include_weekend):
+                    prob_user += user.weekend_presence
+                else:
+                    prob_user += user.week_presence
 
         prob_user = normalize(prob_user).values
 
@@ -600,16 +639,22 @@ class OutsideTap(EndUse):
 
         return duration, intensity, temperature
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False, include_weekend=False):
 
         prob_usage = self.usage_probability().values
 
         freq = 0
         for j, user in enumerate(users):
             if j == 0:
-                prob_user = copy.deepcopy(user.presence)
+                if (is_weekend_day(day_num) and include_weekend):
+                    prob_user = copy.deepcopy(user.weekend_presence)
+                else:
+                    prob_user = copy.deepcopy(user.week_presence)
             else:
-                prob_user += user.presence
+                if (is_weekend_day(day_num) and include_weekend):
+                    prob_user += user.week_presence
+                else:
+                    prob_user += user.weekend_presence
             freq += self.fct_frequency()
 
         prob_user = normalize(prob_user).values
@@ -701,7 +746,7 @@ class Shower(EndUse):
 
         return discharge
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False, include_weekend=False):
 
         prob_usage = self.usage_probability().values
 
@@ -709,7 +754,7 @@ class Shower(EndUse):
 
         for j, user in enumerate(users):
             freq = self.fct_frequency(age=user.age)
-            prob_user = user.presence.values
+            prob_user = self.calc_prob_user(day_num, user, include_weekend)
 
             for i in range(freq):
                 duration, intensity, temperature = self.fct_duration_intensity_temperature(age=user.age)
@@ -806,18 +851,27 @@ class WashingMachine(EndUse):
 
         return discharge
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False, include_weekend=False):
 
-        prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
+        if (is_weekend_day(day_num) and include_weekend):
+            prob_usage = copy.deepcopy(self.statistics['daily_pattern_weekend'].values)
+        else:
+            prob_usage = copy.deepcopy(self.statistics['daily_pattern'].values)
 
         # for j, user in enumerate(users):
         freq = self.fct_frequency(numusers=len(users))
 
         for j, user in enumerate(users):
             if j == 0:
-                prob_user = copy.deepcopy(user.presence)
+                if (is_weekend_day(day_num) and include_weekend):
+                    prob_user = copy.deepcopy(user.weekend_presence)
+                else:
+                    prob_user = copy.deepcopy(user.week_presence)
             else:
-                prob_user += user.presence
+                if (is_weekend_day(day_num) and include_weekend):
+                    prob_user += user.week_presence
+                else:
+                    prob_user += user.weekend_presence
 
         prob_user = normalize(prob_user).values
         j = len(users)
@@ -917,7 +971,7 @@ class Wc(EndUse):
         return discharge
 
 
-    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False):
+    def simulate(self, consumption, discharge=None, users=None, ind_enduse=None, pattern_num=1, day_num=0, total_days=1, simulate_discharge=False, spillover=False, include_weekend=False):
 
         prob_usage = self.usage_probability().values
 
@@ -925,7 +979,7 @@ class Wc(EndUse):
 
         for j, user in enumerate(users):
             freq = self.fct_frequency(age=user.age, gender=user.gender)
-            prob_user = user.presence.values
+            prob_user = self.calc_prob_user(day_num, user, include_weekend)
 
             for i in range(freq):
 

@@ -165,7 +165,7 @@ def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num, 
         return start #return original start
 
 
-def complex_daily_pattern(config, resolution='1s', freq='1h'):
+def complex_daily_pattern(config, resolution='1s', freq='1h', weekend=False):
     """Generates a daily pattern for water usage based on the provided configuration.
 
     This function reads the daily pattern data from the provided configuration,
@@ -183,7 +183,11 @@ def complex_daily_pattern(config, resolution='1s', freq='1h'):
     if freq not in ['1h', '15Min']:
         raise ValueError("The 'freq' parameter must be either '1h' or '15Min'.")
     
-    x = config['daily_pattern_input']['x']
+    if weekend:
+        x = config['daily_pattern_weekend_input']['x']
+    else:
+        x = config['daily_pattern_input']['x']
+        
     data = list(map(float, x.split(' ')))
     if freq == '1h':
         index = pd.timedelta_range(start='00:00:00', freq='1h', periods=25)

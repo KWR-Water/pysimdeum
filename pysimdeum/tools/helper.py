@@ -8,7 +8,8 @@ def create_diurnal_pattern(statistics: Statistics) -> pd.Series:
     
     num_sim = 500
     time = pd.timedelta_range(start='00:00:00', end='23:59:59', freq='1S')
-    diurnal_pattern = pd.Series(index=time).fillna(0)
+    diurnal_pattern_week = pd.Series(index=time).fillna(0)
+    diurnal_pattern_weekend = pd.Series(index=time).fillna(0)
 
     for i in range(num_sim):
         prop = Property(statistics=statistics)
@@ -16,10 +17,12 @@ def create_diurnal_pattern(statistics: Statistics) -> pd.Series:
         house.populate_house()
 
         for user in house.users:
-            presence = user.compute_presence(weekday=True, statistics=statistics)
-            presence = presence.fillna(0)
-            diurnal_pattern = diurnal_pattern + presence
-    return diurnal_pattern
+            user.compute_presence(statistics=statistics)
+            presence_week = user.week_presence.fillna(0)
+            presence_weekend = user.weekend_presence.fillna(0)
+            diurnal_pattern_week = diurnal_pattern_week + presence_week
+            diurnal_pattern_weekend = diurnal_pattern_weekend + presence_weekend
+    return diurnal_pattern_week, diurnal_pattern_weekend
 
 def create_usage_data(houses: Union[list, House]): #TODO I am not able to tell that it should be a list[str], list[House] or House
     if type(houses) == list:

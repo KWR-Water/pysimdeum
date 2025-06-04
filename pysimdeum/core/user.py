@@ -29,9 +29,9 @@ class Presence:
     def __post_init__(self) -> None:
 
         if self.weekday:
-            diurnal = copy.deepcopy(self.stats.diurnal_pattern[self.user.age])
+            diurnal = copy.deepcopy(self.stats.diurnal_pattern['week'][self.user.age])
         else:
-            diurnal = copy.deepcopy(self.stats.diurnal_pattern['weekend'])
+            diurnal = copy.deepcopy(self.stats.diurnal_pattern['weekend'][self.user.age])
 
         for key, val in diurnal.items():
             dist = val['dist']
@@ -165,7 +165,8 @@ class User(Base):
     age: Literal['child', 'teen', 'adult', 'home_ad', 'work_ad', 'senior'] = None  #TODO: Detangle home and work adult from adult
     job: bool = True
 
-    presence: Presence = field(init=False, repr=False)
+    week_presence: Presence = field(init=False, repr=False)
+    weekend_presence: Presence = field(init=False, repr=False)
 
     def __post_init__(self):
 
@@ -180,6 +181,8 @@ class User(Base):
 
         presence = Presence(user=self, weekday=weekday, stats=statistics)
         pdf = presence.pdf(peak=peak, normal=normal, away=away, night=night)
-        self.presence = pdf
+        self.week_presence = pdf
 
-        return self.presence
+        presence = Presence(user=self, weekday=False, stats=statistics)
+        pdf = presence.pdf(peak=peak, normal=normal, away=away, night=night)
+        self.weekend_presence = pdf

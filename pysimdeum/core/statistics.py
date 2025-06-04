@@ -59,12 +59,15 @@ class Statistics:
 
     def _initialize_patterns(self):
         self.end_uses['WashingMachine']['daily_pattern'] = complex_daily_pattern(self.end_uses['WashingMachine'])
+        self.end_uses['WashingMachine']['daily_pattern_weekend'] = complex_daily_pattern(self.end_uses['WashingMachine'], weekend=True)
         self.end_uses['WashingMachine']['enduse_pattern'] = complex_enduse_pattern(self.end_uses['WashingMachine'])
         self.end_uses['WashingMachine']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['WashingMachine'], self.end_uses['WashingMachine']['enduse_pattern'])
         self.end_uses['Dishwasher']['daily_pattern'] = complex_daily_pattern(self.end_uses['Dishwasher'])
+        self.end_uses['Dishwasher']['daily_pattern_weekend'] = complex_daily_pattern(self.end_uses['Dishwasher'], weekend=True)
         self.end_uses['Dishwasher']['enduse_pattern'] = complex_enduse_pattern(self.end_uses['Dishwasher'])
         self.end_uses['Dishwasher']['discharge_pattern'] = complex_discharge_pattern(self.end_uses['Dishwasher'], self.end_uses['Dishwasher']['enduse_pattern'])
         self.end_uses['KitchenTap']['daily_pattern'] = complex_daily_pattern(self.end_uses['KitchenTap'], freq='15Min')
+        self.end_uses['KitchenTap']['daily_pattern_weekend'] = complex_daily_pattern(self.end_uses['KitchenTap'], freq='15Min', weekend=True)
 
     def _convert_to_dict(self, data):
         if isinstance(data, dict):

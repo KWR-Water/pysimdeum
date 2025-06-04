@@ -1,127 +1,219 @@
 # Statistics for Diurnal Patterns in Blokker (2006). "Modeling water demand patterns; ..."
 
-[child]
-    [child.getting_up]
-        dist = 'norm'
-        mu = '07:00:00'
-        sd = '01:00:00'
-    [child.leaving_house]
-        dist = 'norm'
-        mu = '08:30:00'
-        sd = '00:30:00'
-    [child.being_away]
-        dist = 'norm'
-        mu = '07:00:00'
-        sd = '02:00:00'
-    [child.sleep]
-        dist = 'norm'
-        mu = '10:00:00'
-        sd = '01:00:00'
+[week]
+    [week.child]
+        [week.child.getting_up]
+            dist = 'norm'
+            mu = '07:00:00'
+            sd = '01:00:00'
+        [week.child.leaving_house]
+            dist = 'norm'
+            mu = '08:30:00'
+            sd = '00:30:00'
+        [week.child.being_away]
+            dist = 'norm'
+            mu = '07:00:00'
+            sd = '02:00:00'
+        [week.child.sleep]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '01:00:00'
 
-[teen]
-    [teen.getting_up]
-        dist = 'norm'
-        mu = '07:00:00'
-        sd = '01:00:00'
-    [teen.leaving_house]
-        dist = 'norm'
-        mu = '08:15:00'
-        sd = '00:30:00'
-    [teen.being_away]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '02:00:00'
-    [teen.sleep]
-        dist = 'norm'
-        mu = '09:00:00'
-        sd = '01:00:00'
+    [week.teen]
+        [week.teen.getting_up]
+            dist = 'norm'
+            mu = '07:00:00'
+            sd = '01:00:00'
+        [week.teen.leaving_house]
+            dist = 'norm'
+            mu = '08:15:00'
+            sd = '00:30:00'
+        [week.teen.being_away]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '02:00:00'
+        [week.teen.sleep]
+            dist = 'norm'
+            mu = '09:00:00'
+            sd = '01:00:00'
 
-[work_ad]
-    [work_ad.getting_up]
-        dist = 'norm'
-        mu = '07:00:00'
-        sd = '01:00:00'
-    [work_ad.leaving_house]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '00:45:00'
-    [work_ad.being_away]
-        dist = 'norm'
-        mu = '09:30:00'
-        sd = '03:15:00'
-    [work_ad.sleep]
-        dist = 'norm'
-        mu = '07:00:00'
-        sd = '01:00:00'
+    [week.work_ad]
+        [week.work_ad.getting_up]
+            dist = 'norm'
+            mu = '07:00:00'
+            sd = '01:00:00'
+        [week.work_ad.leaving_house]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '00:45:00'
+        [week.work_ad.being_away]
+            dist = 'norm'
+            mu = '09:30:00'
+            sd = '03:15:00'
+        [week.work_ad.sleep]
+            dist = 'norm'
+            mu = '07:00:00'
+            sd = '01:00:00'
 
-[home_ad]
-    [home_ad.getting_up]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '01:00:00'
-    [home_ad.leaving_house]
-        dist = 'norm'
-        mu = '13:00:00'
-        sd = '03:00:00'
-    [home_ad.being_away]
-        dist = 'norm'
-        mu = '10:00:00'
-        sd = '04:30:00'
-    [home_ad.sleep]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '01:00:00'
+    [week.home_ad]
+        [week.home_ad.getting_up]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:00:00'
+        [week.home_ad.leaving_house]
+            dist = 'norm'
+            mu = '13:00:00'
+            sd = '03:00:00'
+        [week.home_ad.being_away]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '04:30:00'
+        [week.home_ad.sleep]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:00:00'
 
- [senior]
-    [senior.getting_up]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '01:00:00'
-    [senior.leaving_house]
-        dist = 'norm'
-        mu = '13:00:00'
-        sd = '03:00:00'
-    [senior.being_away]
-        dist = 'norm'
-        mu = '10:00:00'
-        sd = '04:30:00'
-    [senior.sleep]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '01:00:00'
+    [week.senior]
+        [week.senior.getting_up]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:00:00'
+        [week.senior.leaving_house]
+            dist = 'norm'
+            mu = '13:00:00'
+            sd = '03:00:00'
+        [week.senior.being_away]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '04:30:00'
+        [week.senior.sleep]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:00:00'
 
-[total]
-    [total.getting_up]
-        dist = 'norm'
-        mu = '07:00:00'
-        sd = '01:00:00'
-    [total.leaving_house]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '01:00:00'
-    [total.being_away]
-        dist = 'norm'
-        mu = '08:30:00'
-        sd = '01:00:00'
-    [total.sleep]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '01:00:00'
+    [week.total]
+        [week.total.getting_up]
+            dist = 'norm'
+            mu = '07:00:00'
+            sd = '01:00:00'
+        [week.total.leaving_house]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:00:00'
+        [week.total.being_away]
+            dist = 'norm'
+            mu = '08:30:00'
+            sd = '01:00:00'
+        [week.total.sleep]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:00:00'
 
 [weekend]
-    [weekend.getting_up]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '01:00:00'
-    [weekend.leaving_house]
-        dist = 'norm'
-        mu = '13:00:00'
-        sd = '03:00:00'
-    [weekend.being_away]
-        dist = 'norm'
-        mu = '10:00:00'
-        sd = '04:30:00'
-    [weekend.sleep]
-        dist = 'norm'
-        mu = '08:00:00'
-        sd = '01:00:00'
+    [weekend.child]
+        [weekend.child.getting_up]
+            dist = 'norm'
+            mu = '09:00:00'
+            sd = '01:30:00'
+        [weekend.child.leaving_house]
+            dist = 'norm'
+            mu = '13:00:00'
+            sd = '03:00:00'
+        [weekend.child.being_away]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '04:30:00'
+        [weekend.child.sleep]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '01:30:00'
+
+    [weekend.teen]
+        [weekend.teen.getting_up]
+            dist = 'norm'
+            mu = '09:00:00'
+            sd = '01:30:00'
+        [weekend.teen.leaving_house]
+            dist = 'norm'
+            mu = '13:00:00'
+            sd = '03:00:00'
+        [weekend.teen.being_away]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '04:30:00'
+        [weekend.teen.sleep]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '01:30:00'
+
+    [weekend.work_ad]
+        [weekend.work_ad.getting_up]
+            dist = 'norm'
+            mu = '09:00:00'
+            sd = '01:30:00'
+        [weekend.work_ad.leaving_house]
+            dist = 'norm'
+            mu = '13:00:00'
+            sd = '03:00:00'
+        [weekend.work_ad.being_away]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '04:30:00'
+        [weekend.work_ad.sleep]
+            dist = 'norm'
+            mu = '09:00:00'
+            sd = '01:30:00'
+
+    [weekend.home_ad]
+        [weekend.home_ad.getting_up]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:30:00'
+        [weekend.home_ad.leaving_house]
+            dist = 'norm'
+            mu = '13:00:00'
+            sd = '03:00:00'
+        [weekend.home_ad.being_away]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '04:30:00'
+        [weekend.home_ad.sleep]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:30:00'
+
+    [weekend.senior]
+        [weekend.senior.getting_up]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:30:00'
+        [weekend.senior.leaving_house]
+            dist = 'norm'
+            mu = '13:00:00'
+            sd = '03:00:00'
+        [weekend.senior.being_away]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '04:30:00'
+        [weekend.senior.sleep]
+            dist = 'norm'
+            mu = '08:00:00'
+            sd = '01:30:00'
+
+    [weekend.total]
+        [weekend.total.getting_up]
+            dist = 'norm'
+            mu = '09:00:00'
+            sd = '01:30:00'
+        [weekend.total.leaving_house]
+            dist = 'norm'
+            mu = '13:00:00'
+            sd = '03:00:00'
+        [weekend.total.being_away]
+            dist = 'norm'
+            mu = '10:00:00'
+            sd = '04:30:00'
+        [weekend.total.sleep]
+            dist = 'norm'
+            mu = '09:00:00'
+            sd = '01:30:00'

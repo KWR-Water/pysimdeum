@@ -148,12 +148,13 @@ def plot_diurnal_pattern(statistics: Statistics):
         ax (matplotlib axessubplot): an matplotlib axes containing the plot (use plt.show() to render)
     """
     
-    diurnal_pattern = create_diurnal_pattern(statistics)
-    fig, ax1 = plt.subplots()
+    diurnal_pattern_week, diurnal_pattern_weekend = create_diurnal_pattern(statistics)
+    fig, (ax1, ax2) = plt.subplots(1, 2)
 
-    ax1.plot(diurnal_pattern.index, diurnal_pattern.values)
+    ax1.plot(diurnal_pattern_week.index, diurnal_pattern_week.values)
+    ax2.plot(diurnal_pattern_weekend.index, diurnal_pattern_weekend.values)
     
-    return ax1
+    return fig
 
 def __create_pie_fig(data, text, title):
     fig, ax = plt.subplots(figsize=(6, 3), subplot_kw=dict(aspect="equal"))
