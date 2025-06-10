@@ -786,6 +786,12 @@ class FancyShower(Shower):
     def __post_init__(self):
         self.name = "FancyShower"
         self.wastewater_type = "greywater"
+
+class RainShower(Shower):
+
+    def __post_init__(self):
+        self.name = "RainShower"
+        self.wastewater_type = "greywater"
     
 
 class WashingMachine(EndUse):
