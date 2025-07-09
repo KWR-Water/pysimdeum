@@ -62,7 +62,8 @@ def _create_data(inputproperty):
     total_water_usage = float(inputproperty.consumption.sel(flowtypes='totalflow').sum('user').sum('time').sum('enduse').sum('patterns').values)
     total_patterns = len(inputproperty.consumption.patterns)
     total_users = len(inputproperty.users)
-    appliance_data = inputproperty.consumption.sel(flowtypes='totalflow').sum('user').sum('time').sum('patterns').to_dataframe('total')
+    appliance_data = inputproperty.consumption.sum(dim=['user', 'time', 'patterns']).sel(flowtypes='totalflow')
+    appliance_data = appliance_data.as_numpy().to_dataframe('total')
     appliance_data['percentage'] = (appliance_data['total']/total_water_usage)*100
     appliance_data['pp'] = appliance_data['total']/total_users
     number_of_seconds = len(inputproperty.consumption)

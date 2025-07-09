@@ -9,6 +9,9 @@ def test_plot_water_use_distribution():
     prop = Property(statistics=stats)
     house = prop.built_house()
     house.populate_house()
+    house.furnish_house()
+    for user in house.users:
+        user.compute_presence(statistics=stats)
     house.simulate()
     testax = plot_water_use_distribution(house)
     
@@ -16,6 +19,9 @@ def test_plot_water_use_distribution():
 
     house2 = prop.built_house()
     house2.populate_house()
+    house.furnish_house()
+    for user in house.users:
+        user.compute_presence(statistics=stats)
     house2.simulate()
     testax2 = plot_water_use_distribution([house, house2])
 

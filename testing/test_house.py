@@ -9,6 +9,9 @@ def test_usersminimal1():
         prop = Property(statistics=stats)
         house = prop.built_house()
         house.populate_house()
+        house.furnish_house()
+        for user in house.users:
+            user.compute_presence(statistics=stats)
         number_of_users.append(len(house.users))
     
     assert 0 not in number_of_users
@@ -20,6 +23,9 @@ def test_average_users():
         prop = Property(statistics=stats)
         house = prop.built_house()
         house.populate_house()
+        house.furnish_house()
+        for user in house.users:
+            user.compute_presence(statistics=stats)
         number_of_users.append(len(house.users))
     
     assert mean(number_of_users) > 2.1
@@ -30,6 +36,9 @@ def test_save_and_load_house():
     prop = Property(statistics=stats)
     house = prop.built_house()
     house.populate_house()
+    house.furnish_house()
+    for user in house.users:
+        user.compute_presence(statistics=stats)
     house.save_house('unittest')
 
     prop2 = Property(statistics=stats)
