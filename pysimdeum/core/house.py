@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Any, Union
 from pysimdeum.utils.base import Base
 from pysimdeum.utils.probability import chooser, normalize
-from pysimdeum.utils.patterns import start_sparse_consumption, finalize_sparse_consumption
+from pysimdeum.utils.patterns import start_sparse, finalize_sparse
 from pysimdeum.core.statistics import Statistics
 from pysimdeum.core.user import User
 import pysimdeum.core.end_use as EndUses
@@ -295,7 +295,7 @@ class House(Property):
         
         if simulate_discharge:
             dischargetype = ['greywater', 'blackwater']
-            discharge = np.zeros((len(time), len(users), len(enduse), num_patterns, len(dischargetype)))
+            discharge = sparse.COO(data=np.zeros((0,)), coords=[[], [], [], [] ,[]], shape=(len(time), len(users), len(enduse), num_patterns, len(dischargetype)))
             # Clear discharge_events for all appliances
             for appliance in self.appliances:
                 if hasattr(appliance, 'discharge_events'):
@@ -303,16 +303,18 @@ class House(Property):
         else:
             discharge = None
         
-        sparse_consumption_arr = start_sparse_consumption(consumption.shape)
+        sparse_consumption_arr = start_sparse(consumption.shape)
+        sparse_discharge_arr = start_sparse(discharge.shape) if discharge is not None else None
         for num in patterns:
             for k, appliance in enumerate(self.appliances):
                 for day in range(0, number_of_days, 1):
                     if simulate_discharge:
-                        sparse_consumption_arr, discharge = appliance.simulate(sparse_consumption_arr, discharge, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, total_days=number_of_days, simulate_discharge=simulate_discharge, spillover=spillover, include_weekend=include_weekend)
+                        sparse_consumption_arr, sparse_discharge_arr = appliance.simulate(sparse_consumption_arr, sparse_discharge_arr, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, total_days=number_of_days, simulate_discharge=simulate_discharge, spillover=spillover, include_weekend=include_weekend)
                     else:
                         sparse_consumption_arr, _ = appliance.simulate(sparse_consumption_arr, None, users=self.users, ind_enduse=k, pattern_num=num, day_num=day, total_days=number_of_days, simulate_discharge=simulate_discharge, spillover=spillover, include_weekend=include_weekend)
         
-        consumption = finalize_sparse_consumption(sparse_consumption_arr)
+        consumption = finalize_sparse(sparse_consumption_arr)
+        discharge = finalize_sparse(sparse_discharge_arr) if sparse_discharge_arr is not None else None
         if simulate_discharge:
             self.consumption = xr.DataArray(data=consumption, coords=[time, users, enduse, patterns, flowtype], dims=['time', 'user', 'enduse', 'patterns', 'flowtypes'])
             self.discharge = xr.DataArray(data=discharge, coords=[time, users, enduse, patterns, dischargetype], dims=['time', 'user', 'enduse', 'patterns', 'dischargetypes'])

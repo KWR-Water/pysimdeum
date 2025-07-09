@@ -3,11 +3,18 @@ import pandas as pd
 import sparse
 from pysimdeum.utils.probability import normalize
 
-def start_sparse_consumption(shape):
-    return {'coords': [], 'data': [], 'shape': shape}
+def start_sparse(shape):
+    return {'coords': [], 'data': [], 'shape': shape, 'filled_positions': set()}
 
-def accumulate_sparse_consumption(acc, ind_enduse, pattern_num, j, intensity, start, end, flow_type):
+def accumulate_sparse(acc, ind_enduse, pattern_num, j, intensity, start, end, flow_type):
+    if start > acc['shape'][0] and end > acc['shape'][0]:
+        return acc
+    elif end > acc['shape'][0]:
+        end = acc['shape'][0]
     indices = np.arange(start, end)
+    for idx in indices:
+        coord_tuple = (idx, j, ind_enduse, pattern_num, flow_type)
+        acc['filled_positions'].add(coord_tuple)
     acc['coords'].append(np.vstack([
         indices,
         np.full_like(indices, j),
@@ -18,7 +25,11 @@ def accumulate_sparse_consumption(acc, ind_enduse, pattern_num, j, intensity, st
     acc['data'].append(np.full(indices.shape, intensity))
     return acc
 
-def finalize_sparse_consumption(acc):
+def is_position_filled(acc, ind_enduse, pattern_num, j, start, flow_type):
+    coord_tuple = (start, j, ind_enduse, pattern_num, flow_type)
+    return coord_tuple in acc['filled_positions']
+
+def finalize_sparse(acc):
     if acc['coords']:
         coords = np.hstack(acc['coords'])
         data = np.concatenate(acc['data'])
@@ -80,7 +91,7 @@ def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse
     print("A usage event for ", name, " use has spilled over to the next day. Adjusting spillover times...")
     # Part that fits within the current day
     difference = end_of_day - start
-    consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end_of_day, 0)
+    consumption = accumulate_sparse(consumption, ind_enduse, pattern_num, j, pattern[:difference], start, end_of_day, 0)
 
     # Part that spills over into the next day
     spillover_start = 0
@@ -91,12 +102,12 @@ def handle_spillover_consumption(consumption, pattern, start, end, j, ind_enduse
     next_day = (current_day + 1) % total_days # if next day exceeds total number of days in the sim, wraps around to the beginning (day 0)
 
     if next_day == 0:
-        consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, pattern[difference:difference + spillover_end], spillover_start, spillover_start + spillover_end, 0)
+        consumption = accumulate_sparse(consumption, ind_enduse, pattern_num, j, pattern[difference:difference + spillover_end], spillover_start, spillover_start + spillover_end, 0)
     else:
         # Continue to the next day
         spillover_start = next_day * 24 * 60 * 60
         spillover_end = spillover_start + spillover_end
-        consumption = accumulate_sparse_consumption(consumption, ind_enduse, pattern_num, j, pattern[difference:difference + (spillover_end - spillover_start)], spillover_start, spillover_end, 0)
+        consumption = accumulate_sparse(consumption, ind_enduse, pattern_num, j, pattern[difference:difference + (spillover_end - spillover_start)], spillover_start, spillover_end, 0)
 
     print("Spillover consumption adjustment complete.")
 
@@ -124,11 +135,11 @@ def handle_discharge_spillover(discharge, discharge_pattern, time, discharge_tim
     """
     if discharge_time >= (total_days * 24 * 60 * 60):
         spillover_time = discharge_time - end_of_day
-        discharge[spillover_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
+        discharge = accumulate_sparse(discharge, ind_enduse, pattern_num, j, discharge_pattern[time], spillover_time, spillover_time +1, 1)
     else:
         # Continue to the next day
         discharge[discharge_time, j, ind_enduse, pattern_num, 1] = discharge_pattern[time]
-
+        discharge = accumulate_sparse(discharge, ind_enduse, pattern_num, j, discharge_pattern[time], discharge_time, discharge_time + 1, 1)
     return discharge
 
 def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num, spillover=False):
@@ -147,17 +158,16 @@ def offset_simultaneous_discharge(discharge, start, j, ind_enduse, pattern_num, 
     Returns:
         numpy.ndarray: The updated start index or original array if no zero is found
     """
-
-    if discharge[start, j, ind_enduse, pattern_num, 0] > 0:
+    if is_position_filled(discharge, ind_enduse, pattern_num, j, start, 0):
         next_zero_timestamp = start + 1
-        while next_zero_timestamp < len(discharge) and discharge[next_zero_timestamp, j, ind_enduse, pattern_num, 0] > 0: 
+        while next_zero_timestamp < len(discharge) and is_position_filled(discharge, ind_enduse, pattern_num, j, next_zero_timestamp, 0): 
             next_zero_timestamp += 1
 
         if next_zero_timestamp < len(discharge):
             return next_zero_timestamp # return update start time
         elif spillover:
             next_zero_timestamp = 0
-            while next_zero_timestamp < start and discharge[next_zero_timestamp, j, ind_enduse, pattern_num, 0] > 0:
+            while next_zero_timestamp < start and is_position_filled(discharge, ind_enduse, pattern_num, j, next_zero_timestamp, 0):
                 next_zero_timestamp += 1
 
             if next_zero_timestamp < start:
