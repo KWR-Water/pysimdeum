@@ -28,7 +28,7 @@ To simulate the water consumption of a house, you can use the House's `simulate`
 
 ```python
 # Simulate water consumption for house
-consumption = house.simulate(num_patterns=1)
+consumption, __ = house.simulate(num_patterns=1)
 ```
 
 `pysimdeum` also allows you to simulate discharge flows that are linked to your consumption flows.
@@ -38,7 +38,7 @@ consumption = house.simulate(num_patterns=1)
 consumption, discharge = house.simulate(num_patterns=1, simulate_discharge=True)
 ```
 
-The consumption (and discharge) simulation result is an `xarray.DataArray` - basically a labelled `numpy.ndarray` with four dimensions / axes (i.e. `time`, `user`, `enduse`, `patterns`)
+The consumption (and discharge) simulation result is an `xarray.DataArray` - basically a labelled `numpy.ndarray` with five dimensions / axes (i.e. `time`, `user`, `enduse`, `patterns`, `flowtypes`)
 
 You can easily create statistics over the `consumption` and `discharge` objects, for example, to compute the total consumption (sum of consumption of all users and enduses), you can build the sum over the `user` and `enduse` axes (the total consumption). Within `consumption`, there are two `flowtypes` defined. `totalflow` and `hotflow`. `totalflow` reflects the total water use while `hotflow` reflects the water that has been heated up.
 
