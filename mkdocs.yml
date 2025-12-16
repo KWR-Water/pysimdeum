@@ -76,7 +76,7 @@ plugins:
             show_root_toc_entry: false
             show_signature_annotations: false
           paths: [src]
-          import:
+          inventories:
             - https://docs.python.org/3/objects.inv
             - https://pandas.pydata.org/docs/objects.inv
             - https://shapely.readthedocs.io/en/stable/objects.inv
